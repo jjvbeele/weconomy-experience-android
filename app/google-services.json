@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "958733613222",
+    "firebase_url": "https://weconomyexperience.firebaseio.com",
+    "project_id": "weconomyexperience",
+    "storage_bucket": "weconomyexperience.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:958733613222:android:22cab011f94c09a5",
+        "android_client_info": {
+          "package_name": "com.teachwithapps.weconomyexperience"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "958733613222-kjiu2tp23flrfujfr5sk838ae54minno.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teachwithapps.weconomyexperience",
+            "certificate_hash": "e55d0f38507dcb442473640ff80f6c2341868a29"
+          }
+        },
+        {
+          "client_id": "958733613222-0kq2uv5hn7artb5hvvoniknerf2dqq07.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnss4-XHEYFU7ixO6MmFWu4ldGbxGOhKM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "958733613222-0kq2uv5hn7artb5hvvoniknerf2dqq07.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
