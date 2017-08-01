@@ -28,42 +28,34 @@ import static com.teachwithapps.weconomyexperience.firebase.FireAuthHelper.RC_SI
  * Created by mint on 26-7-17.
  */
 
-public class LobbyActivity extends AppCompatActivity {
+public class HubActivity extends AppCompatActivity {
 
-    private static final String TAG = LobbyActivity.class.getName();
+    private static final String TAG = HubActivity.class.getName();
 
+    //views
     @BindView(R.id.recyclerview_game)
     protected RecyclerView gameRecyclerView;
 
+    //hub game attributes
     private List<GameData> gameDataList;
 
+    private GameRecyclerAdapter.OnClickListener clickGameListener = new GameRecyclerAdapter.OnClickListener() {
+        @Override
+        public void onClick(GameData gameData) {
+            clickHubGame(gameData);
+        }
+    };
+
+    private GameRecyclerAdapter.OnClickListener clickRemoveGameListener = new GameRecyclerAdapter.OnClickListener() {
+        @Override
+        public void onClick(GameData gameData) {
+            removeHubGame(gameData);
+        }
+    };
+
+    //firebase attributes
     private FireDatabaseTransactions fireDatabaseTransactions;
     private FireAuthHelper fireAuthHelper;
-
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_lobby);
-
-        fireDatabaseTransactions = new FireDatabaseTransactions();
-
-        ButterKnife.bind(this);
-
-        gameDataList = new ArrayList<>();
-        gameRecyclerView.setAdapter(new GameRecyclerAdapter(
-                gameDataList,
-                new GameRecyclerAdapter.OnClickListener() {
-                    @Override
-                    public void onClick(GameData gameData) {
-                        fireDatabaseTransactions.removeHubGame(gameData);
-                    }
-                }));
-        gameRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        fireAuthHelper = new FireAuthHelper(this);
-        fireAuthHelper.withUser(this, fireAuthCallback);
-    }
 
     private FireAuthHelper.FireAuthCallback fireAuthCallback = new FireAuthHelper.FireAuthCallback() {
         @Override
@@ -72,6 +64,38 @@ public class LobbyActivity extends AppCompatActivity {
         }
     };
 
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_hub);
+
+        //set up firebase helper classes
+        fireAuthHelper = new FireAuthHelper(this);
+        fireAuthHelper.withUser(this, fireAuthCallback);
+        fireDatabaseTransactions = new FireDatabaseTransactions();
+
+        ButterKnife.bind(this);
+
+        //set up the list of games present in the hub
+        gameDataList = new ArrayList<>();
+        gameRecyclerView.setAdapter(
+                new GameRecyclerAdapter(
+                        gameDataList,
+                        clickGameListener,
+                        clickRemoveGameListener
+                )
+        );
+        gameRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    /**
+     * Needed for firebase to handle login by google account
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -83,6 +107,9 @@ public class LobbyActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * request list of games in the hub
+     */
     private void getHubGames() {
         fireDatabaseTransactions.queryHubGames(
                 new Returnable<List<GameData>>() {
@@ -94,6 +121,27 @@ public class LobbyActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * remove game from the hub
+     * TODO: don't actually remove, but put data in inactive state
+     * @param gameData
+     */
+    private void removeHubGame(GameData gameData) {
+        fireDatabaseTransactions.removeHubGame(gameData);
+    }
+
+    /**
+     * handle when user clicks on a game to join
+     * @param gameData
+     */
+    private void clickHubGame(GameData gameData) {
+
+    }
+
+    /**
+     * fill hub with the provided list of games
+     * @param dataList
+     */
     private void fillListWithGames(List<GameData> dataList) {
         gameDataList.clear();
         gameDataList.addAll(dataList);
@@ -101,6 +149,9 @@ public class LobbyActivity extends AppCompatActivity {
         Log.d(TAG, "Found " + dataList.size() + " Games");
     }
 
+    /**
+     * user wants to make a new game
+     */
     @OnClick(R.id.button_start_new_game)
     protected void startNewGame() {
         GameData gameData = new GameData("Test " + gameDataList.size());

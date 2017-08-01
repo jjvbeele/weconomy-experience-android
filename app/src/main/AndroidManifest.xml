@@ -10,7 +10,7 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name=".LobbyActivity">
+        <activity android:name=".HubActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -26,9 +26,11 @@ public class GameRecyclerAdapter extends RecyclerView.Adapter<GameRecyclerAdapte
 
     private List<GameData> gameDataList;
     private OnClickListener removeGameListener;
+    private OnClickListener clickGameListener;
 
-    public GameRecyclerAdapter(List<GameData> gameDataList, OnClickListener removeGameListener) {
+    public GameRecyclerAdapter(List<GameData> gameDataList, OnClickListener clickGameListener, OnClickListener removeGameListener) {
         this.gameDataList = gameDataList;
+        this.clickGameListener = clickGameListener;
         this.removeGameListener = removeGameListener;
     }
 
@@ -51,6 +53,12 @@ public class GameRecyclerAdapter extends RecyclerView.Adapter<GameRecyclerAdapte
                 notifyItemRemoved(index);
 
                 removeGameListener.onClick(gameData);
+            }
+        });
+        holder.setOnGameClick(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clickGameListener.onClick(gameData);
             }
         });
     }
@@ -80,6 +88,10 @@ public class GameRecyclerAdapter extends RecyclerView.Adapter<GameRecyclerAdapte
 
         public void setOnGameDelete(View.OnClickListener deleteGameListener) {
             deleteGameButton.setOnClickListener(deleteGameListener);
+        }
+
+        public void setOnGameClick(View.OnClickListener clickGameListener) {
+            itemView.setOnClickListener(clickGameListener);
         }
     }
 }

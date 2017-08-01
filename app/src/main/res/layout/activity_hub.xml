@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:textSize="20sp"
         android:layout_gravity="center_horizontal"
-        android:text="@string/lobby_title"
+        android:text="@string/hub_title"
         android:layout_marginTop="20dp" />
 
     <android.support.v7.widget.RecyclerView
