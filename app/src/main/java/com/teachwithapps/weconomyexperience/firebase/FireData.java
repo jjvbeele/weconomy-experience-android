@@ -8,7 +8,7 @@ import com.google.firebase.database.IgnoreExtraProperties;
 @IgnoreExtraProperties
 public class FireData {
 
-    private String id;
+    protected String id;
 
     public String getId() {
         return id;

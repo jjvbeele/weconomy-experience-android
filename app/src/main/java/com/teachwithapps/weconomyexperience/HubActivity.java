@@ -75,9 +75,9 @@ public class HubActivity extends AppCompatActivity {
         setContentView(R.layout.activity_hub);
 
         //set up firebase helper classes
+        fireDatabaseTransactions = new FireDatabaseTransactions();
         fireAuthHelper = new FireAuthHelper(this);
         fireAuthHelper.withUser(this, fireAuthCallback);
-        fireDatabaseTransactions = new FireDatabaseTransactions();
 
         ButterKnife.bind(this);
 

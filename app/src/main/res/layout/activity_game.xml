@@ -5,18 +5,73 @@
     android:orientation="vertical">
 
     <TextView
+        android:id="@+id/goal_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/dark_gray"
-        android:textColor="@color/white_blue"
         android:padding="10dp"
-        android:textSize="14sp"
-        android:text="@string/goals_text"/>
+        android:text="@string/goals_text"
+        android:textColor="@color/white_blue"
+        android:textSize="14sp" />
 
     <LinearLayout
+        android:id="@+id/days_row"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/goal_view">
 
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:background="@color/light_gray"
+            android:padding="4dp"
+            android:text="Day 1" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:background="@color/light_gray"
+            android:padding="4dp"
+            android:text="Day 2" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:background="@color/light_gray"
+            android:padding="4dp"
+            android:text="Day 3" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:background="@color/light_gray"
+            android:padding="4dp"
+            android:text="Day 4" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:background="@color/light_gray"
+            android:padding="4dp"
+            android:text="Day 5" />
+
+    </LinearLayout>
+
+    <com.teachwithapps.weconomyexperience.view.MultiLinearRecyclerView
+        android:id="@+id/schedule_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/days_row" />
 
 
 </RelativeLayout>

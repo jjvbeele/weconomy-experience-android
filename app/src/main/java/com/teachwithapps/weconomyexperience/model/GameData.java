@@ -13,19 +13,17 @@ import org.parceler.Parcel;
 @Parcel
 public class GameData extends FireData {
 
-    public String id;
-
     @PropertyName("name")
-    public String name;
+    protected String name;
 
     @PropertyName("password")
-    public boolean password;
+    protected boolean password;
 
     @PropertyName("players")
-    public int players;
+    protected int players;
 
     @PropertyName("state")
-    public String state;
+    protected String state;
 
     public GameData() {
     }
