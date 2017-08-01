@@ -4,10 +4,13 @@ import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.PropertyName;
 import com.teachwithapps.weconomyexperience.firebase.FireData;
 
+import org.parceler.Parcel;
+
 /**
  * Created by mint on 26-7-17.
  */
 @IgnoreExtraProperties
+@Parcel
 public class GameData extends FireData {
 
     public String id;

@@ -2,4 +2,5 @@
     <string name="app_name">Weconomy Experience</string>
     <string name="hub_title">Beschikbare Spellen</string>
     <string name="start_new_game">start nieuw spel</string>
+    <string name="goals_text">Goals: %1$d</string>
 </resources>

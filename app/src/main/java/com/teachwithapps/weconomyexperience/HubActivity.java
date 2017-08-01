@@ -15,6 +15,9 @@ import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.util.Returnable;
 import com.teachwithapps.weconomyexperience.view.GameRecyclerAdapter;
 
+import org.parceler.Parcel;
+import org.parceler.Parcels;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -135,7 +138,9 @@ public class HubActivity extends AppCompatActivity {
      * @param gameData
      */
     private void clickHubGame(GameData gameData) {
-
+        Intent intent = new Intent(HubActivity.this, GameActivity.class);
+        intent.putExtra(Constants.GAME_DATA_PARCEL, Parcels.wrap(gameData));
+        startActivity(intent);
     }
 
     /**
