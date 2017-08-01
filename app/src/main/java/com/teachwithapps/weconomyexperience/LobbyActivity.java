@@ -6,8 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.view.GameRecyclerAdapter;
