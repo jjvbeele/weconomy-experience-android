@@ -36,7 +36,7 @@ public class GameRecyclerAdapter extends RecyclerView.Adapter<GameRecyclerAdapte
     @Override
     public void onBindViewHolder(GameViewHolder holder, int position) {
         final GameData gameData = gameDataList.get(position);
-        holder.setData(gameData.getGameName());
+        holder.setData(gameData.getName());
         holder.setOnGameDelete(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

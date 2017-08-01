@@ -7,3 +7,4 @@ package com.teachwithapps.weconomyexperience.util;
 public interface Returnable<T> {
     void onResult(T data);
 }
+

@@ -7,6 +7,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.teachwithapps.weconomyexperience.util.Returnable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by mint on 23-12-16.
  */
@@ -21,6 +24,41 @@ public class FireDatabaseHelper {
     public FireDatabaseHelper() {
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseRef = firebaseDatabase.getReference();
+    }
+
+    public <T> void getRecordArray(
+            final Class<T> dataResultClass,
+            String[] locationArray,
+            final Returnable<List<T>> returnOnSuccess,
+            final Returnable<DatabaseError> returnOnFail) {
+
+        DatabaseReference locationRef = null;
+        for (String location : locationArray) {
+            if (location == null) {
+                returnOnFail.onResult(null);
+                return;
+            }
+
+            locationRef = databaseRef.child(location);
+        }
+
+        if (locationRef != null) {
+            locationRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    List<T> dataList = new ArrayList<T>();
+                    for(DataSnapshot childData : dataSnapshot.getChildren()) {
+                        dataList.add(childData.getValue(dataResultClass));
+                    }
+                    returnOnSuccess.onResult(dataList);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    returnOnFail.onResult(databaseError);
+                }
+            });
+        }
     }
 
     public <T> void getRecord(

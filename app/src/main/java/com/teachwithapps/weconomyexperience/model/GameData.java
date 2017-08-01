@@ -1,23 +1,45 @@
 package com.teachwithapps.weconomyexperience.model;
 
+import com.google.firebase.database.PropertyName;
+
 /**
  * Created by mint on 26-7-17.
  */
 
 public class GameData {
 
-    private String gameName;
+    @PropertyName("name")
+    public String name;
 
-    public GameData(String gameName) {
-        this.gameName = gameName;
+    @PropertyName("password")
+    public boolean password;
+
+    @PropertyName("players")
+    public int players;
+
+    @PropertyName("state")
+    public String state;
+
+    public GameData() {}
+
+    public GameData(String name) {
+        this.name = name;
     }
 
-    public void setGameName(String gameName) {
-        this.gameName = gameName;
+    public String getName() {
+        return name;
     }
 
-    public String getGameName() {
-        return this.gameName;
+    public boolean getPassword() {
+        return password;
+    }
+
+    public int getPlayers() {
+        return players;
+    }
+
+    public String getState() {
+        return state;
     }
 
 }
