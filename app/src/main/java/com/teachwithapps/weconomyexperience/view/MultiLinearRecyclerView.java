@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -20,13 +19,6 @@ import java.util.List;
 public class MultiLinearRecyclerView extends LinearLayout {
 
     private List<List<InstructionData>> instructionDataMap;
-
-    private RecyclerView.OnScrollListener syncScrollListener = new RecyclerView.OnScrollListener() {
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-        }
-    };
 
     public MultiLinearRecyclerView(Context context) {
         super(context);
@@ -57,7 +49,6 @@ public class MultiLinearRecyclerView extends LinearLayout {
                     )
             );
 
-            recyclerView.addOnScrollListener(syncScrollListener);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             recyclerView.setAdapter(new ScheduleRecyclerAdapter(instructionDataMap.get(i)));
             addView(recyclerView);

@@ -58,6 +58,7 @@ public class GameActivity extends AppCompatActivity {
         for (int i = 0; i < 5; i++) {
             List<InstructionData> instructionList = new ArrayList<>();
             if(i == 0) {
+                instructionList.add(new InstructionData(InstructionData.ListItemType.TYPE_ADD_BUTTON));
                 instructionList.add(new InstructionData("Grind Flour"));
                 instructionList.add(new InstructionData("Grind Flour"));
                 instructionList.add(new InstructionData("Grind Flour"));
@@ -67,6 +68,7 @@ public class GameActivity extends AppCompatActivity {
 
             }
             if(i == 1) {
+                instructionList.add(new InstructionData(InstructionData.ListItemType.TYPE_ADD_BUTTON));
                 instructionList.add(new InstructionData("Grind Flour"));
                 instructionList.add(new InstructionData("Grind Flour"));
                 instructionList.add(new InstructionData("Grind Flour"));
@@ -82,6 +84,7 @@ public class GameActivity extends AppCompatActivity {
 
             }
             if(i == 2) {
+                instructionList.add(new InstructionData(InstructionData.ListItemType.TYPE_ADD_BUTTON));
                 instructionList.add(new InstructionData("Grind Flour"));
                 instructionList.add(new InstructionData("Grind Flour"));
                 instructionList.add(new InstructionData("Mill Flour"));
@@ -93,6 +96,7 @@ public class GameActivity extends AppCompatActivity {
 
             }
             if(i == 3) {
+                instructionList.add(new InstructionData(InstructionData.ListItemType.TYPE_ADD_BUTTON));
                 instructionList.add(new InstructionData("Grind Flour"));
                 instructionList.add(new InstructionData("Bake Bread"));
                 instructionList.add(new InstructionData("Bake Bread"));
@@ -104,6 +108,7 @@ public class GameActivity extends AppCompatActivity {
 
             }
             if(i == 4) {
+                instructionList.add(new InstructionData(InstructionData.ListItemType.TYPE_ADD_BUTTON));
                 instructionList.add(new InstructionData("Bake Bread"));
                 instructionList.add(new InstructionData("Bake Bread"));
                 instructionList.add(new InstructionData("Bake Bread"));

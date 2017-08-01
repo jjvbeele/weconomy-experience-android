@@ -46,11 +46,20 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
 
     class InstructionViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.instruction_view)
+        protected View instructionView;
+
+        @BindView(R.id.add_instruction_button)
+        protected View instructionButton;
+
         @BindView(R.id.title)
         protected TextView titleTextView;
 
         @BindView(R.id.filler)
         protected View fillerView;
+
+        @BindView(R.id.image_view)
+        protected View imageView;
 
         public InstructionViewHolder(View itemView) {
             super(itemView);
@@ -59,8 +68,20 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
         }
 
         public void setData(InstructionData instructionData) {
-            titleTextView.setText(instructionData.getText());
-            fillerView.setMinimumHeight(instructionData.getSize() * 100);
+            if(instructionData.getType() == InstructionData.ListItemType.TYPE_ADD_BUTTON) {
+                instructionView.setVisibility(View.INVISIBLE);
+                instructionButton.setVisibility(View.VISIBLE);
+                fillerView.setMinimumHeight(0);
+                itemView.requestLayout();
+
+            } else {
+                instructionView.setVisibility(View.VISIBLE);
+                instructionButton.setVisibility(View.INVISIBLE);
+
+                titleTextView.setText(instructionData.getText());
+                fillerView.setMinimumHeight(instructionData.getSize() * 100);
+                itemView.requestLayout();
+            }
         }
     }
 }
