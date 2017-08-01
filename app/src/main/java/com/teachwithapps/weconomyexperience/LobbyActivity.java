@@ -9,9 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseError;
 import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
-import com.teachwithapps.weconomyexperience.firebase.FireDatabaseHelper;
+import com.teachwithapps.weconomyexperience.firebase.FireDatabaseTransactions;
 import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.util.Returnable;
 import com.teachwithapps.weconomyexperience.view.GameRecyclerAdapter;
@@ -38,7 +37,7 @@ public class LobbyActivity extends AppCompatActivity {
 
     private List<GameData> gameDataList;
 
-    private FireDatabaseHelper fireDatabaseHelper;
+    private FireDatabaseTransactions fireDatabaseTransactions;
     private FireAuthHelper fireAuthHelper;
 
     @Override
@@ -47,12 +46,19 @@ public class LobbyActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_lobby);
 
-        fireDatabaseHelper = new FireDatabaseHelper();
+        fireDatabaseTransactions = new FireDatabaseTransactions();
 
         ButterKnife.bind(this);
 
         gameDataList = new ArrayList<>();
-        gameRecyclerView.setAdapter(new GameRecyclerAdapter(gameDataList));
+        gameRecyclerView.setAdapter(new GameRecyclerAdapter(
+                gameDataList,
+                new GameRecyclerAdapter.OnClickListener() {
+                    @Override
+                    public void onClick(GameData gameData) {
+                        fireDatabaseTransactions.removeHubGame(gameData);
+                    }
+                }));
         gameRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         fireAuthHelper = new FireAuthHelper(this);
@@ -78,21 +84,14 @@ public class LobbyActivity extends AppCompatActivity {
     }
 
     private void getHubGames() {
-        fireDatabaseHelper.getRecordArray(
-                GameData.class,
-                new String[]{"hub"},
+        fireDatabaseTransactions.queryHubGames(
                 new Returnable<List<GameData>>() {
                     @Override
                     public void onResult(List<GameData> dataList) {
                         fillListWithGames(dataList);
                     }
-                },
-                new Returnable<DatabaseError>() {
-                    @Override
-                    public void onResult(DatabaseError data) {
-                        Log.e(TAG, "Error retrieving hub data", data.toException());
-                    }
-                });
+                }
+        );
     }
 
     private void fillListWithGames(List<GameData> dataList) {
@@ -104,8 +103,11 @@ public class LobbyActivity extends AppCompatActivity {
 
     @OnClick(R.id.button_start_new_game)
     protected void startNewGame() {
-        gameDataList.add(new GameData("Test " + gameDataList.size()));
+        GameData gameData = new GameData("Test " + gameDataList.size());
+        gameDataList.add(gameData);
         Log.d(TAG, "Click new game. Games available: " + gameDataList.size());
         gameRecyclerView.getAdapter().notifyItemInserted(gameDataList.size() - 1);
+
+        fireDatabaseTransactions.registerNewGame(gameData);
     }
 }

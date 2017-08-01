@@ -20,10 +20,16 @@ import butterknife.ButterKnife;
 
 public class GameRecyclerAdapter extends RecyclerView.Adapter<GameRecyclerAdapter.GameViewHolder> {
 
-    private List<GameData> gameDataList;
+    public interface OnClickListener {
+        void onClick(GameData gameData);
+    }
 
-    public GameRecyclerAdapter(List<GameData> gameDataList) {
+    private List<GameData> gameDataList;
+    private OnClickListener removeGameListener;
+
+    public GameRecyclerAdapter(List<GameData> gameDataList, OnClickListener removeGameListener) {
         this.gameDataList = gameDataList;
+        this.removeGameListener = removeGameListener;
     }
 
     @Override
@@ -43,6 +49,8 @@ public class GameRecyclerAdapter extends RecyclerView.Adapter<GameRecyclerAdapte
                 int index = gameDataList.indexOf(gameData);
                 gameDataList.remove(gameData);
                 notifyItemRemoved(index);
+
+                removeGameListener.onClick(gameData);
             }
         });
     }

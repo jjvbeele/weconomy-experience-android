@@ -1,5 +1,9 @@
 package com.teachwithapps.weconomyexperience.firebase;
 
+import android.support.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -26,29 +30,23 @@ public class FireDatabaseHelper {
         databaseRef = firebaseDatabase.getReference();
     }
 
-    public <T> void getRecordArray(
+    public <T extends FireData> void getRecordArray(
             final Class<T> dataResultClass,
             String[] locationArray,
             final Returnable<List<T>> returnOnSuccess,
             final Returnable<DatabaseError> returnOnFail) {
 
-        DatabaseReference locationRef = null;
-        for (String location : locationArray) {
-            if (location == null) {
-                returnOnFail.onResult(null);
-                return;
-            }
-
-            locationRef = databaseRef.child(location);
-        }
+        DatabaseReference locationRef = getLocationRef(locationArray);
 
         if (locationRef != null) {
             locationRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     List<T> dataList = new ArrayList<T>();
-                    for(DataSnapshot childData : dataSnapshot.getChildren()) {
-                        dataList.add(childData.getValue(dataResultClass));
+                    for (DataSnapshot childData : dataSnapshot.getChildren()) {
+                        T data = childData.getValue(dataResultClass);
+                        data.setId(childData.getKey());
+                        dataList.add(data);
                     }
                     returnOnSuccess.onResult(dataList);
                 }
@@ -67,15 +65,7 @@ public class FireDatabaseHelper {
             final Returnable<T> returnOnSuccess,
             final Returnable<DatabaseError> returnOnFail) {
 
-        DatabaseReference locationRef = null;
-        for (String location : locationArray) {
-            if (location == null) {
-                returnOnFail.onResult(null);
-                return;
-            }
-
-            locationRef = databaseRef.child(location);
-        }
+        DatabaseReference locationRef = getLocationRef(locationArray);
 
         if (locationRef != null) {
             locationRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -92,11 +82,47 @@ public class FireDatabaseHelper {
         }
     }
 
-    private String escapeChar(char escapeChar) {
+    public <T> String pushRecord(String[] locationArray, T data) {
+        DatabaseReference locationRef = getLocationRef(locationArray);
+
+        if (locationRef != null) {
+            DatabaseReference newRecordRef = locationRef.push();
+            newRecordRef.setValue(data);
+
+            return newRecordRef.getKey();
+
+        } else {
+            return null;
+        }
+    }
+
+    public void removeRecord(String[] locationArray, String id) {
+        DatabaseReference locationRef = getLocationRef(locationArray);
+
+        if (locationRef != null) {
+            locationRef.child(id).removeValue();
+        }
+    }
+
+    private DatabaseReference getLocationRef(String[] locationArray) {
+        DatabaseReference locationRef = databaseRef;
+        for (String location : locationArray) {
+            if (locationRef != null && location == null) {
+                return null;
+            }
+
+            locationRef = locationRef.child(location);
+        }
+        return locationRef;
+    }
+
+
+
+    public static String escapeChar(char escapeChar) {
         return "|" + Integer.toHexString(escapeChar) + "|";
     }
 
-    private String escape(String unescaped) {
+    public static String escape(String unescaped) {
         return unescaped
                 .replace(".", escapeChar('.'))
                 .replace(":", escapeChar(':'))

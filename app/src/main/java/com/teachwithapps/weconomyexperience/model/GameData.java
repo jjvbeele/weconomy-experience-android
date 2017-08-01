@@ -1,12 +1,16 @@
 package com.teachwithapps.weconomyexperience.model;
 
+import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.PropertyName;
+import com.teachwithapps.weconomyexperience.firebase.FireData;
 
 /**
  * Created by mint on 26-7-17.
  */
+@IgnoreExtraProperties
+public class GameData extends FireData {
 
-public class GameData {
+    public String id;
 
     @PropertyName("name")
     public String name;
@@ -20,10 +24,19 @@ public class GameData {
     @PropertyName("state")
     public String state;
 
-    public GameData() {}
+    public GameData() {
+    }
 
     public GameData(String name) {
         this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
