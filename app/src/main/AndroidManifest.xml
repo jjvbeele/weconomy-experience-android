@@ -10,6 +10,11 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
+        <activity android:name=".SelectInstructionActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
         <activity android:name=".HubActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

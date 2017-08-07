@@ -1,19 +1,18 @@
 package com.teachwithapps.weconomyexperience.model;
 
+import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.PropertyName;
 import com.teachwithapps.weconomyexperience.firebase.FireData;
+
+import org.parceler.Parcel;
 
 /**
  * Created by mint on 1-8-17.
  */
 
+@IgnoreExtraProperties
+@Parcel
 public class InstructionData extends FireData {
-
-    public enum ListItemType {
-        TYPE_ADD_BUTTON
-    }
-
-    private ListItemType listItemType;
 
     @PropertyName("text")
     protected String text;
@@ -22,11 +21,6 @@ public class InstructionData extends FireData {
     protected int size;
 
     public InstructionData() {}
-
-    public InstructionData(ListItemType type) {
-        setType(type);
-        size = 1;
-    }
 
     public InstructionData(String text) {
         this(text, (int)(Math.random() * 6) + 1);
@@ -43,13 +37,5 @@ public class InstructionData extends FireData {
 
     public int getSize() {
         return size;
-    }
-
-    public ListItemType getType() {
-        return listItemType;
-    }
-
-    public void setType(ListItemType type) {
-        this.listItemType = type;
     }
 }

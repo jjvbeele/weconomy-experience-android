@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 
 import com.teachwithapps.weconomyexperience.model.InstructionData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,6 +20,8 @@ import java.util.List;
 public class MultiLinearRecyclerView extends LinearLayout {
 
     private List<List<InstructionData>> instructionDataMap;
+
+    private List<RecyclerView> scheduleRecyclerList = new ArrayList<>();
 
     public MultiLinearRecyclerView(Context context) {
         super(context);
@@ -37,6 +40,12 @@ public class MultiLinearRecyclerView extends LinearLayout {
         dataMapChanged();
     }
 
+    public void dataMapContentChanged(int day, int index) {
+        RecyclerView dayRecycler = scheduleRecyclerList.get(day);
+        dayRecycler.getAdapter().notifyItemInserted(index);
+        dayRecycler.smoothScrollToPosition(index);
+    }
+
     public void dataMapChanged() {
         removeAllViews();
         for (int i = 0; i < instructionDataMap.size(); i++) {
@@ -52,6 +61,8 @@ public class MultiLinearRecyclerView extends LinearLayout {
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             recyclerView.setAdapter(new ScheduleRecyclerAdapter(instructionDataMap.get(i)));
             addView(recyclerView);
+
+            scheduleRecyclerList.add(recyclerView);
         }
 
         requestLayout();
