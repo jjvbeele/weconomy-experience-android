@@ -70,14 +70,10 @@ public class GameActivity extends AppCompatActivity {
         gameData = getIntentData(getIntent(), savedInstanceState, Constants.KEY_GAME_DATA_PARCEL);
 
         //initialize instructiondatamap, this will hold the instructions for the visible schedule
-        instructionDataMap = getIntentData(getIntent(), savedInstanceState, Constants.KEY_INSTRUCTION_MAP_PARCEL);
-        if(instructionDataMap == null) {
-            instructionDataMap = new ArrayList<>();
+        instructionDataMap = new ArrayList<>();
 
-            for(int i = 0; i < numberOfVisibleDays; i++) {
-                instructionDataMap.add(i, new ArrayList<InstructionData>());
-            }
-
+        for(int i = 0; i < numberOfVisibleDays; i++) {
+            instructionDataMap.add(i, new ArrayList<InstructionData>());
         }
 
         //fill the schedule for the number of visible days
@@ -124,7 +120,6 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelable(Constants.KEY_GAME_DATA_PARCEL, Parcels.wrap(gameData));
-        outState.putParcelable(Constants.KEY_INSTRUCTION_MAP_PARCEL, Parcels.wrap(instructionDataMap));
         super.onSaveInstanceState(outState);
     }
 
