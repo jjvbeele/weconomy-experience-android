@@ -4,6 +4,9 @@ import android.util.Log;
 
 import com.google.firebase.database.DatabaseError;
 import com.teachwithapps.weconomyexperience.model.GameData;
+import com.teachwithapps.weconomyexperience.model.InstructionData;
+import com.teachwithapps.weconomyexperience.model.InstructionDayTuple;
+import com.teachwithapps.weconomyexperience.model.PlanningData;
 import com.teachwithapps.weconomyexperience.util.Returnable;
 
 import java.util.List;
@@ -92,6 +95,63 @@ public class FireDatabaseTransactions {
                     }
                 },
                 false
+        );
+    }
+
+    public void addInstructionToLibrary(String instructionLibraryName, InstructionData instructionData) {
+        fireDatabaseHelper.pushFireDataRecord(
+                new String[] {
+                        "instruction_libraries",
+                        instructionLibraryName
+                },
+                instructionData
+        );
+    }
+
+    public void planInstruction(String gameKey, int day, InstructionDayTuple instructionDayTuple) {
+        String key = fireDatabaseHelper.pushRecord(
+                new String[] {"games", gameKey, "planning"},
+                instructionDayTuple
+        );
+    }
+
+    public void observePlanning(String gameKey, Returnable<List<InstructionDayTuple>> callback) {
+        fireDatabaseHelper.observeRecordFireDataArray(
+                InstructionDayTuple.class,
+                new String[]{"game_plannings", gameKey},
+                callback,
+                new Returnable<DatabaseError>() {
+                    @Override
+                    public void onResult(DatabaseError error) {
+                        if(error != null) {
+                            Log.e(TAG, "Error retrieving game data", error.toException());
+
+                        } else {
+                            Log.e(TAG, "Error retrieving game data, unknown error");
+                        }
+                    }
+                },
+                true
+        );
+    }
+
+    public void observeInstructionLibrary(String instructionLibraryKey, Returnable<List<InstructionData>> callback) {
+        fireDatabaseHelper.observeRecordFireDataArray(
+                InstructionData.class,
+                new String[]{"instruction_libraries", instructionLibraryKey},
+                callback,
+                new Returnable<DatabaseError>() {
+                    @Override
+                    public void onResult(DatabaseError error) {
+                        if(error != null) {
+                            Log.e(TAG, "Error retrieving game data", error.toException());
+
+                        } else {
+                            Log.e(TAG, "Error retrieving game data, unknown error");
+                        }
+                    }
+                },
+                true
         );
     }
 }

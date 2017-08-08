@@ -1,5 +1,6 @@
 package com.teachwithapps.weconomyexperience.firebase;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -109,8 +110,10 @@ public class FireDatabaseHelper {
                     List<T> dataList = new ArrayList<T>();
                     for (DataSnapshot childData : dataSnapshot.getChildren()) {
                         T data = childData.getValue(dataResultClass);
-                        data.setId(childData.getKey());
-                        dataList.add(data);
+                        if(data != null) {
+                            data.setId(childData.getKey());
+                            dataList.add(data);
+                        }
                     }
                     returnOnSuccess.onResult(dataList);
                 }
@@ -231,6 +234,22 @@ public class FireDatabaseHelper {
         }
     }
 
+    public <T extends FireData> String pushFireDataRecord(String[] locationArray, T data) {
+        DatabaseReference locationRef = getLocationRef(locationArray);
+
+        if (locationRef != null) {
+            DatabaseReference newRecordRef = locationRef.push();
+            newRecordRef.setValue(data);
+
+            data.setId(newRecordRef.getKey());
+
+            return newRecordRef.getKey();
+
+        } else {
+            return null;
+        }
+    }
+
     public <T> void addRecord(String location, String key, T data) {
         addRecord(new String[] {location}, key, data);
     }
@@ -263,6 +282,10 @@ public class FireDatabaseHelper {
         } else {
             ref.addListenerForSingleValueEvent(valueEventListener);
         }
+    }
+
+    private void addRecordChildListener(DatabaseReference ref, ChildEventListener childEventListener) {
+        ref.addChildEventListener(childEventListener);
     }
 
     private DatabaseReference getLocationRef(String[] locationArray) {

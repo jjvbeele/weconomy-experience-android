@@ -181,7 +181,7 @@ public class HubActivity extends AppCompatActivity {
      */
     @OnClick(R.id.button_start_new_game)
     protected void startNewGame() {
-        GameData gameData = new GameData("Test " + gameDataMap.size());
+        GameData gameData = new GameData("Test " + gameDataMap.size(), "default_library");
         fireDatabaseTransactions.registerNewGame(gameData);
     }
 }

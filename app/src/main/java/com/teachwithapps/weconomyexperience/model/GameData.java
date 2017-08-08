@@ -25,11 +25,18 @@ public class GameData extends FireData {
     @PropertyName("state")
     protected String state;
 
+    @PropertyName("planning")
+    protected PlanningData planningData;
+
+    @PropertyName("instruction_library")
+    protected String instructionLibraryKey;
+
     public GameData() {
     }
 
-    public GameData(String name) {
+    public GameData(String name, String libraryKey) {
         this.name = name;
+        this.instructionLibraryKey = libraryKey;
     }
 
     public String getId() {
@@ -54,6 +61,22 @@ public class GameData extends FireData {
 
     public String getState() {
         return state;
+    }
+
+    public PlanningData getPlanningData() {
+        return planningData;
+    }
+
+    public void setPlanningData(PlanningData planningData) {
+        this.planningData = planningData;
+    }
+
+    public String getInstructionLibraryKey() {
+        return instructionLibraryKey;
+    }
+
+    public void setInstructionLibraryKey(String instructionLibraryKey) {
+        this.instructionLibraryKey = instructionLibraryKey;
     }
 
 }

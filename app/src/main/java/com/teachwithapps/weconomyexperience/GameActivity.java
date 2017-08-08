@@ -9,9 +9,15 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseUser;
+import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
+import com.teachwithapps.weconomyexperience.firebase.FireDatabaseTransactions;
 import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
+import com.teachwithapps.weconomyexperience.model.InstructionDayTuple;
+import com.teachwithapps.weconomyexperience.model.PlanningData;
 import com.teachwithapps.weconomyexperience.util.Log;
+import com.teachwithapps.weconomyexperience.util.Returnable;
 import com.teachwithapps.weconomyexperience.view.MultiLinearRecyclerView;
 
 import org.parceler.Parcels;
@@ -42,6 +48,17 @@ public class GameActivity extends AppCompatActivity {
 
     private List<List<InstructionData>> instructionDataMap;
 
+    //firebase attributes
+    private FireDatabaseTransactions fireDatabaseTransactions;
+    private FireAuthHelper fireAuthHelper;
+
+    private FireAuthHelper.FireAuthCallback fireAuthCallback = new FireAuthHelper.FireAuthCallback() {
+        @Override
+        public void userReady(FirebaseUser firebaseUser) {
+            observePlanning();
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +87,11 @@ public class GameActivity extends AppCompatActivity {
 
         //add instructiondatamap to the schedulerecyclerview
         scheduleRecyclerView.setDataMap(instructionDataMap);
+
+        //set up firebase helper classes
+        fireDatabaseTransactions = new FireDatabaseTransactions();
+        fireAuthHelper = new FireAuthHelper(this);
+        fireAuthHelper.withUser(this, fireAuthCallback);
     }
 
     /**
@@ -140,13 +162,18 @@ public class GameActivity extends AppCompatActivity {
         dayCell.findViewById(R.id.add_instruction_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(GameActivity.this, SelectInstructionActivity.class);
-                intent.putExtra(Constants.KEY_INSTRUCTION_INDEX_IN_SCHEDULE, indexInView);
-                startActivityForResult(intent, Constants.REQUEST_CODE_SELECT_INSTRUCTION);
+                openSelectInstructionScreen(indexInView);
             }
         });
 
         daysRowLayout.addView(dayCell);
+    }
+
+    private void openSelectInstructionScreen(int indexInView) {
+        Intent intent = new Intent(GameActivity.this, SelectInstructionActivity.class);
+        intent.putExtra(Constants.KEY_INSTRUCTION_INDEX_IN_SCHEDULE, indexInView);
+        intent.putExtra(Constants.KEY_INSTRUCTION_LIBRARY_KEY, gameData.getInstructionLibraryKey());
+        startActivityForResult(intent, Constants.REQUEST_CODE_SELECT_INSTRUCTION);
     }
 
     /**
@@ -159,5 +186,19 @@ public class GameActivity extends AppCompatActivity {
         instructionDataList.add(0, instructionData);
 
         scheduleRecyclerView.dataMapContentChanged(indexInView, 0, true);
+    }
+
+    private void addInstructionToLibrary(InstructionData instructionData) {
+        fireDatabaseTransactions.addInstructionToLibrary(gameData.getId(), instructionData);
+    }
+
+    private void observePlanning() {
+        fireDatabaseTransactions.observePlanning(gameData.getId(), new Returnable<List<InstructionDayTuple>>() {
+            @Override
+            public void onResult(List<InstructionDayTuple> dataList) {
+                for(InstructionDayTuple instructionDayTuple : dataList) {
+                }
+            }
+        });
     }
 }
