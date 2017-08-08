@@ -165,6 +165,69 @@ public class FireDatabaseHelper {
         }
     }
 
+
+    public <T extends FireData> void observeChildFireData(
+            final Class<T> dataResultClass,
+            String[] locationArray,
+            final ReturnableChange<T> returnOnChange,
+            final Returnable<DatabaseError> returnOnFail) {
+
+        DatabaseReference locationRef = getLocationRef(locationArray);
+
+        if (locationRef != null) {
+            addRecordChildListener(locationRef, new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    T data = dataSnapshot.getValue(dataResultClass);
+                    if(data != null) {
+                        data.setId(dataSnapshot.getKey());
+                        returnOnChange.onChildAdded(data);
+                    } else {
+                        returnOnFail.onResult(null);
+                    }
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    T data = dataSnapshot.getValue(dataResultClass);
+                    if(data != null) {
+                        data.setId(dataSnapshot.getKey());
+                        returnOnChange.onChildChanged(data);
+                    } else {
+                        returnOnFail.onResult(null);
+                    }
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    T data = dataSnapshot.getValue(dataResultClass);
+                    if(data != null) {
+                        data.setId(dataSnapshot.getKey());
+                        returnOnChange.onChildRemoved(data);
+                    } else {
+                        returnOnFail.onResult(null);
+                    }
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                    T data = dataSnapshot.getValue(dataResultClass);
+                    if(data != null) {
+                        data.setId(dataSnapshot.getKey());
+                        returnOnChange.onChildMoved(data);
+                    } else {
+                        returnOnFail.onResult(null);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
     /**
      * Retrieve one record from the firebase
      *

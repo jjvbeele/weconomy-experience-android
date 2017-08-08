@@ -13,19 +13,15 @@ import com.google.firebase.auth.FirebaseUser;
 import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
 import com.teachwithapps.weconomyexperience.firebase.FireDatabaseTransactions;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
-import com.teachwithapps.weconomyexperience.model.InstructionDayTuple;
 import com.teachwithapps.weconomyexperience.util.Returnable;
 import com.teachwithapps.weconomyexperience.view.FoldedInstructionRecyclerAdapter;
-import com.teachwithapps.weconomyexperience.view.ScheduleRecyclerAdapter;
 
 import org.parceler.Parcels;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 /**
  * Created by mint on 7-8-17.

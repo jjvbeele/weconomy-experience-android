@@ -12,10 +12,10 @@ import android.widget.TextView;
 import com.google.firebase.auth.FirebaseUser;
 import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
 import com.teachwithapps.weconomyexperience.firebase.FireDatabaseTransactions;
+import com.teachwithapps.weconomyexperience.firebase.ReturnableChange;
 import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
-import com.teachwithapps.weconomyexperience.model.InstructionDayTuple;
-import com.teachwithapps.weconomyexperience.model.PlanningData;
+import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 import com.teachwithapps.weconomyexperience.util.Log;
 import com.teachwithapps.weconomyexperience.util.Returnable;
 import com.teachwithapps.weconomyexperience.view.MultiLinearRecyclerView;
@@ -55,7 +55,7 @@ public class GameActivity extends AppCompatActivity {
     private FireAuthHelper.FireAuthCallback fireAuthCallback = new FireAuthHelper.FireAuthCallback() {
         @Override
         public void userReady(FirebaseUser firebaseUser) {
-            observePlanning();
+            observeSchedule();
         }
     };
 
@@ -138,7 +138,7 @@ public class GameActivity extends AppCompatActivity {
                 InstructionData instructionData = Parcels.unwrap(data.getParcelableExtra(Constants.KEY_INSTRUCTION_PARCEL));
 
                 if(instructionIndexInView >= 0 && instructionData != null) {
-                    addInstructionToSchedule(instructionIndexInView, instructionData);
+                    registerInstructionToSchedule(instructionIndexInView, instructionData);
 
                 } else {
                     Log.d(TAG, "NO VALID ARGUMENTS");
@@ -169,6 +169,13 @@ public class GameActivity extends AppCompatActivity {
         daysRowLayout.addView(dayCell);
     }
 
+    private void registerInstructionToSchedule(int instructionIndexView, InstructionData instructionData) {
+        ScheduledInstructionData scheduledInstructionData = new ScheduledInstructionData();
+        scheduledInstructionData.setInstructionKey(instructionData.getId());
+        scheduledInstructionData.setDay(instructionIndexView);
+        fireDatabaseTransactions.registerInstructionToSchedule(gameData.getId(), scheduledInstructionData);
+    }
+
     private void openSelectInstructionScreen(int indexInView) {
         Intent intent = new Intent(GameActivity.this, SelectInstructionActivity.class);
         intent.putExtra(Constants.KEY_INSTRUCTION_INDEX_IN_SCHEDULE, indexInView);
@@ -192,13 +199,42 @@ public class GameActivity extends AppCompatActivity {
         fireDatabaseTransactions.addInstructionToLibrary(gameData.getId(), instructionData);
     }
 
-    private void observePlanning() {
-        fireDatabaseTransactions.observePlanning(gameData.getId(), new Returnable<List<InstructionDayTuple>>() {
-            @Override
-            public void onResult(List<InstructionDayTuple> dataList) {
-                for(InstructionDayTuple instructionDayTuple : dataList) {
+    private void observeSchedule() {
+        fireDatabaseTransactions.observeSchedule(
+                new String[] {
+                        "game_schedules",
+                        gameData.getId()
+                },
+                new ReturnableChange<ScheduledInstructionData>() {
+                    @Override
+                    public void onChildAdded(final ScheduledInstructionData scheduledInstructionData) {
+                        fireDatabaseTransactions.getInstructionFromLibrary(
+                                gameData.getInstructionLibraryKey(),
+                                scheduledInstructionData.getInstructionKey(),
+                                new Returnable<InstructionData>() {
+                                    @Override
+                                    public void onResult(InstructionData instructionData) {
+                                        instructionDataMap.get(scheduledInstructionData.getDay()).add(instructionData);
+                                        scheduleRecyclerView.dataMapChanged();
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onChildChanged(ScheduledInstructionData data) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(ScheduledInstructionData data) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(ScheduledInstructionData data) {
+
+                    }
                 }
-            }
-        });
+        );
     }
 }

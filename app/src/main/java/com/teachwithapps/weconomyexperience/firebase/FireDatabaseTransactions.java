@@ -5,8 +5,7 @@ import android.util.Log;
 import com.google.firebase.database.DatabaseError;
 import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
-import com.teachwithapps.weconomyexperience.model.InstructionDayTuple;
-import com.teachwithapps.weconomyexperience.model.PlanningData;
+import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 import com.teachwithapps.weconomyexperience.util.Returnable;
 
 import java.util.List;
@@ -108,33 +107,6 @@ public class FireDatabaseTransactions {
         );
     }
 
-    public void planInstruction(String gameKey, int day, InstructionDayTuple instructionDayTuple) {
-        String key = fireDatabaseHelper.pushRecord(
-                new String[] {"games", gameKey, "planning"},
-                instructionDayTuple
-        );
-    }
-
-    public void observePlanning(String gameKey, Returnable<List<InstructionDayTuple>> callback) {
-        fireDatabaseHelper.observeRecordFireDataArray(
-                InstructionDayTuple.class,
-                new String[]{"game_plannings", gameKey},
-                callback,
-                new Returnable<DatabaseError>() {
-                    @Override
-                    public void onResult(DatabaseError error) {
-                        if(error != null) {
-                            Log.e(TAG, "Error retrieving game data", error.toException());
-
-                        } else {
-                            Log.e(TAG, "Error retrieving game data, unknown error");
-                        }
-                    }
-                },
-                true
-        );
-    }
-
     public void observeInstructionLibrary(String instructionLibraryKey, Returnable<List<InstructionData>> callback) {
         fireDatabaseHelper.observeRecordFireDataArray(
                 InstructionData.class,
@@ -152,6 +124,50 @@ public class FireDatabaseTransactions {
                     }
                 },
                 true
+        );
+    }
+
+    public void registerInstructionToSchedule(String gameKey, ScheduledInstructionData scheduledInstructionData) {
+        fireDatabaseHelper.pushFireDataRecord(
+                new String[] {
+                        "game_schedules",
+                        gameKey
+                },
+                scheduledInstructionData
+        );
+    }
+
+    public void observeSchedule(String[] locationArray,
+                                ReturnableChange<ScheduledInstructionData> onReturnChange) {
+        fireDatabaseHelper.observeChildFireData(
+                ScheduledInstructionData.class,
+                locationArray,
+                onReturnChange,
+                new Returnable<DatabaseError>() {
+                    @Override
+                    public void onResult(DatabaseError data) {
+                        Log.e(TAG, "Can't observe schedule", data.toException());
+                    }
+                }
+        );
+    }
+
+    public void getInstructionFromLibrary(String instructionLibraryKey, String instructionKey, Returnable<InstructionData> onReturnSuccess) {
+        fireDatabaseHelper.observeRecord(
+                InstructionData.class,
+                new String[]{
+                        "instruction_libraries",
+                        instructionLibraryKey,
+                        instructionKey
+                },
+                onReturnSuccess,
+                new Returnable<DatabaseError>() {
+                    @Override
+                    public void onResult(DatabaseError data) {
+                        Log.e(TAG, "Can't retrieve instruction from library", data.toException());
+                    }
+                },
+                false
         );
     }
 }
