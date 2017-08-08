@@ -62,7 +62,6 @@ public class GameActivity extends AppCompatActivity {
             }
 
         }
-        Log.d(TAG, "Map size " + instructionDataMap.size());
 
         //fill the schedule for the number of visible days
         for(int i = 0; i < numberOfVisibleDays; i++) {
@@ -159,6 +158,6 @@ public class GameActivity extends AppCompatActivity {
         List<InstructionData> instructionDataList = instructionDataMap.get(indexInView);
         instructionDataList.add(0, instructionData);
 
-        scheduleRecyclerView.dataMapContentChanged(indexInView, 0);
+        scheduleRecyclerView.dataMapContentChanged(indexInView, 0, true);
     }
 }

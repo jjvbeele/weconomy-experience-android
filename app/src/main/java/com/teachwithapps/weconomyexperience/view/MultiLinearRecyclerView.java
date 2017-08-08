@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.teachwithapps.weconomyexperience.model.InstructionData;
-import com.teachwithapps.weconomyexperience.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,7 @@ public class MultiLinearRecyclerView extends LinearLayout {
 
     private List<List<InstructionData>> instructionDataMap;
 
-    private List<RecyclerView> scheduleRecyclerList = new ArrayList<>();
+    private List<RecyclerView> childRecyclerList = new ArrayList<>();
 
     public MultiLinearRecyclerView(Context context) {
         super(context);
@@ -43,12 +42,28 @@ public class MultiLinearRecyclerView extends LinearLayout {
         dataMapChanged();
     }
 
-    public void dataMapContentChanged(int day, int index) {
-        RecyclerView dayRecycler = scheduleRecyclerList.get(day);
-        dayRecycler.getAdapter().notifyItemInserted(index);
-        dayRecycler.smoothScrollToPosition(index);
+    /**
+     * Method to be called when the map's child content changed
+     * @param column column to change
+     * @param index index where a new item was inserted or removed
+     * @param inserted boolean to indicate if an item was inserted or removed
+     */
+    public void dataMapContentChanged(int column, int index, boolean inserted) {
+        RecyclerView childRecycler = childRecyclerList.get(column);
+
+        if(inserted) {
+            childRecycler.getAdapter().notifyItemInserted(index);
+
+        } else {
+            childRecycler.getAdapter().notifyItemRemoved(index);
+        }
+
+        childRecycler.smoothScrollToPosition(index);
     }
 
+    /**
+     * Method to be called when the map's child number changed, remove all views and rebuild
+     */
     public void dataMapChanged() {
         removeAllViews();
         for (int i = 0; i < instructionDataMap.size(); i++) {
@@ -65,7 +80,7 @@ public class MultiLinearRecyclerView extends LinearLayout {
             recyclerView.setAdapter(new ScheduleRecyclerAdapter(instructionDataMap.get(i)));
             addView(recyclerView);
 
-            scheduleRecyclerList.add(recyclerView);
+            childRecyclerList.add(recyclerView);
         }
 
         requestLayout();
