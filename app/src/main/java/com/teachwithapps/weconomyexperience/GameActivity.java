@@ -50,22 +50,19 @@ public class GameActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        //get gamedata parcel
-        if (getIntent().hasExtra(Constants.KEY_GAME_DATA_PARCEL)) {
-            //get from intent given by calling activity
-            gameData = Parcels.unwrap(getIntent().getParcelableExtra(Constants.KEY_GAME_DATA_PARCEL));
-
-        } else if (savedInstanceState != null && savedInstanceState.containsKey(Constants.KEY_GAME_DATA_PARCEL)) {
-            //get from savedinstancestate saved when activity is recreated by the app
-            gameData = Parcels.unwrap(savedInstanceState.getBundle(Constants.KEY_GAME_DATA_PARCEL));
-
-        } else {
-            //no game data avaiable, finish this activity
-            finish();
-        }
+        gameData = getIntentData(getIntent(), savedInstanceState, Constants.KEY_GAME_DATA_PARCEL);
 
         //initialize instructiondatamap, this will hold the instructions for the visible schedule
-        instructionDataMap = new ArrayList<>();
+        instructionDataMap = getIntentData(getIntent(), savedInstanceState, Constants.KEY_INSTRUCTION_MAP_PARCEL);
+        if(instructionDataMap == null) {
+            instructionDataMap = new ArrayList<>();
+
+            for(int i = 0; i < numberOfVisibleDays; i++) {
+                instructionDataMap.add(i, new ArrayList<InstructionData>());
+            }
+
+        }
+        Log.d(TAG, "Map size " + instructionDataMap.size());
 
         //fill the schedule for the number of visible days
         for(int i = 0; i < numberOfVisibleDays; i++) {
@@ -76,9 +73,37 @@ public class GameActivity extends AppCompatActivity {
         scheduleRecyclerView.setDataMap(instructionDataMap);
     }
 
+    /**
+     * Helper method to load intent and savedinstancestate data if available
+     * @param intent intent of the activity with parameters passed from the calling parent activity
+     * @param savedInstanceState savedinstancestate bundle to retrieve parameters when activity is recreated
+     * @param key key of the data
+     * @param <T> data to return
+     * @return returns data of type T
+     */
+    private <T> T getIntentData(Intent intent, Bundle savedInstanceState, String key) {
+        T data = null;
+
+        //get parcel
+        if (intent.hasExtra(key)) {
+            //get from intent given by calling activity
+            data = Parcels.unwrap(getIntent().getParcelableExtra(key));
+
+        } else if (savedInstanceState != null && savedInstanceState.containsKey(key)) {
+            //get from savedinstancestate saved when activity is recreated by the app
+            data = Parcels.unwrap(savedInstanceState.getParcelable(key));
+
+        } else {
+            Log.d(TAG, "Can't find key " + key + " in intent or savedinstancestate bundle");
+        }
+
+        return data;
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelable(Constants.KEY_GAME_DATA_PARCEL, Parcels.wrap(gameData));
+        outState.putParcelable(Constants.KEY_INSTRUCTION_MAP_PARCEL, Parcels.wrap(instructionDataMap));
         super.onSaveInstanceState(outState);
     }
 
@@ -105,10 +130,14 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Add a day to the schedule visible on the screen
+     * @param indexInView index of the visible screen
+     */
     private void addDayToSchedule(final int indexInView) {
         View dayCell = LayoutInflater.from(this).inflate(R.layout.view_schedule_day, daysRowLayout, false);
 
-        ((TextView)dayCell.findViewById(R.id.day_text)).setText(getString(R.string.day_text, indexInView));
+        ((TextView)dayCell.findViewById(R.id.day_text)).setText(getString(R.string.day_text, indexInView + 1));
         dayCell.findViewById(R.id.add_instruction_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,11 +147,14 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
-        instructionDataMap.add(indexInView, new ArrayList<InstructionData>());
-
         daysRowLayout.addView(dayCell);
     }
 
+    /**
+     * Add an instruction to the schedule
+     * @param indexInView day visible on the screen to add the instruction to
+     * @param instructionData instruction to be added
+     */
     private void addInstructionToSchedule(int indexInView, InstructionData instructionData) {
         List<InstructionData> instructionDataList = instructionDataMap.get(indexInView);
         instructionDataList.add(0, instructionData);

@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.teachwithapps.weconomyexperience.model.InstructionData;
+import com.teachwithapps.weconomyexperience.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,8 @@ import java.util.List;
  */
 
 public class MultiLinearRecyclerView extends LinearLayout {
+
+    private static final String TAG = MultiLinearRecyclerView.class.getName();
 
     private List<List<InstructionData>> instructionDataMap;
 

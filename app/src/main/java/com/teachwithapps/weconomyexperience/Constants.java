@@ -13,5 +13,6 @@ public class Constants {
 
     public static final String KEY_INSTRUCTION_INDEX_IN_SCHEDULE = "instruction_index_in_schedule";
     public static final String KEY_GAME_DATA_PARCEL = "game_data_parcel";
+    public static final String KEY_INSTRUCTION_MAP_PARCEL = "instruction_map_parcel";
     public static final String KEY_INSTRUCTION_PARCEL = "instruction_parcel";
 }
