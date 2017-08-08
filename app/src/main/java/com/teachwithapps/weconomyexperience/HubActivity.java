@@ -18,7 +18,9 @@ import com.teachwithapps.weconomyexperience.view.GameRecyclerAdapter;
 import org.parceler.Parcels;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -39,7 +41,7 @@ public class HubActivity extends AppCompatActivity {
     protected RecyclerView gameRecyclerView;
 
     //hub game attributes
-    private List<GameData> gameDataList;
+    private Map<String, GameData> gameDataMap;
 
     private GameRecyclerAdapter.OnClickListener clickGameListener = new GameRecyclerAdapter.OnClickListener() {
         @Override
@@ -73,23 +75,23 @@ public class HubActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_hub);
 
-        //set up firebase helper classes
-        fireDatabaseTransactions = new FireDatabaseTransactions();
-        fireAuthHelper = new FireAuthHelper(this);
-        fireAuthHelper.withUser(this, fireAuthCallback);
-
         ButterKnife.bind(this);
 
         //set up the list of games present in the hub
-        gameDataList = new ArrayList<>();
+        gameDataMap = new HashMap<>();
         gameRecyclerView.setAdapter(
                 new GameRecyclerAdapter(
-                        gameDataList,
+                        gameDataMap,
                         clickGameListener,
                         clickRemoveGameListener
                 )
         );
         gameRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        //set up firebase helper classes
+        fireDatabaseTransactions = new FireDatabaseTransactions();
+        fireAuthHelper = new FireAuthHelper(this);
+        fireAuthHelper.withUser(this, fireAuthCallback);
     }
 
     /**
@@ -113,19 +115,40 @@ public class HubActivity extends AppCompatActivity {
      * request list of games in the hub
      */
     private void getHubGames() {
-        fireDatabaseTransactions.queryHubGames(
-                new Returnable<List<GameData>>() {
+        fireDatabaseTransactions.observeHubGames(
+                new Returnable<List<String>>() {
                     @Override
-                    public void onResult(List<GameData> dataList) {
-                        fillListWithGames(dataList);
+                    public void onResult(List<String> dataList) {
+                        Log.d(TAG, "Listed changes: " + dataList.size());
+                        for(String gameKey : dataList) {
+                            getGameData(gameKey);
+                        }
                     }
                 }
         );
     }
 
+    private void getGameData(final String gameKey) {
+        fireDatabaseTransactions.observeGame(gameKey, new Returnable<GameData>() {
+            @Override
+            public void onResult(GameData data) {
+                if(gameDataMap.containsKey(gameKey)) {
+                    Log.d(TAG, "Existing game updated: " + gameKey);
+                    gameDataMap.remove(gameKey);
+                    gameDataMap.put(gameKey, data);
+                    gameRecyclerView.getAdapter().notifyDataSetChanged();
+
+                } else {
+                    Log.d(TAG, "New game: " + gameKey);
+                    gameDataMap.put(gameKey, data);
+                    gameRecyclerView.getAdapter().notifyItemInserted(gameDataMap.size() - 1);
+                }
+            }
+        });
+    }
+
     /**
      * remove game from the hub
-     * TODO: don't actually remove, but put data in inactive state
      * @param gameData
      */
     private void removeHubGame(GameData gameData) {
@@ -146,9 +169,9 @@ public class HubActivity extends AppCompatActivity {
      * fill hub with the provided list of games
      * @param dataList
      */
-    private void fillListWithGames(List<GameData> dataList) {
-        gameDataList.clear();
-        gameDataList.addAll(dataList);
+    private void fillListWithGames(Map<String, GameData> dataList) {
+        gameDataMap.clear();
+        gameDataMap.putAll(dataList);
         gameRecyclerView.getAdapter().notifyDataSetChanged();
         Log.d(TAG, "Found " + dataList.size() + " Games");
     }
@@ -158,11 +181,7 @@ public class HubActivity extends AppCompatActivity {
      */
     @OnClick(R.id.button_start_new_game)
     protected void startNewGame() {
-        GameData gameData = new GameData("Test " + gameDataList.size());
-        gameDataList.add(gameData);
-        Log.d(TAG, "Click new game. Games available: " + gameDataList.size());
-        gameRecyclerView.getAdapter().notifyItemInserted(gameDataList.size() - 1);
-
+        GameData gameData = new GameData("Test " + gameDataMap.size());
         fireDatabaseTransactions.registerNewGame(gameData);
     }
 }

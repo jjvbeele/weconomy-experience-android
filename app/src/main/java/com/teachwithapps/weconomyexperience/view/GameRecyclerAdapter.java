@@ -9,7 +9,9 @@ import android.widget.TextView;
 import com.teachwithapps.weconomyexperience.R;
 import com.teachwithapps.weconomyexperience.model.GameData;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -24,12 +26,12 @@ public class GameRecyclerAdapter extends RecyclerView.Adapter<GameRecyclerAdapte
         void onClick(GameData gameData);
     }
 
-    private List<GameData> gameDataList;
+    private Map<String, GameData> gameDataMap;
     private OnClickListener removeGameListener;
     private OnClickListener clickGameListener;
 
-    public GameRecyclerAdapter(List<GameData> gameDataList, OnClickListener clickGameListener, OnClickListener removeGameListener) {
-        this.gameDataList = gameDataList;
+    public GameRecyclerAdapter(Map<String, GameData> gameDataList, OnClickListener clickGameListener, OnClickListener removeGameListener) {
+        this.gameDataMap = gameDataList;
         this.clickGameListener = clickGameListener;
         this.removeGameListener = removeGameListener;
     }
@@ -43,13 +45,14 @@ public class GameRecyclerAdapter extends RecyclerView.Adapter<GameRecyclerAdapte
 
     @Override
     public void onBindViewHolder(GameViewHolder holder, int position) {
+        final List<GameData> gameDataList = new ArrayList<>(gameDataMap.values());
         final GameData gameData = gameDataList.get(position);
         holder.setData(gameData.getName());
         holder.setOnGameDelete(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int index = gameDataList.indexOf(gameData);
-                gameDataList.remove(gameData);
+                gameDataMap.remove(gameData.getId());
                 notifyItemRemoved(index);
 
                 removeGameListener.onClick(gameData);
@@ -65,7 +68,7 @@ public class GameRecyclerAdapter extends RecyclerView.Adapter<GameRecyclerAdapte
 
     @Override
     public int getItemCount() {
-        return gameDataList.size();
+        return gameDataMap.size();
     }
 
     class GameViewHolder extends RecyclerView.ViewHolder {
