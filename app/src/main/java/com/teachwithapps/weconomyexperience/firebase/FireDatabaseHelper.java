@@ -165,7 +165,6 @@ public class FireDatabaseHelper {
         }
     }
 
-
     public <T extends FireData> void observeChildFireData(
             final Class<T> dataResultClass,
             String[] locationArray,
@@ -276,6 +275,44 @@ public class FireDatabaseHelper {
                     returnOnFail.onResult(databaseError);
                 }
             }, continuousListener);
+        }
+    }
+
+    public <T> void observeChild(
+            final Class<T> dataResultClass,
+            String[] locationArray,
+            final ReturnableChange<T> returnOnSuccess,
+            final Returnable<DatabaseError> returnOnFail) {
+
+        DatabaseReference locationRef = getLocationRef(locationArray);
+
+        if (locationRef != null) {
+            addRecordChildListener(locationRef, new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    returnOnSuccess.onChildAdded(dataSnapshot.getValue(dataResultClass));
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    returnOnSuccess.onChildChanged(dataSnapshot.getValue(dataResultClass));
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    returnOnSuccess.onChildRemoved(dataSnapshot.getValue(dataResultClass));
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                    returnOnSuccess.onChildMoved(dataSnapshot.getValue(dataResultClass));
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "Can't observe child", databaseError.toException());
+                }
+            });
         }
     }
 

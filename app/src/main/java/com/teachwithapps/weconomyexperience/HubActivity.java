@@ -11,6 +11,7 @@ import android.util.Log;
 import com.google.firebase.auth.FirebaseUser;
 import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
 import com.teachwithapps.weconomyexperience.firebase.FireDatabaseTransactions;
+import com.teachwithapps.weconomyexperience.firebase.ReturnableChange;
 import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.util.Returnable;
 import com.teachwithapps.weconomyexperience.view.GameRecyclerAdapter;
@@ -116,13 +117,25 @@ public class HubActivity extends AppCompatActivity {
      */
     private void getHubGames() {
         fireDatabaseTransactions.observeHubGames(
-                new Returnable<List<String>>() {
+                new ReturnableChange<String>() {
                     @Override
-                    public void onResult(List<String> dataList) {
-                        Log.d(TAG, "Listed changes: " + dataList.size());
-                        for(String gameKey : dataList) {
-                            getGameData(gameKey);
-                        }
+                    public void onChildAdded(String data) {
+                        getGameData(data);
+                    }
+
+                    @Override
+                    public void onChildChanged(String data) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(String data) {
+                        gameDataMap.remove(data);
+                    }
+
+                    @Override
+                    public void onChildMoved(String data) {
+
                     }
                 }
         );
@@ -132,17 +145,17 @@ public class HubActivity extends AppCompatActivity {
         fireDatabaseTransactions.observeGame(gameKey, new Returnable<GameData>() {
             @Override
             public void onResult(GameData data) {
-                if(gameDataMap.containsKey(gameKey)) {
-                    Log.d(TAG, "Existing game updated: " + gameKey);
-                    gameDataMap.remove(gameKey);
-                    gameDataMap.put(gameKey, data);
-                    gameRecyclerView.getAdapter().notifyDataSetChanged();
-
-                } else {
-                    Log.d(TAG, "New game: " + gameKey);
+//                if(gameDataMap.containsKey(gameKey)) {
+//                    Log.d(TAG, "Existing game updated: " + gameKey);
+//                    gameDataMap.remove(gameKey);
+//                    gameDataMap.put(gameKey, data);
+//                    gameRecyclerView.getAdapter().notifyDataSetChanged();
+//
+//                } else {
+//                    Log.d(TAG, "New game: " + gameKey);
                     gameDataMap.put(gameKey, data);
                     gameRecyclerView.getAdapter().notifyItemInserted(gameDataMap.size() - 1);
-                }
+//                }
             }
         });
     }

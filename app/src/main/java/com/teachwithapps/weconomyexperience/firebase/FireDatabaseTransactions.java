@@ -58,17 +58,17 @@ public class FireDatabaseTransactions {
     /**
      * Retrieves a list of hub game keys
      **/
-    public void observeHubGames(Returnable<List<String>> callback) {
-        fireDatabaseHelper.observeRecordArray(
+    public void observeHubGames(ReturnableChange<String> callback) {
+        fireDatabaseHelper.observeChild(
                 String.class,
-                "hub",
+                new String[] {"hub"},
                 callback,
                 new Returnable<DatabaseError>() {
                     @Override
                     public void onResult(DatabaseError data) {
                         Log.e(TAG, "Error retrieving hub data", data.toException());
                     }
-                }, true);
+                });
     }
 
     /**
