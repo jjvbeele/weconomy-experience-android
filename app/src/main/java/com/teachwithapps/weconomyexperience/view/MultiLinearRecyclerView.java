@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.teachwithapps.weconomyexperience.model.InstructionData;
+import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class MultiLinearRecyclerView extends LinearLayout {
 
     private static final String TAG = MultiLinearRecyclerView.class.getName();
 
-    private List<List<InstructionData>> instructionDataMap;
+    private List<List<ScheduledInstructionData>> scheduledInstructionDataMap;
 
     private List<RecyclerView> childRecyclerList = new ArrayList<>();
 
@@ -37,8 +38,8 @@ public class MultiLinearRecyclerView extends LinearLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    public void setDataMap(List<List<InstructionData>> instructionDataMap) {
-        this.instructionDataMap = instructionDataMap;
+    public void setDataMap(List<List<ScheduledInstructionData>> scheduledInstructionDataMap) {
+        this.scheduledInstructionDataMap = scheduledInstructionDataMap;
         dataMapChanged();
     }
 
@@ -66,7 +67,7 @@ public class MultiLinearRecyclerView extends LinearLayout {
      */
     public void dataMapChanged() {
         removeAllViews();
-        for (int i = 0; i < instructionDataMap.size(); i++) {
+        for (int i = 0; i < scheduledInstructionDataMap.size(); i++) {
             RecyclerView recyclerView = new RecyclerView(getContext());
             recyclerView.setLayoutParams(
                     new LinearLayout.LayoutParams(
@@ -77,7 +78,9 @@ public class MultiLinearRecyclerView extends LinearLayout {
             );
 
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-            recyclerView.setAdapter(new ScheduleRecyclerAdapter(instructionDataMap.get(i)));
+            recyclerView.setAdapter(new ScheduleRecyclerAdapter(
+                    scheduledInstructionDataMap.get(i)
+            ));
             addView(recyclerView);
 
             childRecyclerList.add(recyclerView);

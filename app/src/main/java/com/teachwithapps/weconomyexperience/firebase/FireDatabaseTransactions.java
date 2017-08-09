@@ -5,6 +5,7 @@ import android.util.Log;
 import com.google.firebase.database.DatabaseError;
 import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
+import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 import com.teachwithapps.weconomyexperience.util.Returnable;
 
@@ -27,23 +28,23 @@ public class FireDatabaseTransactions {
     /**
      * Registers a new game in the firebase
      * The full game data is placed in "games"
-     * The game key is placed in "hub"
+     * The game id is placed in "hub"
      *
      * @param gameData
      */
     public void registerNewGame(GameData gameData) {
-        String key = fireDatabaseHelper.pushRecord(
+        String id = fireDatabaseHelper.pushRecord(
                 "game_id_",
                 "games",
                 gameData
         );
 
-        gameData.setId(key);
+        gameData.setId(id);
 
         fireDatabaseHelper.pushRecord(
                 "hub_id_",
                 "hub",
-                key
+                id
         );
 
         //No custom library? Create a copy of the default library
@@ -96,7 +97,7 @@ public class FireDatabaseTransactions {
     }
 
     /**
-     * Retrieves a list of hub game keys
+     * Retrieves a list of hub game ids
      **/
     public void observeHubGames(ReturnableChange<String> callback) {
         fireDatabaseHelper.observeChild(
@@ -112,15 +113,15 @@ public class FireDatabaseTransactions {
     }
 
     /**
-     * Retrieves game data from "games" by game key
+     * Retrieves game data from "games" by game id
      *
-     * @param gameKey
+     * @param gameId
      * @param callback
      */
-    public void observeGame(String gameKey, Returnable<GameData> callback) {
+    public void observeGame(String gameId, Returnable<GameData> callback) {
         fireDatabaseHelper.observeRecordFireData(
                 GameData.class,
-                new String[]{"games", gameKey},
+                new String[]{"games", gameId},
                 callback,
                 new Returnable<DatabaseError>() {
                     @Override
@@ -168,14 +169,26 @@ public class FireDatabaseTransactions {
         );
     }
 
-    public void registerInstructionToSchedule(String gameKey, ScheduledInstructionData scheduledInstructionData) {
+    public void registerInstructionToSchedule(String gameId, ScheduledInstructionData scheduledInstructionData) {
         fireDatabaseHelper.pushFireDataRecord(
                 "scheduled_instruction_id_",
                 new String[]{
                         "game_schedules",
-                        gameKey
+                        gameId
                 },
                 scheduledInstructionData
+        );
+    }
+
+    public void registerPlayerToGame(String gameId, PlayerData playerData) {
+        fireDatabaseHelper.addRecord(
+                new String[]{
+                        "games",
+                        gameId,
+                        "players"
+                },
+                playerData.getId(),
+                playerData
         );
     }
 
@@ -191,6 +204,25 @@ public class FireDatabaseTransactions {
                         Log.e(TAG, "Can't observe schedule", data.toException());
                     }
                 }
+        );
+    }
+
+    public void observePlayersInGame(String gameId, Returnable<List<PlayerData>> onReturnChange) {
+        fireDatabaseHelper.observeRecordFireDataArray(
+                PlayerData.class,
+                new String[]{
+                        "games",
+                        gameId,
+                        "players"
+                },
+                onReturnChange,
+                new Returnable<DatabaseError>() {
+                    @Override
+                    public void onResult(DatabaseError data) {
+                        Log.e(TAG, "Can't observe schedule", data.toException());
+                    }
+                },
+                false
         );
     }
 
@@ -210,6 +242,16 @@ public class FireDatabaseTransactions {
                     }
                 },
                 false
+        );
+    }
+
+    public void updateScheduledInstruction(String gameId, ScheduledInstructionData scheduledInstructionData) {
+        fireDatabaseHelper.setFireDataRecord(
+                new String[]{
+                        "game_schedules",
+                        gameId
+                },
+                scheduledInstructionData
         );
     }
 }

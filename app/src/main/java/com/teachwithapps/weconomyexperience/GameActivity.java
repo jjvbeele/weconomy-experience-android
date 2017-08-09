@@ -1,8 +1,11 @@
 package com.teachwithapps.weconomyexperience;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +18,7 @@ import com.teachwithapps.weconomyexperience.firebase.FireDatabaseTransactions;
 import com.teachwithapps.weconomyexperience.firebase.ReturnableChange;
 import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
+import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 import com.teachwithapps.weconomyexperience.util.Log;
 import com.teachwithapps.weconomyexperience.util.Returnable;
@@ -46,7 +50,7 @@ public class GameActivity extends AppCompatActivity {
 
     private int numberOfVisibleDays = 4;
 
-    private List<List<InstructionData>> instructionDataMap;
+    private List<List<ScheduledInstructionData>> scheduledInstructionDataMap;
 
     //firebase attributes
     private FireDatabaseTransactions fireDatabaseTransactions;
@@ -55,6 +59,7 @@ public class GameActivity extends AppCompatActivity {
     private FireAuthHelper.FireAuthCallback fireAuthCallback = new FireAuthHelper.FireAuthCallback() {
         @Override
         public void userReady(FirebaseUser firebaseUser) {
+            registerPlayer();
             observeSchedule();
         }
     };
@@ -70,19 +75,19 @@ public class GameActivity extends AppCompatActivity {
         gameData = getIntentData(getIntent(), savedInstanceState, Constants.KEY_GAME_DATA_PARCEL);
 
         //initialize instructiondatamap, this will hold the instructions for the visible schedule
-        instructionDataMap = new ArrayList<>();
+        scheduledInstructionDataMap = new ArrayList<>();
 
-        for(int i = 0; i < numberOfVisibleDays; i++) {
-            instructionDataMap.add(i, new ArrayList<InstructionData>());
+        for (int i = 0; i < numberOfVisibleDays; i++) {
+            scheduledInstructionDataMap.add(i, new ArrayList<ScheduledInstructionData>());
         }
 
         //fill the schedule for the number of visible days
-        for(int i = 0; i < numberOfVisibleDays; i++) {
+        for (int i = 0; i < numberOfVisibleDays; i++) {
             addDayToSchedule(i + 1); //we start at day 1
         }
 
         //add instructiondatamap to the schedulerecyclerview
-        scheduleRecyclerView.setDataMap(instructionDataMap);
+        scheduleRecyclerView.setDataMap(scheduledInstructionDataMap);
 
         //set up firebase helper classes
         fireDatabaseTransactions = new FireDatabaseTransactions();
@@ -92,10 +97,11 @@ public class GameActivity extends AppCompatActivity {
 
     /**
      * Helper method to load intent and savedinstancestate data if available
-     * @param intent intent of the activity with parameters passed from the calling parent activity
+     *
+     * @param intent             intent of the activity with parameters passed from the calling parent activity
      * @param savedInstanceState savedinstancestate bundle to retrieve parameters when activity is recreated
-     * @param key key of the data
-     * @param <T> data to return
+     * @param key                key of the data
+     * @param <T>                data to return
      * @return returns data of type T
      */
     private <T> T getIntentData(Intent intent, Bundle savedInstanceState, String key) {
@@ -127,12 +133,12 @@ public class GameActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == Constants.REQUEST_CODE_SELECT_INSTRUCTION) {
-            if(resultCode == Constants.RESULT_CODE_OK) {
+        if (requestCode == Constants.REQUEST_CODE_SELECT_INSTRUCTION) {
+            if (resultCode == Constants.RESULT_CODE_OK) {
                 int instructionIndexInView = data.getIntExtra(Constants.KEY_INSTRUCTION_INDEX_IN_SCHEDULE, -1);
                 InstructionData instructionData = Parcels.unwrap(data.getParcelableExtra(Constants.KEY_INSTRUCTION_PARCEL));
 
-                if(instructionIndexInView >= 0 && instructionData != null) {
+                if (instructionIndexInView >= 0 && instructionData != null) {
                     registerInstructionToSchedule(instructionIndexInView, instructionData);
 
                 } else {
@@ -148,12 +154,13 @@ public class GameActivity extends AppCompatActivity {
 
     /**
      * Add a day to the schedule visible on the screen
+     *
      * @param indexInView index of the visible screen
      */
     private void addDayToSchedule(final int indexInView) {
         View dayCell = LayoutInflater.from(this).inflate(R.layout.view_schedule_day, daysRowLayout, false);
 
-        ((TextView)dayCell.findViewById(R.id.day_text)).setText(getString(R.string.day_text, indexInView + 1));
+        ((TextView) dayCell.findViewById(R.id.day_text)).setText(getString(R.string.day_text, indexInView + 1));
         dayCell.findViewById(R.id.add_instruction_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -168,6 +175,8 @@ public class GameActivity extends AppCompatActivity {
         ScheduledInstructionData scheduledInstructionData = new ScheduledInstructionData();
         scheduledInstructionData.setInstructionKey(instructionData.getId());
         scheduledInstructionData.setDay(instructionIndexView);
+
+        //push it to the firebase
         fireDatabaseTransactions.registerInstructionToSchedule(gameData.getId(), scheduledInstructionData);
     }
 
@@ -180,12 +189,13 @@ public class GameActivity extends AppCompatActivity {
 
     /**
      * Add an instruction to the schedule
-     * @param indexInView day visible on the screen to add the instruction to
-     * @param instructionData instruction to be added
+     *
+     * @param indexInView              day visible on the screen to add the instruction to
+     * @param scheduledInstructionData instruction to be added
      */
-    private void addInstructionToSchedule(int indexInView, InstructionData instructionData) {
-        List<InstructionData> instructionDataList = instructionDataMap.get(indexInView);
-        instructionDataList.add(0, instructionData);
+    private void addInstructionToSchedule(int indexInView, ScheduledInstructionData scheduledInstructionData) {
+        List<ScheduledInstructionData> instructionDataList = scheduledInstructionDataMap.get(indexInView);
+        instructionDataList.add(0, scheduledInstructionData);
 
         scheduleRecyclerView.dataMapContentChanged(indexInView, 0, true);
     }
@@ -194,22 +204,35 @@ public class GameActivity extends AppCompatActivity {
         fireDatabaseTransactions.addInstructionToLibrary(gameData.getId(), instructionData);
     }
 
+    private void registerPlayer() {
+        FirebaseUser user = fireAuthHelper.getUser();
+        Uri photoUrl = user.getPhotoUrl();
+        PlayerData playerData = new PlayerData(
+                user.getUid(),
+                user.getDisplayName(),
+                (photoUrl != null) ? photoUrl.toString() : null
+        );
+        fireDatabaseTransactions.registerPlayerToGame(gameData.getId(), playerData);
+    }
+
     private void observeSchedule() {
         fireDatabaseTransactions.observeSchedule(
-                new String[] {
+                new String[]{
                         "game_schedules",
                         gameData.getId()
                 },
                 new ReturnableChange<ScheduledInstructionData>() {
                     @Override
                     public void onChildAdded(final ScheduledInstructionData scheduledInstructionData) {
+                        //get instructiondata by key and add to the scheduledInstruction datamap
                         fireDatabaseTransactions.getInstructionFromLibrary(
                                 gameData.getInstructionLibraryKey(),
                                 scheduledInstructionData.getInstructionKey(),
                                 new Returnable<InstructionData>() {
                                     @Override
                                     public void onResult(InstructionData instructionData) {
-                                        instructionDataMap.get(scheduledInstructionData.getDay() - 1).add(instructionData);
+                                        scheduledInstructionData.bindInstructionData(instructionData);
+                                        scheduledInstructionDataMap.get(scheduledInstructionData.getDay() - 1).add(scheduledInstructionData);
                                         scheduleRecyclerView.dataMapChanged();
                                     }
                                 });
@@ -228,6 +251,57 @@ public class GameActivity extends AppCompatActivity {
                     @Override
                     public void onChildMoved(ScheduledInstructionData data) {
 
+                    }
+                }
+        );
+    }
+
+    public void setLabour(final ScheduledInstructionData scheduledInstructionData) {
+        showPlayerSelectionScreen(
+                "Select a player to assign for labour",
+                new Returnable<PlayerData>() {
+                    @Override
+                    public void onResult(PlayerData playerData) {
+                        scheduledInstructionData.getLabourList().add(playerData.getId());
+                        fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionData);
+                    }
+                });
+    }
+
+    public void setClaim(final ScheduledInstructionData scheduledInstructionData) {
+        showPlayerSelectionScreen(
+                "Select a player to claim output for",
+                new Returnable<PlayerData>() {
+                    @Override
+                    public void onResult(PlayerData playerData) {
+                        scheduledInstructionData.getClaimList().add(playerData.getId());
+                        fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionData);
+                    }
+                });
+    }
+
+    private void showPlayerSelectionScreen(final String title, final Returnable<PlayerData> returnable) {
+        fireDatabaseTransactions.observePlayersInGame(
+                gameData.getId(),
+                new Returnable<List<PlayerData>>() {
+                    @Override
+                    public void onResult(final List<PlayerData> playerDataList) {
+                        final CharSequence[] playerNames = new CharSequence[playerDataList.size()];
+                        for (int i = 0; i < playerDataList.size(); i++) {
+                            playerNames[i] = playerDataList.get(i).getName();
+                        }
+
+                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(GameActivity.this);
+                        dialogBuilder.setTitle(title);
+                        dialogBuilder.setItems(
+                                playerNames,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        returnable.onResult(playerDataList.get(which));
+                                    }
+                                });
+                        dialogBuilder.show();
                     }
                 }
         );

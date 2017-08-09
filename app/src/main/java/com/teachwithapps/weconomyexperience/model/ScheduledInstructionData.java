@@ -7,6 +7,7 @@ import com.teachwithapps.weconomyexperience.firebase.FireData;
 
 import org.parceler.Parcel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,10 +18,18 @@ import java.util.List;
 @Parcel
 public class ScheduledInstructionData extends FireData {
 
+    @PropertyName("instruction_key")
     private String instructionKey;
+    @PropertyName("day")
     private int day;
+    @PropertyName("labour_list")
     private List<String> labourList;
+    @PropertyName("claim_list")
     private List<String> claimList;
+
+    //ignored for json parsing
+    @Exclude
+    private InstructionData bindedInstructionData;
 
     public ScheduledInstructionData() {}
 
@@ -36,6 +45,9 @@ public class ScheduledInstructionData extends FireData {
 
     @PropertyName("labour_list")
     public List<String> getLabourList() {
+        if(labourList == null) {
+            labourList = new ArrayList<>();
+        }
         return labourList;
     }
 
@@ -46,6 +58,9 @@ public class ScheduledInstructionData extends FireData {
 
     @PropertyName("claim_list")
     public List<String> getClaimList() {
+        if(claimList == null) {
+            claimList = new ArrayList<>();
+        }
         return claimList;
     }
 
@@ -62,5 +77,15 @@ public class ScheduledInstructionData extends FireData {
     @PropertyName("day")
     public void setDay(int day) {
         this.day = day;
+    }
+
+    @Exclude
+    public void bindInstructionData(InstructionData instructionData) {
+        this.bindedInstructionData = instructionData;
+    }
+
+    @Exclude
+    public InstructionData getBindedInstructionData() {
+        return bindedInstructionData;
     }
 }

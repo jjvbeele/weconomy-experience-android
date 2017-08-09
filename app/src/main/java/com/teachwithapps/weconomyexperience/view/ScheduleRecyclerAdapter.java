@@ -10,8 +10,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.teachwithapps.weconomyexperience.Constants;
+import com.teachwithapps.weconomyexperience.GameActivity;
 import com.teachwithapps.weconomyexperience.R;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
+import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 
 import java.util.List;
 
@@ -24,10 +26,10 @@ import butterknife.ButterKnife;
 
 public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecyclerAdapter.InstructionViewHolder> {
 
-    private List<InstructionData> instructionDataList;
+    private List<ScheduledInstructionData> scheduledInstructionDataList;
 
-    public ScheduleRecyclerAdapter(List<InstructionData> instructionDataList) {
-        this.instructionDataList = instructionDataList;
+    public ScheduleRecyclerAdapter(List<ScheduledInstructionData> scheduledInstructionDataList) {
+        this.scheduledInstructionDataList = scheduledInstructionDataList;
     }
 
     @Override
@@ -39,16 +41,20 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
 
     @Override
     public void onBindViewHolder(InstructionViewHolder holder, int position) {
-        InstructionData instructionData = instructionDataList.get(position);
-        holder.setData(instructionData);
+        ScheduledInstructionData scheduledInstructionData = scheduledInstructionDataList.get(position);
+        holder.setData(scheduledInstructionData);
     }
 
     @Override
     public int getItemCount() {
-        return instructionDataList.size();
+        return scheduledInstructionDataList.size();
     }
 
     class InstructionViewHolder extends RecyclerView.ViewHolder {
+
+        private int PROPERTY_INPUT = 0;
+        private int PROPERTY_LABOUR = 1;
+        private int PROPERTY_CLAIM = 2;
 
         @BindView(R.id.title)
         protected TextView titleTextView;
@@ -65,13 +71,17 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
         @BindView(R.id.output_col)
         protected LinearLayout outputCol;
 
+        private ScheduledInstructionData scheduledInstructionData;
+
         public InstructionViewHolder(View itemView) {
             super(itemView);
 
             ButterKnife.bind(this, itemView);
         }
 
-        public void setData(InstructionData instructionData) {
+        public void setData(ScheduledInstructionData scheduledInstructionData) {
+            this.scheduledInstructionData = scheduledInstructionData;
+            InstructionData instructionData = scheduledInstructionData.getBindedInstructionData();
             titleTextView.setText(instructionData.getText());
 
             LayoutInflater inflater = LayoutInflater.from(itemView.getContext());
@@ -83,25 +93,43 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
 
             for (int i = 0; i < instructionData.getLabour(); i++) {
                 if (i % 2 == 0) {
-                    addInfoImage(inflater, labourCol1, Constants.getLabourIcon());
+                    addInfoImage(inflater, labourCol1, Constants.getLabourIcon(), PROPERTY_LABOUR);
                 } else {
-                    addInfoImage(inflater, labourCol2, Constants.getLabourIcon());
+                    addInfoImage(inflater, labourCol2, Constants.getLabourIcon(), PROPERTY_LABOUR);
                 }
             }
 
             for (int i = 0; i < instructionData.getInput(); i++) {
-                addInfoImage(inflater, inputCol, Constants.getProductIcon(instructionData.getInputType()));
+                addInfoImage(inflater, inputCol, Constants.getProductIcon(instructionData.getInputType()), PROPERTY_INPUT);
             }
 
             for (int i = 0; i < instructionData.getOutput(); i++) {
-                addInfoImage(inflater, outputCol, Constants.getProductIcon(instructionData.getOutputType()));
+                addInfoImage(inflater, outputCol, Constants.getProductIcon(instructionData.getOutputType()), PROPERTY_CLAIM);
             }
-
         }
 
-        private void addInfoImage(LayoutInflater inflater, ViewGroup row, @DrawableRes int drawableId) {
-            ImageView imageView = (ImageView) inflater.inflate(R.layout.imageview_info_scheduled_instruction, row, false);
+        private void setLabour() {
+            ((GameActivity)itemView.getContext()).setLabour(scheduledInstructionData);
+        }
+
+        private void setClaim() {
+            ((GameActivity)itemView.getContext()).setClaim(scheduledInstructionData);
+        }
+
+        private void addInfoImage(LayoutInflater inflater, ViewGroup row, @DrawableRes int drawableId, final int propertyType) {
+            final ImageView imageView = (ImageView) inflater.inflate(R.layout.imageview_info_scheduled_instruction, row, false);
             imageView.setImageResource(drawableId);
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(propertyType == PROPERTY_LABOUR) {
+                        setLabour();
+
+                    } else if(propertyType == PROPERTY_CLAIM) {
+                        setClaim();
+                    }
+                }
+            });
             row.addView(imageView);
         }
     }

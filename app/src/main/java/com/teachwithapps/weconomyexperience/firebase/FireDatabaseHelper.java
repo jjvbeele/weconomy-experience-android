@@ -6,6 +6,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 import com.teachwithapps.weconomyexperience.util.Log;
 import com.teachwithapps.weconomyexperience.util.Returnable;
 
@@ -23,6 +24,7 @@ public class FireDatabaseHelper {
 
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseRef;
+    private ScheduledInstructionData record;
 
     public FireDatabaseHelper() {
         firebaseDatabase = FirebaseDatabase.getInstance();
@@ -441,5 +443,10 @@ public class FireDatabaseHelper {
                 .replace("\'", escapeChar('\''))
                 .replace("\"", escapeChar('\"'))
                 .replace("]", escapeChar(']'));
+    }
+
+    public <T extends FireData> void setFireDataRecord(String[] location, T record) {
+        DatabaseReference ref = getLocationRef(location);
+        ref.child(record.getId()).setValue(record);
     }
 }
