@@ -13,20 +13,8 @@ import org.parceler.Parcel;
 @Parcel
 public class GameData extends FireData {
 
-    @PropertyName("name")
-    protected String name;
-
-    @PropertyName("password")
-    protected boolean password;
-
-    @PropertyName("players")
-    protected int players;
-
-    @PropertyName("state")
-    protected String state;
-
-    @PropertyName("instruction_library_key")
-    protected String instructionLibraryKey;
+    private String name;
+    private String instructionLibraryKey;
 
     public GameData() {
     }
@@ -36,34 +24,17 @@ public class GameData extends FireData {
         this.instructionLibraryKey = libraryKey;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
+    @PropertyName("name")
     public String getName() {
         return name;
     }
 
-    public boolean getPassword() {
-        return password;
-    }
-
-    public int getPlayers() {
-        return players;
-    }
-
-    public String getState() {
-        return state;
-    }
-
+    @PropertyName("instruction_library_key")
     public String getInstructionLibraryKey() {
         return instructionLibraryKey;
     }
 
+    @PropertyName("instruction_library_key")
     public void setInstructionLibraryKey(String instructionLibraryKey) {
         this.instructionLibraryKey = instructionLibraryKey;
     }

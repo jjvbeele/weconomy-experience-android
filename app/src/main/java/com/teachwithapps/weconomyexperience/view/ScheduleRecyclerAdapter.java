@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.teachwithapps.weconomyexperience.Constants;
 import com.teachwithapps.weconomyexperience.R;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
 
@@ -82,18 +83,18 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
 
             for (int i = 0; i < instructionData.getLabour(); i++) {
                 if (i % 2 == 0) {
-                    addInfoImage(inflater, labourCol1, R.drawable.ic_shovel);
+                    addInfoImage(inflater, labourCol1, Constants.getLabourIcon());
                 } else {
-                    addInfoImage(inflater, labourCol2, R.drawable.ic_shovel);
+                    addInfoImage(inflater, labourCol2, Constants.getLabourIcon());
                 }
             }
 
             for (int i = 0; i < instructionData.getInput(); i++) {
-                addInfoImage(inflater, inputCol, R.drawable.ic_flour);
+                addInfoImage(inflater, inputCol, Constants.getProductIcon(instructionData.getInputType()));
             }
 
             for (int i = 0; i < instructionData.getOutput(); i++) {
-                addInfoImage(inflater, outputCol, R.drawable.ic_bread);
+                addInfoImage(inflater, outputCol, Constants.getProductIcon(instructionData.getOutputType()));
             }
 
         }

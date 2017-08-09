@@ -1,5 +1,6 @@
 package com.teachwithapps.weconomyexperience.model;
 
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.PropertyName;
 import com.teachwithapps.weconomyexperience.firebase.FireData;
@@ -16,48 +17,49 @@ import java.util.List;
 @Parcel
 public class ScheduledInstructionData extends FireData {
 
-    @PropertyName("instruction_key")
-    protected String instructionKey;
-
-    @PropertyName("day")
-    protected int day;
-
-    @PropertyName("labour_list")
-    protected List<String> labourList;
-
-    @PropertyName("claim_list")
-    protected List<String> claimList;
+    private String instructionKey;
+    private int day;
+    private List<String> labourList;
+    private List<String> claimList;
 
     public ScheduledInstructionData() {}
 
+    @PropertyName("instruction_key")
     public String getInstructionKey() {
         return instructionKey;
     }
 
+    @PropertyName("instruction_key")
     public void setInstructionKey(String instructionKey) {
         this.instructionKey = instructionKey;
     }
 
+    @PropertyName("labour_list")
     public List<String> getLabourList() {
         return labourList;
     }
 
+    @PropertyName("labour_list")
     public void setLabourList(List<String> labourList) {
         this.labourList = labourList;
     }
 
+    @PropertyName("claim_list")
     public List<String> getClaimList() {
         return claimList;
     }
 
+    @PropertyName("claim_list")
     public void setClaimList(List<String> claimList) {
         this.claimList = claimList;
     }
 
+    @PropertyName("day")
     public int getDay() {
         return day;
     }
 
+    @PropertyName("day")
     public void setDay(int day) {
         this.day = day;
     }

@@ -78,7 +78,7 @@ public class GameActivity extends AppCompatActivity {
 
         //fill the schedule for the number of visible days
         for(int i = 0; i < numberOfVisibleDays; i++) {
-            addDayToSchedule(i);
+            addDayToSchedule(i + 1); //we start at day 1
         }
 
         //add instructiondatamap to the schedulerecyclerview

@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.teachwithapps.weconomyexperience.Constants;
 import com.teachwithapps.weconomyexperience.R;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
 
@@ -94,15 +95,15 @@ public class FoldedInstructionRecyclerAdapter extends RecyclerView.Adapter<Folde
             outputRow.removeAllViews();
 
             for(int i = 0; i < instructionData.getLabour(); i++) {
-                addInfoImage(inflater, labourRow, R.drawable.ic_shovel);
+                addInfoImage(inflater, labourRow, Constants.getLabourIcon());
             }
 
             for(int i = 0; i < instructionData.getInput(); i++) {
-                addInfoImage(inflater, inputRow, R.drawable.ic_flour);
+                addInfoImage(inflater, inputRow, Constants.getProductIcon(instructionData.getInputType()));
             }
 
             for(int i = 0; i < instructionData.getOutput(); i++) {
-                addInfoImage(inflater, outputRow, R.drawable.ic_bread);
+                addInfoImage(inflater, outputRow, Constants.getProductIcon(instructionData.getOutputType()));
             }
         }
 
