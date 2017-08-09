@@ -40,11 +40,50 @@ public class FireDatabaseTransactions {
 
         gameData.setId(key);
 
-        fireDatabaseHelper.addRecord(
+        fireDatabaseHelper.pushRecord(
+                "hub_id_",
                 "hub",
-                key,
                 key
         );
+
+        //No custom library? Create a copy of the default library
+        if (gameData.getInstructionLibraryKey() == null) {
+            final String instructionLibraryKey = fireDatabaseHelper.pushRecord(
+                    "library_id_",
+                    "instruction_libraries",
+                    gameData.getId()
+            );
+
+            fireDatabaseHelper.observeRecordFireDataArray(
+                    InstructionData.class,
+                    new String[]{
+                            "insruction_libraries",
+                            "default_library"
+                    },
+                    new Returnable<List<InstructionData>>() {
+                        @Override
+                        public void onResult(List<InstructionData> dataList) {
+                            for (InstructionData instructionData : dataList) {
+                                fireDatabaseHelper.addRecord(
+                                        new String[]{
+                                                "instruction_libraries",
+                                                instructionLibraryKey
+                                        },
+                                        instructionData.getId(),
+                                        instructionData
+                                );
+                            }
+                        }
+                    },
+                    new Returnable<DatabaseError>() {
+                        @Override
+                        public void onResult(DatabaseError data) {
+                            Log.e(TAG, "Can't copy default library", data.toException());
+                        }
+                    },
+                    false
+            );
+        }
     }
 
     public void removeHubGame(GameData gameData) {
@@ -62,7 +101,7 @@ public class FireDatabaseTransactions {
     public void observeHubGames(ReturnableChange<String> callback) {
         fireDatabaseHelper.observeChild(
                 String.class,
-                new String[] {"hub"},
+                new String[]{"hub"},
                 callback,
                 new Returnable<DatabaseError>() {
                     @Override
@@ -86,7 +125,7 @@ public class FireDatabaseTransactions {
                 new Returnable<DatabaseError>() {
                     @Override
                     public void onResult(DatabaseError error) {
-                        if(error != null) {
+                        if (error != null) {
                             Log.e(TAG, "Error retrieving game data", error.toException());
 
                         } else {
@@ -101,7 +140,7 @@ public class FireDatabaseTransactions {
     public void addInstructionToLibrary(String instructionLibraryName, InstructionData instructionData) {
         fireDatabaseHelper.pushFireDataRecord(
                 "library_id_",
-                new String[] {
+                new String[]{
                         "instruction_libraries",
                         instructionLibraryName
                 },
@@ -117,7 +156,7 @@ public class FireDatabaseTransactions {
                 new Returnable<DatabaseError>() {
                     @Override
                     public void onResult(DatabaseError error) {
-                        if(error != null) {
+                        if (error != null) {
                             Log.e(TAG, "Error retrieving game data", error.toException());
 
                         } else {
@@ -132,7 +171,7 @@ public class FireDatabaseTransactions {
     public void registerInstructionToSchedule(String gameKey, ScheduledInstructionData scheduledInstructionData) {
         fireDatabaseHelper.pushFireDataRecord(
                 "scheduled_instruction_id_",
-                new String[] {
+                new String[]{
                         "game_schedules",
                         gameKey
                 },
