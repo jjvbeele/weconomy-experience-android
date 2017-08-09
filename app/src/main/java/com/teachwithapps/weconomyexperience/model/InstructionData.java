@@ -17,25 +17,72 @@ public class InstructionData extends FireData {
     @PropertyName("text")
     protected String text;
 
-    @PropertyName("size")
-    protected int size;
+    @PropertyName("input")
+    protected int input;
+
+    @PropertyName("output")
+    protected int output;
+
+    @PropertyName("labour")
+    protected int labour;
+
+    @PropertyName("input_type")
+    protected String inputType;
+
+    @PropertyName("output_type")
+    protected String outputType;
 
     public InstructionData() {}
 
     public InstructionData(String text) {
-        this(text, (int)(Math.random() * 6) + 1);
-    }
-
-    public InstructionData(String text, int size) {
         this.text = text;
-        this.size = size;
     }
 
     public String getText() {
         return text;
     }
 
-    public int getSize() {
-        return size;
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public int getInput() {
+        return input;
+    }
+
+    public void setInput(int input) {
+        this.input = input;
+    }
+
+    public int getOutput() {
+        return output;
+    }
+
+    public void setOutput(int output) {
+        this.output = output;
+    }
+
+    public int getLabour() {
+        return labour;
+    }
+
+    public void setLabour(int labour) {
+        this.labour = labour;
+    }
+
+    public String getInputType() {
+        return inputType;
+    }
+
+    public void setInputType(String inputType) {
+        this.inputType = inputType;
+    }
+
+    public String getOutputType() {
+        return outputType;
+    }
+
+    public void setOutputType(String outputType) {
+        this.outputType = outputType;
     }
 }

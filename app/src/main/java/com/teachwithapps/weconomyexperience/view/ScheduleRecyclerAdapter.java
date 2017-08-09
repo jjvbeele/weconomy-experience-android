@@ -80,7 +80,7 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
             inputCol.removeAllViews();
             outputCol.removeAllViews();
 
-            for (int i = 0; i < instructionData.getSize(); i++) {
+            for (int i = 0; i < instructionData.getLabour(); i++) {
                 if (i % 2 == 0) {
                     addInfoImage(inflater, labourCol1, R.drawable.ic_shovel);
                 } else {
@@ -88,11 +88,11 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
                 }
             }
 
-            for (int i = 0; i < instructionData.getSize(); i++) {
+            for (int i = 0; i < instructionData.getInput(); i++) {
                 addInfoImage(inflater, inputCol, R.drawable.ic_flour);
             }
 
-            for (int i = 0; i < instructionData.getSize(); i++) {
+            for (int i = 0; i < instructionData.getOutput(); i++) {
                 addInfoImage(inflater, outputCol, R.drawable.ic_bread);
             }
 

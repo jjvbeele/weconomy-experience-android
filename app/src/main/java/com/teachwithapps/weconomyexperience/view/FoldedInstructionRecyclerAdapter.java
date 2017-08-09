@@ -93,15 +93,15 @@ public class FoldedInstructionRecyclerAdapter extends RecyclerView.Adapter<Folde
             inputRow.removeAllViews();
             outputRow.removeAllViews();
 
-            for(int i = 0; i < instructionData.getSize(); i++) {
+            for(int i = 0; i < instructionData.getLabour(); i++) {
                 addInfoImage(inflater, labourRow, R.drawable.ic_shovel);
             }
 
-            for(int i = 0; i < instructionData.getSize(); i++) {
+            for(int i = 0; i < instructionData.getInput(); i++) {
                 addInfoImage(inflater, inputRow, R.drawable.ic_flour);
             }
 
-            for(int i = 0; i < instructionData.getSize(); i++) {
+            for(int i = 0; i < instructionData.getOutput(); i++) {
                 addInfoImage(inflater, outputRow, R.drawable.ic_bread);
             }
         }

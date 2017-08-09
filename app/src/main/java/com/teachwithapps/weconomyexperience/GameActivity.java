@@ -209,7 +209,7 @@ public class GameActivity extends AppCompatActivity {
                                 new Returnable<InstructionData>() {
                                     @Override
                                     public void onResult(InstructionData instructionData) {
-                                        instructionDataMap.get(scheduledInstructionData.getDay()).add(instructionData);
+                                        instructionDataMap.get(scheduledInstructionData.getDay() - 1).add(instructionData);
                                         scheduleRecyclerView.dataMapChanged();
                                     }
                                 });
