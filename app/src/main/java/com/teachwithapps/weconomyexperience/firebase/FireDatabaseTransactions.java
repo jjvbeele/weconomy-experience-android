@@ -33,6 +33,7 @@ public class FireDatabaseTransactions {
      */
     public void registerNewGame(GameData gameData) {
         String key = fireDatabaseHelper.pushRecord(
+                "game_id_",
                 "games",
                 gameData
         );
@@ -99,6 +100,7 @@ public class FireDatabaseTransactions {
 
     public void addInstructionToLibrary(String instructionLibraryName, InstructionData instructionData) {
         fireDatabaseHelper.pushFireDataRecord(
+                "library_id_",
                 new String[] {
                         "instruction_libraries",
                         instructionLibraryName
@@ -129,6 +131,7 @@ public class FireDatabaseTransactions {
 
     public void registerInstructionToSchedule(String gameKey, ScheduledInstructionData scheduledInstructionData) {
         fireDatabaseHelper.pushFireDataRecord(
+                "scheduled_instruction_id_",
                 new String[] {
                         "game_schedules",
                         gameKey

@@ -18,9 +18,7 @@ import com.teachwithapps.weconomyexperience.view.GameRecyclerAdapter;
 
 import org.parceler.Parcels;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -97,6 +95,7 @@ public class HubActivity extends AppCompatActivity {
 
     /**
      * Needed for firebase to handle login by google account
+     *
      * @param requestCode
      * @param resultCode
      * @param data
@@ -153,8 +152,8 @@ public class HubActivity extends AppCompatActivity {
 //
 //                } else {
 //                    Log.d(TAG, "New game: " + gameKey);
-                    gameDataMap.put(gameKey, data);
-                    gameRecyclerView.getAdapter().notifyItemInserted(gameDataMap.size() - 1);
+                gameDataMap.put(gameKey, data);
+                gameRecyclerView.getAdapter().notifyItemInserted(gameDataMap.size() - 1);
 //                }
             }
         });
@@ -162,6 +161,7 @@ public class HubActivity extends AppCompatActivity {
 
     /**
      * remove game from the hub
+     *
      * @param gameData
      */
     private void removeHubGame(GameData gameData) {
@@ -170,6 +170,7 @@ public class HubActivity extends AppCompatActivity {
 
     /**
      * handle when user clicks on a game to join
+     *
      * @param gameData
      */
     private void clickHubGame(GameData gameData) {
@@ -180,6 +181,7 @@ public class HubActivity extends AppCompatActivity {
 
     /**
      * fill hub with the provided list of games
+     *
      * @param dataList
      */
     private void fillListWithGames(Map<String, GameData> dataList) {

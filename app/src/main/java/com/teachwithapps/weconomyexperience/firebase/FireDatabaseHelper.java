@@ -316,34 +316,52 @@ public class FireDatabaseHelper {
         }
     }
 
-    public <T> String pushRecord(String location, T data) {
-        return pushRecord(new String[]{location}, data);
+    public <T> String pushRecord(String preKeyName, String location, T data) {
+        return pushRecord(preKeyName, new String[]{location}, data);
     }
 
-    public <T> String pushRecord(String[] locationArray, T data) {
+    public <T> String pushRecord(String preKeyName, String[] locationArray, T data) {
         DatabaseReference locationRef = getLocationRef(locationArray);
 
         if (locationRef != null) {
             DatabaseReference newRecordRef = locationRef.push();
+            String key;
+            if(preKeyName != null) {
+                key = preKeyName + newRecordRef.getKey();
+                newRecordRef.removeValue();
+                newRecordRef = locationRef.child(key);
+
+            } else {
+                key = newRecordRef.getKey();
+            }
             newRecordRef.setValue(data);
 
-            return newRecordRef.getKey();
+            return key;
 
         } else {
             return null;
         }
     }
 
-    public <T extends FireData> String pushFireDataRecord(String[] locationArray, T data) {
+    public <T extends FireData> String pushFireDataRecord(String preKeyName, String[] locationArray, T data) {
         DatabaseReference locationRef = getLocationRef(locationArray);
 
         if (locationRef != null) {
             DatabaseReference newRecordRef = locationRef.push();
+            String key;
+            if(preKeyName != null) {
+                key = preKeyName + newRecordRef.getKey();
+                newRecordRef.removeValue();
+                newRecordRef = locationRef.child(key);
+
+            } else {
+                key = newRecordRef.getKey();
+            }
             newRecordRef.setValue(data);
 
-            data.setId(newRecordRef.getKey());
+            data.setId(key);
 
-            return newRecordRef.getKey();
+            return key;
 
         } else {
             return null;
