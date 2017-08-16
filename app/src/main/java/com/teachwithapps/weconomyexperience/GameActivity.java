@@ -22,7 +22,8 @@ import com.teachwithapps.weconomyexperience.model.InstructionData;
 import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 import com.teachwithapps.weconomyexperience.util.Log;
-import com.teachwithapps.weconomyexperience.view.MultiLinearRecyclerView;
+import com.teachwithapps.weconomyexperience.view.ScheduleRecyclerAdapter;
+import com.teachwithapps.weconomyexperience.view.util.MultiLinearRecyclerView;
 
 import org.parceler.Parcels;
 
@@ -41,7 +42,7 @@ public class GameActivity extends AppCompatActivity {
     private static final String TAG = GameActivity.class.getName();
 
     @BindView(R.id.schedule_recycler_view)
-    protected MultiLinearRecyclerView scheduleRecyclerView;
+    protected MultiLinearRecyclerView<ScheduledInstructionData> scheduleRecyclerView;
 
     @BindView(R.id.days_row)
     protected LinearLayout daysRowLayout;
@@ -86,8 +87,21 @@ public class GameActivity extends AppCompatActivity {
             addDayToSchedule(i + 1); //we start at day 1
         }
 
+        MultiLinearRecyclerView.AdapterFactory
+                <ScheduleRecyclerAdapter.ViewHolder, ScheduledInstructionData>
+                adapterFactory = new MultiLinearRecyclerView.AdapterFactory
+                <ScheduleRecyclerAdapter.ViewHolder, ScheduledInstructionData>() {
+            @Override
+            public RecyclerView.Adapter<ScheduleRecyclerAdapter.ViewHolder> createAdapter(List<ScheduledInstructionData> ts) {
+                return new ScheduleRecyclerAdapter(ts);
+            }
+        };
+
         //add instructiondatamap to the schedulerecyclerview
-        scheduleRecyclerView.setDataMap(scheduledInstructionDataMap);
+        scheduleRecyclerView.setDataMap(
+                scheduledInstructionDataMap,
+                adapterFactory
+        );
 
         //set up firebase helper classes
         fireDatabaseTransactions = new FireDatabaseTransactions();
@@ -231,8 +245,9 @@ public class GameActivity extends AppCompatActivity {
                                 new Returnable<InstructionData>() {
                                     @Override
                                     public void onResult(InstructionData instructionData) {
+                                        final List<ScheduledInstructionData> scheduledInstructionDataList = scheduledInstructionDataMap.get(scheduledInstructionData.getDay() - 1);
                                         scheduledInstructionData.bindInstructionData(instructionData);
-                                        scheduledInstructionDataMap.get(scheduledInstructionData.getDay() - 1).add(scheduledInstructionData);
+                                        scheduledInstructionDataList.add(scheduledInstructionData);
                                         scheduleRecyclerView.dataMapChanged();
                                     }
                                 });
@@ -245,7 +260,19 @@ public class GameActivity extends AppCompatActivity {
 
                     @Override
                     public void onChildRemoved(ScheduledInstructionData data) {
-                        removeData(data);
+                        int column = data.getDay() - 1;
+                        List<ScheduledInstructionData> scheduledInstructionList =
+                                scheduledInstructionDataMap.get(column);
+                        for (int i = 0; i < scheduledInstructionList.size(); i++) {
+                            ScheduledInstructionData scheduledInstruction = scheduledInstructionList.get(i);
+                            Log.d(TAG, "Comparing " + data.getId() + " == " + scheduledInstruction.getId());
+                            if (scheduledInstruction.getId().equals(data.getId())) {
+                                Log.d(TAG, "Remove data " + data.getId());
+                                scheduledInstructionList.remove(i);
+                                scheduleRecyclerView.dataMapContentChanged(column, i, false);
+                                return;
+                            }
+                        }
                     }
 
                     @Override
@@ -257,19 +284,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void removeData(ScheduledInstructionData data) {
-        int column = data.getDay() - 1;
-        List<ScheduledInstructionData> scheduledInstructionList =
-                scheduledInstructionDataMap.get(column);
-        for (int i = 0; i < scheduledInstructionList.size(); i++) {
-            ScheduledInstructionData scheduledInstruction = scheduledInstructionList.get(i);
-            Log.d(TAG, "Comparing " + data.getId() + " == " + scheduledInstruction.getId());
-            if (scheduledInstruction.getId().equals(data.getId())) {
-                Log.d(TAG, "Remove data " + data.getId());
-                scheduledInstructionList.remove(i);
-                scheduleRecyclerView.dataMapContentChanged(column, i, false);
-                return;
-            }
-        }
+        fireDatabaseTransactions.removeScheduledInstruction(gameData.getId(), data);
     }
 
     public void setLabour(final ScheduledInstructionData scheduledInstructionData) {

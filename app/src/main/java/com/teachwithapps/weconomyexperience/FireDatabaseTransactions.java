@@ -253,4 +253,13 @@ public class FireDatabaseTransactions {
                 scheduledInstructionData
         );
     }
+
+    public void removeScheduledInstruction(String gameId, ScheduledInstructionData scheduledInstructionData) {
+        fireDatabaseHelper.removeRecord(
+                new String[]{
+                        "game_schedules",
+                        gameId,
+                        scheduledInstructionData.getId()
+                });
+    }
 }

@@ -24,7 +24,7 @@ import butterknife.ButterKnife;
  * Created by mint on 1-8-17.
  */
 
-public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecyclerAdapter.InstructionViewHolder> {
+public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecyclerAdapter.ViewHolder> {
 
     private List<ScheduledInstructionData> scheduledInstructionDataList;
 
@@ -33,14 +33,13 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
     }
 
     @Override
-    public InstructionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View scheduleInstructionView = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_scheduled_instruction, parent, false);
-        InstructionViewHolder instructionViewHolder = new InstructionViewHolder(scheduleInstructionView);
-        return instructionViewHolder;
+        return new ViewHolder(scheduleInstructionView);
     }
 
     @Override
-    public void onBindViewHolder(InstructionViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
         ScheduledInstructionData scheduledInstructionData = scheduledInstructionDataList.get(position);
         holder.setData(scheduledInstructionData);
     }
@@ -50,7 +49,7 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
         return scheduledInstructionDataList.size();
     }
 
-    class InstructionViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         private int PROPERTY_INPUT = 0;
         private int PROPERTY_LABOUR = 1;
@@ -73,16 +72,24 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
 
         private ScheduledInstructionData scheduledInstructionData;
 
-        public InstructionViewHolder(View itemView) {
+        public ViewHolder(View itemView) {
             super(itemView);
 
             ButterKnife.bind(this, itemView);
         }
 
-        public void setData(ScheduledInstructionData scheduledInstructionData) {
+        public void setData(final ScheduledInstructionData scheduledInstructionData) {
             this.scheduledInstructionData = scheduledInstructionData;
             InstructionData instructionData = scheduledInstructionData.getBindedInstructionData();
             titleTextView.setText(instructionData.getText());
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    ((GameActivity) itemView.getContext()).removeData(scheduledInstructionData);
+                    return true;
+                }
+            });
 
             LayoutInflater inflater = LayoutInflater.from(itemView.getContext());
 
@@ -109,11 +116,11 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
         }
 
         private void setLabour() {
-            ((GameActivity)itemView.getContext()).setLabour(scheduledInstructionData);
+            ((GameActivity) itemView.getContext()).setLabour(scheduledInstructionData);
         }
 
         private void setClaim() {
-            ((GameActivity)itemView.getContext()).setClaim(scheduledInstructionData);
+            ((GameActivity) itemView.getContext()).setClaim(scheduledInstructionData);
         }
 
         private void addInfoImage(LayoutInflater inflater, ViewGroup row, @DrawableRes int drawableId, final int propertyType) {
@@ -122,10 +129,10 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(propertyType == PROPERTY_LABOUR) {
+                    if (propertyType == PROPERTY_LABOUR) {
                         setLabour();
 
-                    } else if(propertyType == PROPERTY_CLAIM) {
+                    } else if (propertyType == PROPERTY_CLAIM) {
                         setClaim();
                     }
                 }

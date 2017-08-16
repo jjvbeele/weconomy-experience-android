@@ -1,4 +1,4 @@
-package com.teachwithapps.weconomyexperience.view;
+package com.teachwithapps.weconomyexperience.view.util;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
@@ -8,7 +8,6 @@ import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 import com.teachwithapps.weconomyexperience.util.Log;
 
 import java.util.ArrayList;
@@ -18,11 +17,17 @@ import java.util.List;
  * Created by mint on 1-8-17.
  */
 
-public class MultiLinearRecyclerView extends LinearLayout {
+public class MultiLinearRecyclerView<DT> extends LinearLayout {
+
+    public interface AdapterFactory<VT extends RecyclerView.ViewHolder, DT> {
+        RecyclerView.Adapter<VT> createAdapter(List<DT> ts);
+    }
 
     private static final String TAG = MultiLinearRecyclerView.class.getName();
 
-    private List<List<ScheduledInstructionData>> scheduledInstructionDataMap;
+    private List<List<DT>> dataMap;
+
+    private AdapterFactory<? extends RecyclerView.ViewHolder, DT> adapterFactory;
 
     private List<RecyclerView> childRecyclerList = new ArrayList<>();
 
@@ -38,26 +43,29 @@ public class MultiLinearRecyclerView extends LinearLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    public void setDataMap(List<List<ScheduledInstructionData>> scheduledInstructionDataMap) {
-        this.scheduledInstructionDataMap = scheduledInstructionDataMap;
+    public void setDataMap(List<List<DT>> dataMap, AdapterFactory<? extends RecyclerView.ViewHolder, DT> adapterFactory) {
+        this.dataMap = dataMap;
+        this.adapterFactory = adapterFactory;
         dataMapChanged();
     }
 
     /**
      * Method to be called when the map's child content changed
-     * @param column column to change
-     * @param index index where a new item was inserted or removed
+     *
+     * @param column   column to change
+     * @param index    index where a new item was inserted or removed
      * @param inserted boolean to indicate if an item was inserted or removed
      */
     public void dataMapContentChanged(int column, int index, boolean inserted) {
         RecyclerView childRecycler = childRecyclerList.get(column);
         RecyclerView.Adapter adapter = childRecycler.getAdapter();
 
-        if(inserted) {
+        if (inserted) {
             adapter.notifyItemInserted(index);
 
         } else {
             Log.d(TAG, "Removing data on " + column + ", " + index);
+//            adapter.notifyItemRemoved(index);
             dataMapChanged();
         }
 
@@ -69,7 +77,7 @@ public class MultiLinearRecyclerView extends LinearLayout {
      */
     public void dataMapChanged() {
         removeAllViews();
-        for (int i = 0; i < scheduledInstructionDataMap.size(); i++) {
+        for (int i = 0; i < dataMap.size(); i++) {
             RecyclerView recyclerView = new RecyclerView(getContext());
             recyclerView.setLayoutParams(
                     new LinearLayout.LayoutParams(
@@ -80,9 +88,7 @@ public class MultiLinearRecyclerView extends LinearLayout {
             );
 
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-            recyclerView.setAdapter(new ScheduleRecyclerAdapter(
-                    scheduledInstructionDataMap.get(i)
-            ));
+            recyclerView.setAdapter(adapterFactory.createAdapter(dataMap.get(i)));
             addView(recyclerView);
 
             childRecyclerList.add(recyclerView);
