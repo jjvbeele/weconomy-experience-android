@@ -4,7 +4,7 @@ package com.teachwithapps.weconomyexperience.firebase;
  * Created by mint on 8-8-17.
  */
 
-public class FireWrap<T> extends FireData {
+public class FireWrapInterface<T> extends FireData {
 
     private T wrappedData;
 
@@ -15,5 +15,4 @@ public class FireWrap<T> extends FireData {
     public void setWrappedData(T wrappedData) {
         this.wrappedData = wrappedData;
     }
-
 }

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -14,14 +15,13 @@ import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
-import com.teachwithapps.weconomyexperience.firebase.FireDatabaseTransactions;
-import com.teachwithapps.weconomyexperience.firebase.ReturnableChange;
+import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
+import com.teachwithapps.weconomyexperience.firebase.util.ReturnableChange;
 import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
 import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 import com.teachwithapps.weconomyexperience.util.Log;
-import com.teachwithapps.weconomyexperience.util.Returnable;
 import com.teachwithapps.weconomyexperience.view.MultiLinearRecyclerView;
 
 import org.parceler.Parcels;
@@ -245,7 +245,7 @@ public class GameActivity extends AppCompatActivity {
 
                     @Override
                     public void onChildRemoved(ScheduledInstructionData data) {
-
+                        removeData(data);
                     }
 
                     @Override
@@ -254,6 +254,22 @@ public class GameActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    public void removeData(ScheduledInstructionData data) {
+        int column = data.getDay() - 1;
+        List<ScheduledInstructionData> scheduledInstructionList =
+                scheduledInstructionDataMap.get(column);
+        for (int i = 0; i < scheduledInstructionList.size(); i++) {
+            ScheduledInstructionData scheduledInstruction = scheduledInstructionList.get(i);
+            Log.d(TAG, "Comparing " + data.getId() + " == " + scheduledInstruction.getId());
+            if (scheduledInstruction.getId().equals(data.getId())) {
+                Log.d(TAG, "Remove data " + data.getId());
+                scheduledInstructionList.remove(i);
+                scheduleRecyclerView.dataMapContentChanged(column, i, false);
+                return;
+            }
+        }
     }
 
     public void setLabour(final ScheduledInstructionData scheduledInstructionData) {
@@ -280,8 +296,8 @@ public class GameActivity extends AppCompatActivity {
                 });
     }
 
-    private void showPlayerSelectionScreen(final String title, final Returnable<PlayerData> returnable) {
-        fireDatabaseTransactions.observePlayersInGame(
+    private void showPlayerSelectionScreen(final String title, final Returnable returnable) {
+        fireDatabaseTransactions.getPlayersInGame(
                 gameData.getId(),
                 new Returnable<List<PlayerData>>() {
                     @Override

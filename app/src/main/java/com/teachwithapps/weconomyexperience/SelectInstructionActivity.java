@@ -11,13 +11,14 @@ import android.view.View;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
-import com.teachwithapps.weconomyexperience.firebase.FireDatabaseTransactions;
+import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
-import com.teachwithapps.weconomyexperience.util.Returnable;
+import com.teachwithapps.weconomyexperience.util.Log;
 import com.teachwithapps.weconomyexperience.view.FoldedInstructionRecyclerAdapter;
 
 import org.parceler.Parcels;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -29,6 +30,8 @@ import butterknife.ButterKnife;
 
 public class SelectInstructionActivity extends AppCompatActivity {
 
+    private static final String TAG = SelectInstructionActivity.class.getName();
+
     @BindView(R.id.select_instruction_button)
     protected View selectInstructionButton;
 
@@ -37,6 +40,8 @@ public class SelectInstructionActivity extends AppCompatActivity {
 
     private int instructionIndexInSchedule;
     private String instructionLibraryKey;
+
+    private List<InstructionData> instructionDataList;
 
     //firebase attributes
     private FireDatabaseTransactions fireDatabaseTransactions;
@@ -50,16 +55,21 @@ public class SelectInstructionActivity extends AppCompatActivity {
     };
 
     private void loadInstructionLibrary() {
-        fireDatabaseTransactions.observeInstructionLibrary(instructionLibraryKey,
+        setupInstructionRecycler();
+        fireDatabaseTransactions.getInstructionsFromLibrary(
+                instructionLibraryKey,
                 new Returnable<List<InstructionData>>() {
                     @Override
-                    public void onResult(List<InstructionData> dataList) {
-                        fillInstructionList(dataList);
+                    public void onResult(List<InstructionData> data) {
+                        Log.d(TAG, "Load data " + data.size());
+                        instructionDataList.addAll(data);
+                        instructionRecycler.getAdapter().notifyDataSetChanged();
                     }
                 });
     }
 
-    private void fillInstructionList(List<InstructionData> instructionDataList) {
+    private void setupInstructionRecycler() {
+        instructionDataList = new ArrayList<>();
         instructionRecycler.setLayoutManager(new LinearLayoutManager(this));
         instructionRecycler.setAdapter(new FoldedInstructionRecyclerAdapter(
                 instructionDataList,

@@ -16,10 +16,11 @@ public class PlayerData extends FireData {
     private String name;
     private String photoUrl;
 
-    public PlayerData() {}
+    public PlayerData() {
+    }
 
     public PlayerData(String uuid, String name, String photoUrl) {
-        this.id = "player_id_" + uuid;
+        this.setId("player_id_" + uuid);
         this.name = name;
         this.photoUrl = photoUrl;
     }
@@ -43,5 +44,4 @@ public class PlayerData extends FireData {
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
     }
-
 }

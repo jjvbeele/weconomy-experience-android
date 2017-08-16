@@ -10,10 +10,9 @@ import android.util.Log;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
-import com.teachwithapps.weconomyexperience.firebase.FireDatabaseTransactions;
-import com.teachwithapps.weconomyexperience.firebase.ReturnableChange;
+import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
+import com.teachwithapps.weconomyexperience.firebase.util.ReturnableChange;
 import com.teachwithapps.weconomyexperience.model.GameData;
-import com.teachwithapps.weconomyexperience.util.Returnable;
 import com.teachwithapps.weconomyexperience.view.GameRecyclerAdapter;
 
 import org.parceler.Parcels;
@@ -63,7 +62,7 @@ public class HubActivity extends AppCompatActivity {
     private FireAuthHelper.FireAuthCallback fireAuthCallback = new FireAuthHelper.FireAuthCallback() {
         @Override
         public void userReady(FirebaseUser firebaseUser) {
-            getHubGames();
+            observeHubGames();
         }
     };
 
@@ -114,12 +113,13 @@ public class HubActivity extends AppCompatActivity {
     /**
      * request list of games in the hub
      */
-    private void getHubGames() {
+    private void observeHubGames() {
         fireDatabaseTransactions.observeHubGames(
                 new ReturnableChange<String>() {
                     @Override
                     public void onChildAdded(String data) {
                         getGameData(data);
+                        Log.d(TAG, "add " + data);
                     }
 
                     @Override
@@ -130,6 +130,8 @@ public class HubActivity extends AppCompatActivity {
                     @Override
                     public void onChildRemoved(String data) {
                         gameDataMap.remove(data);
+                        gameRecyclerView.getAdapter().notifyDataSetChanged();
+                        Log.d(TAG, "remove " + data);
                     }
 
                     @Override
@@ -141,20 +143,11 @@ public class HubActivity extends AppCompatActivity {
     }
 
     private void getGameData(final String gameKey) {
-        fireDatabaseTransactions.observeGame(gameKey, new Returnable<GameData>() {
+        fireDatabaseTransactions.getGameData(gameKey, new Returnable<GameData>() {
             @Override
             public void onResult(GameData data) {
-//                if(gameDataMap.containsKey(gameKey)) {
-//                    Log.d(TAG, "Existing game updated: " + gameKey);
-//                    gameDataMap.remove(gameKey);
-//                    gameDataMap.put(gameKey, data);
-//                    gameRecyclerView.getAdapter().notifyDataSetChanged();
-//
-//                } else {
-//                    Log.d(TAG, "New game: " + gameKey);
                 gameDataMap.put(gameKey, data);
-                gameRecyclerView.getAdapter().notifyItemInserted(gameDataMap.size() - 1);
-//                }
+                gameRecyclerView.getAdapter().notifyDataSetChanged();
             }
         });
     }
@@ -180,23 +173,11 @@ public class HubActivity extends AppCompatActivity {
     }
 
     /**
-     * fill hub with the provided list of games
-     *
-     * @param dataList
-     */
-    private void fillListWithGames(Map<String, GameData> dataList) {
-        gameDataMap.clear();
-        gameDataMap.putAll(dataList);
-        gameRecyclerView.getAdapter().notifyDataSetChanged();
-        Log.d(TAG, "Found " + dataList.size() + " Games");
-    }
-
-    /**
      * user wants to make a new game
      */
     @OnClick(R.id.button_start_new_game)
     protected void startNewGame() {
-        GameData gameData = new GameData("Test " + gameDataMap.size(), "default_library");
+        GameData gameData = new GameData("Test " + gameDataMap.keySet().size(), "default_library");
         fireDatabaseTransactions.registerNewGame(gameData);
     }
 }

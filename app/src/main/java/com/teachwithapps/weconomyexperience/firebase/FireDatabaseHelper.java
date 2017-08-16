@@ -3,12 +3,13 @@ package com.teachwithapps.weconomyexperience.firebase;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
+import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
+import com.teachwithapps.weconomyexperience.firebase.util.ReturnableChange;
 import com.teachwithapps.weconomyexperience.util.Log;
-import com.teachwithapps.weconomyexperience.util.Returnable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,71 +25,14 @@ public class FireDatabaseHelper {
 
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseRef;
-    private ScheduledInstructionData record;
 
     public FireDatabaseHelper() {
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseRef = firebaseDatabase.getReference();
     }
 
-    public <T> void observeRecordArray(
-            Class<T> dataClass,
-            String location,
-            final Returnable<List<T>> returnOnSuccess,
-            final Returnable<DatabaseError> returnOnFail,
-            boolean continuousListener) {
-        observeRecordArray(dataClass, new String[]{location}, returnOnSuccess, returnOnFail, continuousListener);
-    }
-
-    public <T> void observeRecordArray(
-            final Class<T> dataClass,
-            String[] locationArray,
-            final Returnable<List<T>> returnOnSuccess,
-            final Returnable<DatabaseError> returnOnFail,
-            boolean continuousListener) {
-
-        DatabaseReference locationRef = getLocationRef(locationArray);
-
-        if (locationRef != null) {
-            addRecordValueListener(locationRef, new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    List<T> dataList = new ArrayList<>();
-                    for (DataSnapshot childData : dataSnapshot.getChildren()) {
-                        T dataValue = childData.getValue(dataClass);
-                        dataList.add(dataValue);
-                    }
-                    returnOnSuccess.onResult(dataList);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    returnOnFail.onResult(databaseError);
-                }
-            }, continuousListener);
-        }
-    }
-
     /**
-     * Returns array of dataclass inheriting FireData, which ID will be set as its firebase key
-     *
-     * @param dataResultClass
-     * @param location
-     * @param returnOnSuccess
-     * @param returnOnFail
-     * @param <T>
-     */
-    public <T extends FireData> void observeRecordFireDataArray(
-            final Class<T> dataResultClass,
-            String location,
-            final Returnable<List<T>> returnOnSuccess,
-            final Returnable<DatabaseError> returnOnFail,
-            boolean continuousListener) {
-        observeRecordFireDataArray(dataResultClass, new String[]{location}, returnOnSuccess, returnOnFail, continuousListener);
-    }
-
-    /**
-     * Returns array of dataclass inheriting FireData, which ID will be set as its firebase key
+     * Retrieve one record from the firebase
      *
      * @param dataResultClass
      * @param locationArray
@@ -96,159 +40,155 @@ public class FireDatabaseHelper {
      * @param returnOnFail
      * @param <T>
      */
-    public <T extends FireData> void observeRecordFireDataArray(
-            final Class<T> dataResultClass,
-            String[] locationArray,
-            final Returnable<List<T>> returnOnSuccess,
-            final Returnable<DatabaseError> returnOnFail,
-            boolean continuousListener) {
-
-        DatabaseReference locationRef = getLocationRef(locationArray);
-
-        if (locationRef != null) {
-            addRecordValueListener(locationRef, new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    List<T> dataList = new ArrayList<T>();
-                    for (DataSnapshot childData : dataSnapshot.getChildren()) {
-                        T data = childData.getValue(dataResultClass);
-                        if(data != null) {
-                            data.setId(childData.getKey());
-                            dataList.add(data);
-                        }
-                    }
-                    returnOnSuccess.onResult(dataList);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    returnOnFail.onResult(databaseError);
-                }
-            }, continuousListener);
-        }
-    }
-
-    public <T extends FireData> void observeRecordFireData(
-            final Class<T> dataResultClass,
-            String location,
-            final Returnable<T> returnOnSuccess,
-            final Returnable<DatabaseError> returnOnFail,
-            boolean continuousListener) {
-        observeRecordFireData(dataResultClass, new String[]{location}, returnOnSuccess, returnOnFail, continuousListener);
-    }
-
-    public <T extends FireData> void observeRecordFireData(
+    public <T> void getRecord(
             final Class<T> dataResultClass,
             String[] locationArray,
             final Returnable<T> returnOnSuccess,
-            final Returnable<DatabaseError> returnOnFail,
-            boolean continuousListener) {
-
-        DatabaseReference locationRef = getLocationRef(locationArray);
-
-        if (locationRef != null) {
-            addRecordValueListener(locationRef, new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    T data = dataSnapshot.getValue(dataResultClass);
-                    if(data != null) {
-                        data.setId(dataSnapshot.getKey());
+            final Returnable<DatabaseError> returnOnFail) {
+        genericObserveRecord(
+                dataResultClass,
+                locationArray,
+                new Returnable<T>() {
+                    @Override
+                    public void onResult(T data) {
                         returnOnSuccess.onResult(data);
-                    } else {
-                        returnOnFail.onResult(null);
                     }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    returnOnFail.onResult(databaseError);
-                }
-            }, continuousListener);
-        }
+                },
+                returnOnFail,
+                false,
+                false
+        );
     }
 
-    public <T extends FireData> void observeChildFireData(
+    /**
+     * Retrieve records from the firebase asynchronously
+     *
+     * @param dataResultClass
+     * @param locationArray
+     * @param returnOnSuccess
+     * @param returnOnFail
+     * @param <T>
+     */
+    public <T> void getRecordsAsync(
             final Class<T> dataResultClass,
             String[] locationArray,
-            final ReturnableChange<T> returnOnChange,
+            final Returnable<T> returnOnSuccess,
+            final Returnable<DatabaseError> returnOnFail) {
+        genericObserveRecord(
+                dataResultClass,
+                locationArray,
+                new Returnable<T>() {
+                    @Override
+                    public void onResult(T data) {
+                        returnOnSuccess.onResult(data);
+                    }
+                },
+                returnOnFail,
+                true,
+                false);
+    }
+
+    /**
+     * Retrieves a list of data from the database
+     * The list is compiled by counting the amount of nodes and keep waiting
+     * until it is filled. At that point, the callback 'returnOnSuccess' is called.
+     *
+     * @param dataResultClass
+     * @param locationArray
+     * @param returnOnSuccess
+     * @param returnOnFail
+     * @param <T>
+     */
+    public <T> void getRecordsList(
+            final Class<T> dataResultClass,
+            final String[] locationArray,
+            final Returnable<List<T>> returnOnSuccess,
+            final Returnable<DatabaseError> returnOnFail) {
+        getChildCount(
+                locationArray,
+                new Returnable<Long>() {
+                    @Override
+                    public void onResult(final Long childCount) {
+                        final List<T> list = new ArrayList<>();
+                        genericObserveRecord(
+                                dataResultClass,
+                                locationArray,
+                                new Returnable<T>() {
+                                    @Override
+                                    public void onResult(T data) {
+                                        list.add(data);
+                                        if (list.size() >= childCount) {
+                                            returnOnSuccess.onResult(list);
+                                        }
+                                    }
+                                },
+                                returnOnFail,
+                                true,
+                                false);
+                    }
+                },
+                returnOnFail
+        );
+    }
+
+    /**
+     * Observe one record from the firebase
+     *
+     * @param dataResultClass
+     * @param locationArray
+     * @param returnOnSuccess
+     * @param returnOnFail
+     * @param <T>
+     */
+    public <T> void observeRecord(
+            final Class<T> dataResultClass,
+            String[] locationArray,
+            final Returnable<T> returnOnSuccess,
+            final Returnable<DatabaseError> returnOnFail) {
+        genericObserveRecord(
+                dataResultClass,
+                locationArray,
+                new Returnable<T>() {
+                    @Override
+                    public void onResult(T data) {
+                        returnOnSuccess.onResult(data);
+                    }
+                },
+                returnOnFail,
+                false,
+                true);
+    }
+
+    /**
+     * Retrieve number of children nodes on a specific location in the firebase
+     *
+     * @param locationArray
+     * @param returnOnSuccess
+     * @param returnOnFail
+     */
+    public void getChildCount(
+            String[] locationArray,
+            final Returnable<Long> returnOnSuccess,
             final Returnable<DatabaseError> returnOnFail) {
 
         DatabaseReference locationRef = getLocationRef(locationArray);
-
         if (locationRef != null) {
-            addRecordChildListener(locationRef, new ChildEventListener() {
+            locationRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    T data = dataSnapshot.getValue(dataResultClass);
-                    if(data != null) {
-                        data.setId(dataSnapshot.getKey());
-                        returnOnChange.onChildAdded(data);
-                    } else {
-                        returnOnFail.onResult(null);
-                    }
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                    T data = dataSnapshot.getValue(dataResultClass);
-                    if(data != null) {
-                        data.setId(dataSnapshot.getKey());
-                        returnOnChange.onChildChanged(data);
-                    } else {
-                        returnOnFail.onResult(null);
-                    }
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-                    T data = dataSnapshot.getValue(dataResultClass);
-                    if(data != null) {
-                        data.setId(dataSnapshot.getKey());
-                        returnOnChange.onChildRemoved(data);
-                    } else {
-                        returnOnFail.onResult(null);
-                    }
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                    T data = dataSnapshot.getValue(dataResultClass);
-                    if(data != null) {
-                        data.setId(dataSnapshot.getKey());
-                        returnOnChange.onChildMoved(data);
-                    } else {
-                        returnOnFail.onResult(null);
-                    }
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    returnOnSuccess.onResult(dataSnapshot.getChildrenCount());
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                    returnOnFail.onResult(databaseError);
                 }
             });
         }
     }
 
     /**
-     * Retrieve one record from the firebase
-     *
-     * @param dataResultClass
-     * @param location
-     * @param returnOnSuccess
-     * @param returnOnFail
-     * @param <T>
-     */
-    public <T> void observeRecord(
-            final Class<T> dataResultClass,
-            String location,
-            final Returnable<T> returnOnSuccess,
-            final Returnable<DatabaseError> returnOnFail,
-            boolean continuousListener) {
-        observeRecord(dataResultClass, new String[]{location}, returnOnSuccess, returnOnFail, continuousListener);
-    }
-
-    /**
-     * Retrieve one record from the firebase
+     * observe record from the firebase, either once or continuously
      *
      * @param dataResultClass
      * @param locationArray
@@ -256,11 +196,12 @@ public class FireDatabaseHelper {
      * @param returnOnFail
      * @param <T>
      */
-    public <T> void observeRecord(
+    private <T> void genericObserveRecord(
             final Class<T> dataResultClass,
             String[] locationArray,
             final Returnable<T> returnOnSuccess,
             final Returnable<DatabaseError> returnOnFail,
+            final boolean loopChildren,
             boolean continuousListener) {
 
         DatabaseReference locationRef = getLocationRef(locationArray);
@@ -269,7 +210,18 @@ public class FireDatabaseHelper {
             addRecordValueListener(locationRef, new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    returnOnSuccess.onResult(dataSnapshot.getValue(dataResultClass));
+                    if (!loopChildren) {
+                        T data = dataSnapshot.getValue(dataResultClass);
+                        handleFireData(data, dataSnapshot.getKey());
+                        returnOnSuccess.onResult(data);
+
+                    } else {
+                        for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren()) {
+                            T data = childDataSnapshot.getValue(dataResultClass);
+                            handleFireData(data, childDataSnapshot.getKey());
+                            returnOnSuccess.onResult(data);
+                        }
+                    }
                 }
 
                 @Override
@@ -280,6 +232,29 @@ public class FireDatabaseHelper {
         }
     }
 
+    /**
+     * If the data requested is inheriting from FireDataInterface
+     * write the key value to the id
+     *
+     * @param data
+     * @param id
+     * @param <T>
+     */
+    private <T> void handleFireData(T data, String id) {
+        if (data instanceof FireDataInterface) {
+            ((FireDataInterface) data).setId(id);
+        }
+    }
+
+    /**
+     * Observes changes on children within a node
+     *
+     * @param dataResultClass
+     * @param locationArray
+     * @param returnOnSuccess
+     * @param returnOnFail
+     * @param <T>
+     */
     public <T> void observeChild(
             final Class<T> dataResultClass,
             String[] locationArray,
@@ -292,43 +267,76 @@ public class FireDatabaseHelper {
             addRecordChildListener(locationRef, new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    returnOnSuccess.onChildAdded(dataSnapshot.getValue(dataResultClass));
+                    try {
+                        T data = dataSnapshot.getValue(dataResultClass);
+                        handleFireData(data, dataSnapshot.getKey());
+                        returnOnSuccess.onChildAdded(data);
+
+                    } catch (DatabaseException e) {
+                        Log.e(TAG, "Error: corrupted database", e);
+                    }
                 }
 
                 @Override
                 public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                    returnOnSuccess.onChildChanged(dataSnapshot.getValue(dataResultClass));
+                    try {
+                        T data = dataSnapshot.getValue(dataResultClass);
+                        handleFireData(data, dataSnapshot.getKey());
+                        returnOnSuccess.onChildChanged(data);
+
+                    } catch (DatabaseException e) {
+                        Log.e(TAG, "Error: corrupted database", e);
+                    }
                 }
 
                 @Override
                 public void onChildRemoved(DataSnapshot dataSnapshot) {
-                    returnOnSuccess.onChildRemoved(dataSnapshot.getValue(dataResultClass));
+                    try {
+                        T data = dataSnapshot.getValue(dataResultClass);
+                        handleFireData(data, dataSnapshot.getKey());
+                        returnOnSuccess.onChildRemoved(data);
+
+                    } catch (DatabaseException e) {
+                        Log.e(TAG, "Error: corrupted database", e);
+                    }
                 }
 
                 @Override
                 public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                    returnOnSuccess.onChildMoved(dataSnapshot.getValue(dataResultClass));
+                    try {
+                        T data = dataSnapshot.getValue(dataResultClass);
+                        handleFireData(data, dataSnapshot.getKey());
+                        returnOnSuccess.onChildMoved(data);
+
+                    } catch (DatabaseException e) {
+                        Log.e(TAG, "Error: corrupted database", e);
+                    }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Log.e(TAG, "Can't observe child", databaseError.toException());
+                    returnOnFail.onResult(databaseError);
                 }
             });
         }
     }
 
-    public <T> String pushRecord(String preKeyName, String location, T data) {
-        return pushRecord(preKeyName, new String[]{location}, data);
-    }
-
+    /**
+     * Push a new record into the database, giving it a unique key identifier
+     *
+     * @param preKeyName
+     * @param locationArray
+     * @param data
+     * @param <T>
+     * @return
+     */
     public <T> String pushRecord(String preKeyName, String[] locationArray, T data) {
         DatabaseReference locationRef = getLocationRef(locationArray);
 
         if (locationRef != null) {
             DatabaseReference newRecordRef = locationRef.push();
             String key;
-            if(preKeyName != null) {
+            if (preKeyName != null) {
                 key = preKeyName + newRecordRef.getKey();
                 newRecordRef.removeValue();
                 newRecordRef = locationRef.child(key);
@@ -338,30 +346,7 @@ public class FireDatabaseHelper {
             }
             newRecordRef.setValue(data);
 
-            return key;
-
-        } else {
-            return null;
-        }
-    }
-
-    public <T extends FireData> String pushFireDataRecord(String preKeyName, String[] locationArray, T data) {
-        DatabaseReference locationRef = getLocationRef(locationArray);
-
-        if (locationRef != null) {
-            DatabaseReference newRecordRef = locationRef.push();
-            String key;
-            if(preKeyName != null) {
-                key = preKeyName + newRecordRef.getKey();
-                newRecordRef.removeValue();
-                newRecordRef = locationRef.child(key);
-
-            } else {
-                key = newRecordRef.getKey();
-            }
-            newRecordRef.setValue(data);
-
-            data.setId(key);
+            handleFireData(data, newRecordRef.getKey());
 
             return key;
 
@@ -370,33 +355,39 @@ public class FireDatabaseHelper {
         }
     }
 
-    public <T> void addRecord(String location, String key, T data) {
-        addRecord(new String[] {location}, key, data);
-    }
-
+    /**
+     * Add a record to firebase database.
+     * An existing record on the given key node will be replaced
+     *
+     * @param locationArray
+     * @param key
+     * @param data
+     * @param <T>
+     */
     public <T> void addRecord(String[] locationArray, String key, T data) {
         DatabaseReference locationRef = getLocationRef(locationArray);
 
-        if(locationRef != null) {
+        if (locationRef != null) {
             locationRef.child(key).setValue(data);
         }
     }
 
-    public void removeRecord(String location) {
-        removeRecord(new String[]{location});
-    }
-
+    /**
+     * Remove a record from the firebase database
+     *
+     * @param locationArray
+     */
     public void removeRecord(String[] locationArray) {
         DatabaseReference locationRef = getLocationRef(locationArray);
 
         if (locationRef != null) {
-            Log.d(TAG, "Removing " + Arrays.deepToString(locationArray));
             locationRef.removeValue();
+            Log.d(TAG, "Removing record " + Arrays.toString(locationArray));
         }
     }
 
     private void addRecordValueListener(DatabaseReference ref, ValueEventListener valueEventListener, boolean continuous) {
-        if(continuous) {
+        if (continuous) {
             ref.addValueEventListener(valueEventListener);
 
         } else {
@@ -412,14 +403,12 @@ public class FireDatabaseHelper {
         DatabaseReference locationRef = databaseRef;
         for (String location : locationArray) {
             if (location == null) {
-                Log.d(TAG, "Location is null");
                 return null;
             }
 
             locationRef = locationRef.child(location);
 
             if (locationRef == null) {
-                Log.d(TAG, "Location does not exist");
                 return null;
             }
         }
@@ -443,10 +432,5 @@ public class FireDatabaseHelper {
                 .replace("\'", escapeChar('\''))
                 .replace("\"", escapeChar('\"'))
                 .replace("]", escapeChar(']'));
-    }
-
-    public <T extends FireData> void setFireDataRecord(String[] location, T record) {
-        DatabaseReference ref = getLocationRef(location);
-        ref.child(record.getId()).setValue(record);
     }
 }

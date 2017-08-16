@@ -8,8 +8,8 @@ import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.teachwithapps.weconomyexperience.model.InstructionData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
+import com.teachwithapps.weconomyexperience.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,12 +51,14 @@ public class MultiLinearRecyclerView extends LinearLayout {
      */
     public void dataMapContentChanged(int column, int index, boolean inserted) {
         RecyclerView childRecycler = childRecyclerList.get(column);
+        RecyclerView.Adapter adapter = childRecycler.getAdapter();
 
         if(inserted) {
-            childRecycler.getAdapter().notifyItemInserted(index);
+            adapter.notifyItemInserted(index);
 
         } else {
-            childRecycler.getAdapter().notifyItemRemoved(index);
+            Log.d(TAG, "Removing data on " + column + ", " + index);
+            dataMapChanged();
         }
 
         childRecycler.smoothScrollToPosition(index);
@@ -88,5 +90,4 @@ public class MultiLinearRecyclerView extends LinearLayout {
 
         requestLayout();
     }
-
 }

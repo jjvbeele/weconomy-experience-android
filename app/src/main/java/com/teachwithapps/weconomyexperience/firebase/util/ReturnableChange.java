@@ -1,4 +1,4 @@
-package com.teachwithapps.weconomyexperience.firebase;
+package com.teachwithapps.weconomyexperience.firebase.util;
 
 /**
  * Created by mint on 29-12-16.
@@ -6,8 +6,11 @@ package com.teachwithapps.weconomyexperience.firebase;
 
 public interface ReturnableChange<T> {
     void onChildAdded(T data);
+
     void onChildChanged(T data);
+
     void onChildRemoved(T data);
+
     void onChildMoved(T data);
 }
 

@@ -1,6 +1,5 @@
 package com.teachwithapps.weconomyexperience.model;
 
-import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.PropertyName;
 import com.teachwithapps.weconomyexperience.firebase.FireData;
 
@@ -13,11 +12,22 @@ import org.parceler.Parcel;
 @Parcel
 public class InstructionData extends FireData {
 
+    @PropertyName("text")
     private String text;
+
+    @PropertyName("input")
     private int input;
+
+    @PropertyName("output")
     private int output;
+
+    @PropertyName("labour")
     private int labour;
+
+    @PropertyName("input_type")
     private String inputType;
+
+    @PropertyName("output_type")
     private String outputType;
 
     public InstructionData() {
@@ -27,6 +37,7 @@ public class InstructionData extends FireData {
         this.text = text;
     }
 
+    @PropertyName("text")
     public String getText() {
         return text;
     }

@@ -1,4 +1,4 @@
-package com.teachwithapps.weconomyexperience.util;
+package com.teachwithapps.weconomyexperience.firebase.util;
 
 /**
  * Created by mint on 29-12-16.

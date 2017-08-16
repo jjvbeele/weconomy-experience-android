@@ -1,13 +1,14 @@
-package com.teachwithapps.weconomyexperience.firebase;
-
-import android.util.Log;
+package com.teachwithapps.weconomyexperience;
 
 import com.google.firebase.database.DatabaseError;
+import com.teachwithapps.weconomyexperience.firebase.FireDatabaseHelper;
+import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
+import com.teachwithapps.weconomyexperience.firebase.util.ReturnableChange;
 import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
 import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
-import com.teachwithapps.weconomyexperience.util.Returnable;
+import com.teachwithapps.weconomyexperience.util.Log;
 
 import java.util.List;
 
@@ -35,45 +36,45 @@ public class FireDatabaseTransactions {
     public void registerNewGame(GameData gameData) {
         String id = fireDatabaseHelper.pushRecord(
                 "game_id_",
-                "games",
+                new String[]{"games"},
                 gameData
         );
 
         gameData.setId(id);
 
-        fireDatabaseHelper.pushRecord(
-                "hub_id_",
-                "hub",
+        fireDatabaseHelper.addRecord(
+                new String[]{"hub"},
+                id,
                 id
         );
 
-        //No custom library? Create a copy of the default library
+        //No custom instructionlibrary? Create a copy of the default library
         if (gameData.getInstructionLibraryKey() == null) {
+            //push the new library and obtain the firebase key (location)
             final String instructionLibraryKey = fireDatabaseHelper.pushRecord(
                     "library_id_",
-                    "instruction_libraries",
+                    new String[]{"instruction_libraries"},
                     gameData.getId()
             );
 
-            fireDatabaseHelper.observeRecordFireDataArray(
+            //get default library and push it in the newly pushed library using the key
+            fireDatabaseHelper.getRecordsAsync(
                     InstructionData.class,
                     new String[]{
                             "insruction_libraries",
                             "default_library"
                     },
-                    new Returnable<List<InstructionData>>() {
+                    new Returnable<InstructionData>() {
                         @Override
-                        public void onResult(List<InstructionData> dataList) {
-                            for (InstructionData instructionData : dataList) {
-                                fireDatabaseHelper.addRecord(
-                                        new String[]{
-                                                "instruction_libraries",
-                                                instructionLibraryKey
-                                        },
-                                        instructionData.getId(),
-                                        instructionData
-                                );
-                            }
+                        public void onResult(InstructionData data) {
+                            fireDatabaseHelper.addRecord(
+                                    new String[]{
+                                            "instruction_libraries",
+                                            instructionLibraryKey
+                                    },
+                                    data.getId(),
+                                    data
+                            );
                         }
                     },
                     new Returnable<DatabaseError>() {
@@ -81,8 +82,7 @@ public class FireDatabaseTransactions {
                         public void onResult(DatabaseError data) {
                             Log.e(TAG, "Can't copy default library", data.toException());
                         }
-                    },
-                    false
+                    }
             );
         }
     }
@@ -118,8 +118,8 @@ public class FireDatabaseTransactions {
      * @param gameId
      * @param callback
      */
-    public void observeGame(String gameId, Returnable<GameData> callback) {
-        fireDatabaseHelper.observeRecordFireData(
+    public void getGameData(String gameId, Returnable<GameData> callback) {
+        fireDatabaseHelper.getRecord(
                 GameData.class,
                 new String[]{"games", gameId},
                 callback,
@@ -130,16 +130,15 @@ public class FireDatabaseTransactions {
                             Log.e(TAG, "Error retrieving game data", error.toException());
 
                         } else {
-                            Log.e(TAG, "Error retrieving game data, unknown error");
+                            Log.d(TAG, "Error retrieving game data, unknown error");
                         }
                     }
-                },
-                false
+                }
         );
     }
 
     public void addInstructionToLibrary(String instructionLibraryName, InstructionData instructionData) {
-        fireDatabaseHelper.pushFireDataRecord(
+        fireDatabaseHelper.pushRecord(
                 "library_id_",
                 new String[]{
                         "instruction_libraries",
@@ -149,8 +148,10 @@ public class FireDatabaseTransactions {
         );
     }
 
-    public void observeInstructionLibrary(String instructionLibraryKey, Returnable<List<InstructionData>> callback) {
-        fireDatabaseHelper.observeRecordFireDataArray(
+    public void getInstructionsFromLibrary(
+            String instructionLibraryKey,
+            Returnable<List<InstructionData>> callback) {
+        fireDatabaseHelper.getRecordsList(
                 InstructionData.class,
                 new String[]{"instruction_libraries", instructionLibraryKey},
                 callback,
@@ -161,16 +162,15 @@ public class FireDatabaseTransactions {
                             Log.e(TAG, "Error retrieving game data", error.toException());
 
                         } else {
-                            Log.e(TAG, "Error retrieving game data, unknown error");
+                            Log.d(TAG, "Error retrieving game data, unknown error");
                         }
                     }
-                },
-                true
+                }
         );
     }
 
     public void registerInstructionToSchedule(String gameId, ScheduledInstructionData scheduledInstructionData) {
-        fireDatabaseHelper.pushFireDataRecord(
+        fireDatabaseHelper.pushRecord(
                 "scheduled_instruction_id_",
                 new String[]{
                         "game_schedules",
@@ -194,7 +194,7 @@ public class FireDatabaseTransactions {
 
     public void observeSchedule(String[] locationArray,
                                 ReturnableChange<ScheduledInstructionData> onReturnChange) {
-        fireDatabaseHelper.observeChildFireData(
+        fireDatabaseHelper.observeChild(
                 ScheduledInstructionData.class,
                 locationArray,
                 onReturnChange,
@@ -207,27 +207,26 @@ public class FireDatabaseTransactions {
         );
     }
 
-    public void observePlayersInGame(String gameId, Returnable<List<PlayerData>> onReturnChange) {
-        fireDatabaseHelper.observeRecordFireDataArray(
+    public void getPlayersInGame(String gameId, Returnable<List<PlayerData>> onReturn) {
+        fireDatabaseHelper.getRecordsList(
                 PlayerData.class,
                 new String[]{
                         "games",
                         gameId,
                         "players"
                 },
-                onReturnChange,
+                onReturn,
                 new Returnable<DatabaseError>() {
                     @Override
                     public void onResult(DatabaseError data) {
-                        Log.e(TAG, "Can't observe schedule", data.toException());
+                        Log.e(TAG, "Can't retrieve player list", data.toException());
                     }
-                },
-                false
+                }
         );
     }
 
     public void getInstructionFromLibrary(String instructionLibraryKey, String instructionKey, Returnable<InstructionData> onReturnSuccess) {
-        fireDatabaseHelper.observeRecord(
+        fireDatabaseHelper.getRecord(
                 InstructionData.class,
                 new String[]{
                         "instruction_libraries",
@@ -240,17 +239,17 @@ public class FireDatabaseTransactions {
                     public void onResult(DatabaseError data) {
                         Log.e(TAG, "Can't retrieve instruction from library", data.toException());
                     }
-                },
-                false
+                }
         );
     }
 
     public void updateScheduledInstruction(String gameId, ScheduledInstructionData scheduledInstructionData) {
-        fireDatabaseHelper.setFireDataRecord(
+        fireDatabaseHelper.addRecord(
                 new String[]{
                         "game_schedules",
                         gameId
                 },
+                scheduledInstructionData.getId(),
                 scheduledInstructionData
         );
     }

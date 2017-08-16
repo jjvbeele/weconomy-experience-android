@@ -13,7 +13,10 @@ import org.parceler.Parcel;
 @Parcel
 public class GameData extends FireData {
 
+    @PropertyName("name")
     private String name;
+
+    @PropertyName("instruction_library_key")
     private String instructionLibraryKey;
 
     public GameData() {
@@ -29,6 +32,11 @@ public class GameData extends FireData {
         return name;
     }
 
+    @PropertyName("name")
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @PropertyName("instruction_library_key")
     public String getInstructionLibraryKey() {
         return instructionLibraryKey;
@@ -38,5 +46,4 @@ public class GameData extends FireData {
     public void setInstructionLibraryKey(String instructionLibraryKey) {
         this.instructionLibraryKey = instructionLibraryKey;
     }
-
 }

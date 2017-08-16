@@ -4,6 +4,7 @@ import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.PropertyName;
 import com.teachwithapps.weconomyexperience.firebase.FireData;
+import com.teachwithapps.weconomyexperience.firebase.FireDataInterface;
 
 import org.parceler.Parcel;
 
