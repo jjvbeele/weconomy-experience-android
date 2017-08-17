@@ -55,6 +55,8 @@ dependencies {
     //custom views
     compile 'com.felipecsl.asymmetricgridview:library:2.0.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    //picasso
+    compile 'com.squareup.picasso:picasso:2.5.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

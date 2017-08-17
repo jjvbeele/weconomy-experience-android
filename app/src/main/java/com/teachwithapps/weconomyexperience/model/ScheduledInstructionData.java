@@ -4,12 +4,11 @@ import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.PropertyName;
 import com.teachwithapps.weconomyexperience.firebase.FireData;
-import com.teachwithapps.weconomyexperience.firebase.FireDataInterface;
 
 import org.parceler.Parcel;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by mint on 1-8-17.
@@ -24,15 +23,16 @@ public class ScheduledInstructionData extends FireData {
     @PropertyName("day")
     private int day;
     @PropertyName("labour_list")
-    private List<String> labourList;
+    private Map<String, String> labourList;
     @PropertyName("claim_list")
-    private List<String> claimList;
+    private Map<String, String> claimList;
 
     //ignored for json parsing
     @Exclude
     private InstructionData bindedInstructionData;
 
-    public ScheduledInstructionData() {}
+    public ScheduledInstructionData() {
+    }
 
     @PropertyName("instruction_key")
     public String getInstructionKey() {
@@ -45,28 +45,28 @@ public class ScheduledInstructionData extends FireData {
     }
 
     @PropertyName("labour_list")
-    public List<String> getLabourList() {
-        if(labourList == null) {
-            labourList = new ArrayList<>();
+    public Map<String, String> getLabourList() {
+        if (labourList == null) {
+            labourList = new HashMap<>();
         }
         return labourList;
     }
 
     @PropertyName("labour_list")
-    public void setLabourList(List<String> labourList) {
+    public void setLabourList(Map<String, String> labourList) {
         this.labourList = labourList;
     }
 
     @PropertyName("claim_list")
-    public List<String> getClaimList() {
-        if(claimList == null) {
-            claimList = new ArrayList<>();
+    public Map<String, String> getClaimList() {
+        if (claimList == null) {
+            claimList = new HashMap<>();
         }
         return claimList;
     }
 
     @PropertyName("claim_list")
-    public void setClaimList(List<String> claimList) {
+    public void setClaimList(Map<String, String> claimList) {
         this.claimList = claimList;
     }
 

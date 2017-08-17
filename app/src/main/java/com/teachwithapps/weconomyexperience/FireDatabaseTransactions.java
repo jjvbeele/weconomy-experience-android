@@ -262,4 +262,18 @@ public class FireDatabaseTransactions {
                         scheduledInstructionData.getId()
                 });
     }
+
+    public void getPlayerById(String gameId, String playerId, Returnable<PlayerData> callback) {
+            fireDatabaseHelper.getRecord(
+                    PlayerData.class,
+                    new String[]{"games", gameId, "players", playerId},
+                    callback,
+                    new Returnable<DatabaseError>() {
+                        @Override
+                        public void onResult(DatabaseError data) {
+                            Log.e(TAG, "Failed to retrieve player from firebase", data.toException());
+                        }
+                    }
+            );
+    }
 }

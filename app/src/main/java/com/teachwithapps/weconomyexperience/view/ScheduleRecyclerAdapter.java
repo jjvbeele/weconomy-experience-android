@@ -2,6 +2,7 @@ package com.teachwithapps.weconomyexperience.view;
 
 import android.support.annotation.DrawableRes;
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,13 +10,19 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.teachwithapps.weconomyexperience.Constants;
 import com.teachwithapps.weconomyexperience.GameActivity;
 import com.teachwithapps.weconomyexperience.R;
+import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
+import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
+import com.teachwithapps.weconomyexperience.util.SerializableSparseArray;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -72,6 +79,9 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
 
         private ScheduledInstructionData scheduledInstructionData;
 
+        private List<ImageView> claimViewList;
+        private List<ImageView> labourViewList;
+
         public ViewHolder(View itemView) {
             super(itemView);
 
@@ -98,46 +108,76 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
             inputCol.removeAllViews();
             outputCol.removeAllViews();
 
+            labourViewList = new ArrayList<>();
+            claimViewList = new ArrayList<>();
+
             for (int i = 0; i < instructionData.getLabour(); i++) {
                 if (i % 2 == 0) {
-                    addInfoImage(inflater, labourCol1, Constants.getLabourIcon(), PROPERTY_LABOUR);
+                    addInfoImage(inflater, labourCol1, Constants.getLabourIcon(), PROPERTY_LABOUR, i);
                 } else {
-                    addInfoImage(inflater, labourCol2, Constants.getLabourIcon(), PROPERTY_LABOUR);
+                    addInfoImage(inflater, labourCol2, Constants.getLabourIcon(), PROPERTY_LABOUR, i);
                 }
             }
-
             for (int i = 0; i < instructionData.getInput(); i++) {
-                addInfoImage(inflater, inputCol, Constants.getProductIcon(instructionData.getInputType()), PROPERTY_INPUT);
+                addInfoImage(inflater, inputCol, Constants.getProductIcon(instructionData.getInputType()), PROPERTY_INPUT, i);
             }
 
             for (int i = 0; i < instructionData.getOutput(); i++) {
-                addInfoImage(inflater, outputCol, Constants.getProductIcon(instructionData.getOutputType()), PROPERTY_CLAIM);
+                addInfoImage(inflater, outputCol, Constants.getProductIcon(instructionData.getOutputType()), PROPERTY_CLAIM, i);
+            }
+
+            handlePlayerDataFromIds(scheduledInstructionData.getClaimList(), claimViewList);
+            handlePlayerDataFromIds(scheduledInstructionData.getLabourList(), labourViewList);
+        }
+
+        private void handlePlayerDataFromIds(final Map<String, String> playerIdList, final List<ImageView> iconList) {
+            for (String i : playerIdList.keySet()) {
+                final Integer key = Integer.parseInt(i);
+                ((GameActivity) itemView.getContext()).getPlayerById(
+                        playerIdList.get(i),
+                        new Returnable<PlayerData>() {
+                            @Override
+                            public void onResult(PlayerData data) {
+                                Picasso.with(itemView.getContext())
+                                        .load(data.getPhotoUrl())
+                                        .into(iconList.get(key));
+                            }
+                        }
+                );
             }
         }
 
-        private void setLabour() {
-            ((GameActivity) itemView.getContext()).setLabour(scheduledInstructionData);
+        private void setLabour(int index) {
+            ((GameActivity) itemView.getContext()).setLabour(scheduledInstructionData, index);
         }
 
-        private void setClaim() {
-            ((GameActivity) itemView.getContext()).setClaim(scheduledInstructionData);
+        private void setClaim(int index) {
+            ((GameActivity) itemView.getContext()).setClaim(scheduledInstructionData, index);
         }
 
-        private void addInfoImage(LayoutInflater inflater, ViewGroup row, @DrawableRes int drawableId, final int propertyType) {
+        private void addInfoImage(LayoutInflater inflater, ViewGroup row, @DrawableRes int drawableId, final int propertyType, final int index) {
             final ImageView imageView = (ImageView) inflater.inflate(R.layout.imageview_info_scheduled_instruction, row, false);
             imageView.setImageResource(drawableId);
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (propertyType == PROPERTY_LABOUR) {
-                        setLabour();
+                        setLabour(index);
 
                     } else if (propertyType == PROPERTY_CLAIM) {
-                        setClaim();
+                        setClaim(index);
                     }
                 }
             });
             row.addView(imageView);
+
+            if (propertyType == PROPERTY_LABOUR) {
+                labourViewList.add(imageView);
+            }
+
+            if (propertyType == PROPERTY_CLAIM) {
+                claimViewList.add(imageView);
+            }
         }
     }
 }

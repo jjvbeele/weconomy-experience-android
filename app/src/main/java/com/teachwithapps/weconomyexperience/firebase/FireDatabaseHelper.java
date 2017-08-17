@@ -132,7 +132,7 @@ public class FireDatabaseHelper {
     }
 
     /**
-     * Observe one record from the firebase
+     * Observe record from the firebase
      *
      * @param dataResultClass
      * @param locationArray

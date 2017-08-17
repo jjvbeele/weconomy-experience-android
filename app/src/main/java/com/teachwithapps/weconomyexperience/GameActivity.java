@@ -29,6 +29,7 @@ import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -87,6 +88,7 @@ public class GameActivity extends AppCompatActivity {
             addDayToSchedule(i + 1); //we start at day 1
         }
 
+        //adapterfactory that will create scheduleadapters for the scheduledrecyclerview
         MultiLinearRecyclerView.AdapterFactory
                 <ScheduleRecyclerAdapter.ViewHolder, ScheduledInstructionData>
                 adapterFactory = new MultiLinearRecyclerView.AdapterFactory
@@ -255,7 +257,7 @@ public class GameActivity extends AppCompatActivity {
 
                     @Override
                     public void onChildChanged(ScheduledInstructionData data) {
-
+                        scheduleRecyclerView.dataMapChanged();
                     }
 
                     @Override
@@ -287,31 +289,43 @@ public class GameActivity extends AppCompatActivity {
         fireDatabaseTransactions.removeScheduledInstruction(gameData.getId(), data);
     }
 
-    public void setLabour(final ScheduledInstructionData scheduledInstructionData) {
+    public void getPlayerById(String playerId, Returnable<PlayerData> callback) {
+        fireDatabaseTransactions.getPlayerById(
+                gameData.getId(),
+                playerId,
+                callback
+        );
+    }
+
+    public void setLabour(final ScheduledInstructionData scheduledInstructionData, final int index) {
         showPlayerSelectionScreen(
                 "Select a player to assign for labour",
                 new Returnable<PlayerData>() {
                     @Override
                     public void onResult(PlayerData playerData) {
-                        scheduledInstructionData.getLabourList().add(playerData.getId());
+                        Map<String, String> labourArray = scheduledInstructionData.getLabourList();
+                        labourArray.put("0" + String.valueOf(index), playerData.getId());
+                        scheduledInstructionData.setLabourList(labourArray);
                         fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionData);
                     }
                 });
     }
 
-    public void setClaim(final ScheduledInstructionData scheduledInstructionData) {
+    public void setClaim(final ScheduledInstructionData scheduledInstructionData, final int index) {
         showPlayerSelectionScreen(
                 "Select a player to claim output for",
                 new Returnable<PlayerData>() {
                     @Override
                     public void onResult(PlayerData playerData) {
-                        scheduledInstructionData.getClaimList().add(playerData.getId());
+                        Map<String, String> claimArray = scheduledInstructionData.getClaimList();
+                        claimArray.put("0" + String.valueOf(index), playerData.getId());
+                        scheduledInstructionData.setClaimList(claimArray);
                         fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionData);
                     }
                 });
     }
 
-    private void showPlayerSelectionScreen(final String title, final Returnable returnable) {
+    private void showPlayerSelectionScreen(final String title, final Returnable<PlayerData> returnable) {
         fireDatabaseTransactions.getPlayersInGame(
                 gameData.getId(),
                 new Returnable<List<PlayerData>>() {
