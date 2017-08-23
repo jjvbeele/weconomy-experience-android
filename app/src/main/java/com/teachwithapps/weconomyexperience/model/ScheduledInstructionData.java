@@ -89,4 +89,12 @@ public class ScheduledInstructionData extends FireData {
     public InstructionData getBindedInstructionData() {
         return bindedInstructionData;
     }
+
+    @Exclude
+    public void setData(ScheduledInstructionData data) {
+        this.instructionKey = data.instructionKey;
+        this.day = data.day;
+        this.labourList = data.labourList;
+        this.claimList = data.claimList;
+    }
 }

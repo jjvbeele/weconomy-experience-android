@@ -8,66 +8,103 @@ import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.teachwithapps.weconomyexperience.util.Log;
-
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * Created by mint on 1-8-17.
  */
 
-public class MultiLinearRecyclerView<DT> extends LinearLayout {
+public class MultiRecyclerView<DT> extends LinearLayout {
 
     public interface AdapterFactory<VT extends RecyclerView.ViewHolder, DT> {
         RecyclerView.Adapter<VT> createAdapter(List<DT> ts);
     }
 
-    private static final String TAG = MultiLinearRecyclerView.class.getName();
+    private static final String TAG = MultiRecyclerView.class.getName();
 
     private List<List<DT>> dataMap;
+    private Comparator<DT> dataComparator;
 
     private AdapterFactory<? extends RecyclerView.ViewHolder, DT> adapterFactory;
 
     private List<RecyclerView> childRecyclerList = new ArrayList<>();
 
-    public MultiLinearRecyclerView(Context context) {
+    public MultiRecyclerView(Context context) {
         super(context);
     }
 
-    public MultiLinearRecyclerView(Context context, @Nullable AttributeSet attrs) {
+    public MultiRecyclerView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public MultiLinearRecyclerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public MultiRecyclerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
-    public void setDataMap(List<List<DT>> dataMap, AdapterFactory<? extends RecyclerView.ViewHolder, DT> adapterFactory) {
+    public void setDataMap(
+            List<List<DT>> dataMap,
+            AdapterFactory<? extends RecyclerView.ViewHolder, DT> adapterFactory) {
         this.dataMap = dataMap;
         this.adapterFactory = adapterFactory;
         dataMapChanged();
     }
 
+    public void insertData(int column, DT data) {
+        final List<DT> dataList = dataMap.get(column);
+        dataList.add(0, data);
+        dataMapContentInserted(column, 0);
+    }
+
+    public void removeData(int column, DT data) {
+    }
+
+    public void updateData(int column, int index) {
+
+    }
+
+    public int indexOf(int column, DT data) {
+//        List<DT> dataList = dataMap.get(column);
+//        for(int i = 0; i < dataList.size(); i++) {
+//            if(dataComparator.compare(data, dataList.get(i)) == 0) {
+//                dataList.remove(i);
+//                dataMapContentRemoved(column, i);
+//            }
+//        }
+
+        return 0;
+    }
+
     /**
      * Method to be called when the map's child content changed
      *
-     * @param column   column to change
-     * @param index    index where a new item was inserted or removed
-     * @param inserted boolean to indicate if an item was inserted or removed
+     * @param column column to change
+     * @param index  index where a new item was inserted or removed
      */
-    public void dataMapContentChanged(int column, int index, boolean inserted) {
+    public void dataMapContentInserted(int column, int index) {
         RecyclerView childRecycler = childRecyclerList.get(column);
         RecyclerView.Adapter adapter = childRecycler.getAdapter();
 
-        if (inserted) {
-            adapter.notifyItemInserted(index);
+        adapter.notifyItemInserted(index);
 
-        } else {
-            Log.d(TAG, "Removing data on " + column + ", " + index);
-//            adapter.notifyItemRemoved(index);
-            dataMapChanged();
-        }
+        childRecycler.smoothScrollToPosition(index);
+    }
+
+    public void dataMapContentRemoved(int column, int index) {
+        RecyclerView childRecycler = childRecyclerList.get(column);
+        RecyclerView.Adapter adapter = childRecycler.getAdapter();
+
+        adapter.notifyItemRemoved(index);
+
+        childRecycler.smoothScrollToPosition(index);
+    }
+
+    public void dataMapContentUpdated(int column, int index) {
+        RecyclerView childRecycler = childRecyclerList.get(column);
+        RecyclerView.Adapter adapter = childRecycler.getAdapter();
+
+        adapter.notifyItemChanged(index);
 
         childRecycler.smoothScrollToPosition(index);
     }

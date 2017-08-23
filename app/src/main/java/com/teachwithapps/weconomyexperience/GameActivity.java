@@ -23,7 +23,7 @@ import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 import com.teachwithapps.weconomyexperience.util.Log;
 import com.teachwithapps.weconomyexperience.view.ScheduleRecyclerAdapter;
-import com.teachwithapps.weconomyexperience.view.util.MultiLinearRecyclerView;
+import com.teachwithapps.weconomyexperience.view.util.MultiRecyclerView;
 
 import org.parceler.Parcels;
 
@@ -43,7 +43,7 @@ public class GameActivity extends AppCompatActivity {
     private static final String TAG = GameActivity.class.getName();
 
     @BindView(R.id.schedule_recycler_view)
-    protected MultiLinearRecyclerView<ScheduledInstructionData> scheduleRecyclerView;
+    protected MultiRecyclerView<ScheduledInstructionData> scheduleRecyclerView;
 
     @BindView(R.id.days_row)
     protected LinearLayout daysRowLayout;
@@ -84,20 +84,18 @@ public class GameActivity extends AppCompatActivity {
         }
 
         //fill the schedule for the number of visible days
-        for (int i = 0; i < numberOfVisibleDays; i++) {
-            addDayToSchedule(i + 1); //we start at day 1
+        for (int i = 1; i <= numberOfVisibleDays; i++) {
+            addDayToSchedule(i); //we start at day 1
         }
 
         //adapterfactory that will create scheduleadapters for the scheduledrecyclerview
-        MultiLinearRecyclerView.AdapterFactory
-                <ScheduleRecyclerAdapter.ViewHolder, ScheduledInstructionData>
-                adapterFactory = new MultiLinearRecyclerView.AdapterFactory
-                <ScheduleRecyclerAdapter.ViewHolder, ScheduledInstructionData>() {
-            @Override
-            public RecyclerView.Adapter<ScheduleRecyclerAdapter.ViewHolder> createAdapter(List<ScheduledInstructionData> ts) {
-                return new ScheduleRecyclerAdapter(ts);
-            }
-        };
+        MultiRecyclerView.AdapterFactory<ScheduleRecyclerAdapter.ViewHolder, ScheduledInstructionData> adapterFactory =
+                new MultiRecyclerView.AdapterFactory<ScheduleRecyclerAdapter.ViewHolder, ScheduledInstructionData>() {
+                    @Override
+                    public RecyclerView.Adapter<ScheduleRecyclerAdapter.ViewHolder> createAdapter(List<ScheduledInstructionData> ts) {
+                        return new ScheduleRecyclerAdapter(ts);
+                    }
+                };
 
         //add instructiondatamap to the schedulerecyclerview
         scheduleRecyclerView.setDataMap(
@@ -154,7 +152,7 @@ public class GameActivity extends AppCompatActivity {
                 int instructionIndexInView = data.getIntExtra(Constants.KEY_INSTRUCTION_INDEX_IN_SCHEDULE, -1);
                 InstructionData instructionData = Parcels.unwrap(data.getParcelableExtra(Constants.KEY_INSTRUCTION_PARCEL));
 
-                if (instructionIndexInView >= 0 && instructionData != null) {
+                if (instructionIndexInView > 0 && instructionData != null) {
                     registerInstructionToSchedule(instructionIndexInView, instructionData);
 
                 } else {
@@ -176,7 +174,7 @@ public class GameActivity extends AppCompatActivity {
     private void addDayToSchedule(final int indexInView) {
         View dayCell = LayoutInflater.from(this).inflate(R.layout.view_schedule_day, daysRowLayout, false);
 
-        ((TextView) dayCell.findViewById(R.id.day_text)).setText(getString(R.string.day_text, indexInView + 1));
+        ((TextView) dayCell.findViewById(R.id.day_text)).setText(getString(R.string.day_text, indexInView));
         dayCell.findViewById(R.id.add_instruction_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -206,14 +204,13 @@ public class GameActivity extends AppCompatActivity {
     /**
      * Add an instruction to the schedule
      *
-     * @param indexInView              day visible on the screen to add the instruction to
+     * @param day              day visible on the screen to add the instruction to
      * @param scheduledInstructionData instruction to be added
      */
-    private void addInstructionToSchedule(int indexInView, ScheduledInstructionData scheduledInstructionData) {
-        List<ScheduledInstructionData> instructionDataList = scheduledInstructionDataMap.get(indexInView);
+    private void addInstructionToSchedule(int day, ScheduledInstructionData scheduledInstructionData) {
+        List<ScheduledInstructionData> instructionDataList = scheduledInstructionDataMap.get(day);
         instructionDataList.add(0, scheduledInstructionData);
-
-        scheduleRecyclerView.dataMapContentChanged(indexInView, 0, true);
+        scheduleRecyclerView.dataMapContentInserted(day, 0);
     }
 
     private void addInstructionToLibrary(InstructionData instructionData) {
@@ -231,6 +228,10 @@ public class GameActivity extends AppCompatActivity {
         fireDatabaseTransactions.registerPlayerToGame(gameData.getId(), playerData);
     }
 
+    /**
+     * Observes the schedule and any change on the firebase database will be processed into
+     * the schedule view widget
+     */
     private void observeSchedule() {
         fireDatabaseTransactions.observeSchedule(
                 new String[]{
@@ -239,42 +240,18 @@ public class GameActivity extends AppCompatActivity {
                 },
                 new ReturnableChange<ScheduledInstructionData>() {
                     @Override
-                    public void onChildAdded(final ScheduledInstructionData scheduledInstructionData) {
-                        //get instructiondata by key and add to the scheduledInstruction datamap
-                        fireDatabaseTransactions.getInstructionFromLibrary(
-                                gameData.getInstructionLibraryKey(),
-                                scheduledInstructionData.getInstructionKey(),
-                                new Returnable<InstructionData>() {
-                                    @Override
-                                    public void onResult(InstructionData instructionData) {
-                                        final List<ScheduledInstructionData> scheduledInstructionDataList = scheduledInstructionDataMap.get(scheduledInstructionData.getDay() - 1);
-                                        scheduledInstructionData.bindInstructionData(instructionData);
-                                        scheduledInstructionDataList.add(scheduledInstructionData);
-                                        scheduleRecyclerView.dataMapChanged();
-                                    }
-                                });
+                    public void onChildAdded(final ScheduledInstructionData data) {
+                        addScheduledInstruction(data);
                     }
 
                     @Override
                     public void onChildChanged(ScheduledInstructionData data) {
-                        scheduleRecyclerView.dataMapChanged();
+                        updateScheduledInstruction(data);
                     }
 
                     @Override
                     public void onChildRemoved(ScheduledInstructionData data) {
-                        int column = data.getDay() - 1;
-                        List<ScheduledInstructionData> scheduledInstructionList =
-                                scheduledInstructionDataMap.get(column);
-                        for (int i = 0; i < scheduledInstructionList.size(); i++) {
-                            ScheduledInstructionData scheduledInstruction = scheduledInstructionList.get(i);
-                            Log.d(TAG, "Comparing " + data.getId() + " == " + scheduledInstruction.getId());
-                            if (scheduledInstruction.getId().equals(data.getId())) {
-                                Log.d(TAG, "Remove data " + data.getId());
-                                scheduledInstructionList.remove(i);
-                                scheduleRecyclerView.dataMapContentChanged(column, i, false);
-                                return;
-                            }
-                        }
+                        removeScheduledInstruction(data);
                     }
 
                     @Override
@@ -283,6 +260,52 @@ public class GameActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    private void addScheduledInstruction(final ScheduledInstructionData data) {
+        //get instructiondata by key and add to the scheduledInstruction datamap
+        fireDatabaseTransactions.getInstructionFromLibrary(
+                gameData.getInstructionLibraryKey(),
+                data.getInstructionKey(),
+                new Returnable<InstructionData>() {
+                    @Override
+                    public void onResult(InstructionData instructionData) {
+                        data.bindInstructionData(instructionData);
+                        int day = data.getDay() - 1;
+                        addInstructionToSchedule(day, data);
+                    }
+                });
+    }
+
+    private void updateScheduledInstruction(final ScheduledInstructionData data) {
+        //get instructiondata by key and add to the scheduledInstruction datamap
+        int column = data.getDay() - 1;
+        final List<ScheduledInstructionData> scheduledInstructionDataList = scheduledInstructionDataMap.get(column);
+
+        for (int i = 0; i < scheduledInstructionDataList.size(); i++) {
+            ScheduledInstructionData oldData = scheduledInstructionDataList.get(i);
+            if (oldData.getId().equals(data.getId())) {
+                oldData.setData(data);
+                scheduleRecyclerView.dataMapContentUpdated(column, i);
+                return;
+            }
+        }
+    }
+
+    private void removeScheduledInstruction(final ScheduledInstructionData data) {
+        int column = data.getDay() - 1;
+        List<ScheduledInstructionData> scheduledInstructionList =
+                scheduledInstructionDataMap.get(column);
+        for (int i = 0; i < scheduledInstructionList.size(); i++) {
+            ScheduledInstructionData scheduledInstruction = scheduledInstructionList.get(i);
+            Log.d(TAG, "Comparing " + data.getId() + " == " + scheduledInstruction.getId());
+            if (scheduledInstruction.getId().equals(data.getId())) {
+                Log.d(TAG, "Remove data " + data.getId());
+                scheduledInstructionList.remove(i);
+                scheduleRecyclerView.dataMapContentRemoved(column, i);
+                return;
+            }
+        }
     }
 
     public void removeData(ScheduledInstructionData data) {
@@ -304,6 +327,9 @@ public class GameActivity extends AppCompatActivity {
                     @Override
                     public void onResult(PlayerData playerData) {
                         Map<String, String> labourArray = scheduledInstructionData.getLabourList();
+                        //we add "0" as a workaround to force deserialization to String instead of integer
+                        //Otherwise, it is treated as a sparse array instead of a map
+                        //The 0 will later be lost when parsing back to an integer
                         labourArray.put("0" + String.valueOf(index), playerData.getId());
                         scheduledInstructionData.setLabourList(labourArray);
                         fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionData);
@@ -318,6 +344,9 @@ public class GameActivity extends AppCompatActivity {
                     @Override
                     public void onResult(PlayerData playerData) {
                         Map<String, String> claimArray = scheduledInstructionData.getClaimList();
+                        //we add "0" as a workaround to force deserialization to String instead of integer
+                        //Otherwise, it is treated as a sparse array instead of a map
+                        //The 0 will later be lost when parsing back to an integer
                         claimArray.put("0" + String.valueOf(index), playerData.getId());
                         scheduledInstructionData.setClaimList(claimArray);
                         fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionData);
