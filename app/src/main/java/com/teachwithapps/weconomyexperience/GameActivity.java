@@ -1,5 +1,6 @@
 package com.teachwithapps.weconomyexperience;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -10,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -18,6 +20,7 @@ import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
 import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
 import com.teachwithapps.weconomyexperience.firebase.util.ReturnableChange;
 import com.teachwithapps.weconomyexperience.model.GameData;
+import com.teachwithapps.weconomyexperience.model.GoalData;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
 import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
@@ -33,6 +36,7 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by mint on 1-8-17.
@@ -47,6 +51,9 @@ public class GameActivity extends AppCompatActivity {
 
     @BindView(R.id.days_row)
     protected LinearLayout daysRowLayout;
+
+    @BindView(R.id.goal_view)
+    protected TextView goalView;
 
     private GameData gameData;
 
@@ -107,6 +114,8 @@ public class GameActivity extends AppCompatActivity {
         fireDatabaseTransactions = new FireDatabaseTransactions();
         fireAuthHelper = new FireAuthHelper(this);
         fireAuthHelper.withUser(this, fireAuthCallback);
+
+        updateGoalCount();
     }
 
     /**
@@ -178,7 +187,7 @@ public class GameActivity extends AppCompatActivity {
         dayCell.findViewById(R.id.add_instruction_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openSelectInstructionScreen(indexInView);
+                showSelectInstructionScreen(indexInView);
             }
         });
 
@@ -194,7 +203,7 @@ public class GameActivity extends AppCompatActivity {
         fireDatabaseTransactions.registerInstructionToSchedule(gameData.getId(), scheduledInstructionData);
     }
 
-    private void openSelectInstructionScreen(int indexInView) {
+    private void showSelectInstructionScreen(int indexInView) {
         Intent intent = new Intent(GameActivity.this, SelectInstructionActivity.class);
         intent.putExtra(Constants.KEY_INSTRUCTION_INDEX_IN_SCHEDULE, indexInView);
         intent.putExtra(Constants.KEY_INSTRUCTION_LIBRARY_KEY, gameData.getInstructionLibraryKey());
@@ -204,7 +213,7 @@ public class GameActivity extends AppCompatActivity {
     /**
      * Add an instruction to the schedule
      *
-     * @param day              day visible on the screen to add the instruction to
+     * @param day                      day visible on the screen to add the instruction to
      * @param scheduledInstructionData instruction to be added
      */
     private void addInstructionToSchedule(int day, ScheduledInstructionData scheduledInstructionData) {
@@ -379,5 +388,87 @@ public class GameActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    private void updateGoalCount() {
+        fireDatabaseTransactions.getGoalCount(
+                gameData.getId(),
+                new Returnable<Long>() {
+                    @Override
+                    public void onResult(Long count) {
+                        goalView.setText(getString(R.string.goals_text, count));
+                    }
+                }
+        );
+    }
+
+    private void showGoalScreen() {
+        fireDatabaseTransactions.getGoalsInGame(
+                gameData.getId(),
+                new Returnable<List<GoalData>>() {
+                    @Override
+                    public void onResult(final List<GoalData> goalDataList) {
+                        Log.d(TAG, "Show goals screen");
+                        goalDataList.add(0, new GoalData("Create new goal"));
+                        final CharSequence[] goalTextArray = new CharSequence[goalDataList.size()];
+                        for (int i = 0; i < goalDataList.size(); i++) {
+                            goalTextArray[i] = goalDataList.get(i).getText();
+                        }
+
+                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(GameActivity.this);
+                        dialogBuilder.setTitle(getString(R.string.goal_dialog_title));
+                        dialogBuilder.setItems(
+                                goalTextArray,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if (which == 0) {
+                                            showCreateGoalScreen();
+                                            dialog.dismiss();
+                                        } else {
+                                            showEditGoalScreen(goalDataList.get(which));
+                                        }
+                                    }
+                                });
+                        dialogBuilder.show();
+                    }
+                }
+        );
+    }
+
+    private void showCreateGoalScreen() {
+        final View createGoalView = LayoutInflater.from(this).inflate(R.layout.view_create_goal, null);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(GameActivity.this);
+        dialogBuilder.setTitle(getString(R.string.create_goal_dialog_title));
+        dialogBuilder.setView(createGoalView);
+        dialogBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String goalText = ((EditText) createGoalView.findViewById(R.id.goal_text)).getText().toString();
+                fireDatabaseTransactions.addGoalToGame(gameData.getId(), goalText);
+                updateGoalCount();
+                dialog.dismiss();
+            }
+        });
+        Dialog dialog = dialogBuilder.create();
+        dialog.show();
+    }
+
+    private void showEditGoalScreen(GoalData goalData) {
+        final View createGoalView = LayoutInflater.from(this).inflate(R.layout.view_edit_goal, null);
+
+        ((TextView) createGoalView.findViewById(R.id.goal_text)).setText(goalData.getText());
+
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(GameActivity.this);
+        dialogBuilder.setTitle(getString(R.string.edit_goal_dialog_title));
+        dialogBuilder.setView(createGoalView);
+        Dialog dialog = dialogBuilder.create();
+        dialog.show();
+    }
+
+    @OnClick(R.id.goal_view)
+    protected void onClickGoalView() {
+        //Add after first release
+        //showGoalScreen();
     }
 }

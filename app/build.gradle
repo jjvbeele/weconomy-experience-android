@@ -2,6 +2,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'weconomy_key'
+            keyPassword 'pwd_4_weconomy'
+            storeFile file('/home/mint/Documents/Teachwithapps/Code-Projects/WeconomyExperience/Android/app/keystore.jks')
+            storePassword 'pwd_4_weconomy'
+        }
+    }
     compileSdkVersion 25
     buildToolsVersion "26.0.0"
     defaultConfig {
@@ -20,30 +28,26 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
+    }
+    productFlavors {
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     //android support
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     //gson
     compile 'com.google.code.gson:gson:2.7'
-    //rxjava
-    compile 'io.reactivex:rxandroid:1.0.1'
-    compile 'io.reactivex:rxjava:1.1.4'
     //parceler
     compile 'org.parceler:parceler-api:1.1.5'
     apt 'org.parceler:parceler:1.1.5'
-    //dagger
-    compile 'javax.annotation:jsr250-api:1.0'
-    apt 'com.google.dagger:dagger-compiler:2.0.1'
-    compile 'com.google.dagger:dagger:2.0.1'
     //butterknife
     compile 'com.jakewharton:butterknife:8.0.1'
     apt 'com.jakewharton:butterknife-compiler:8.0.1'
@@ -52,9 +56,6 @@ dependencies {
     compile 'com.google.firebase:firebase-storage:11.0.1'
     compile 'com.google.firebase:firebase-database:11.0.1'
     compile 'com.google.android.gms:play-services-auth:11.0.1'
-    //custom views
-    compile 'com.felipecsl.asymmetricgridview:library:2.0.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     //picasso
     compile 'com.squareup.picasso:picasso:2.5.2'
 }
