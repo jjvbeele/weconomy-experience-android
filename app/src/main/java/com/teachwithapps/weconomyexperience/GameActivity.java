@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -25,8 +26,10 @@ import com.teachwithapps.weconomyexperience.model.InstructionData;
 import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 import com.teachwithapps.weconomyexperience.util.Log;
+import com.teachwithapps.weconomyexperience.view.AppNavigationDrawer;
 import com.teachwithapps.weconomyexperience.view.ScheduleRecyclerAdapter;
 import com.teachwithapps.weconomyexperience.view.util.MultiRecyclerView;
+import com.teachwithapps.weconomyexperience.view.util.NavigationDrawer;
 
 import org.parceler.Parcels;
 
@@ -45,6 +48,9 @@ import butterknife.OnClick;
 public class GameActivity extends AppCompatActivity {
 
     private static final String TAG = GameActivity.class.getName();
+
+    @BindView(R.id.drawer_layout)
+    protected DrawerLayout drawerLayout;
 
     @BindView(R.id.schedule_recycler_view)
     protected MultiRecyclerView<ScheduledInstructionData> scheduleRecyclerView;
@@ -80,6 +86,8 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         ButterKnife.bind(this);
+
+        new AppNavigationDrawer(this, drawerLayout);
 
         gameData = getIntentData(getIntent(), savedInstanceState, Constants.KEY_GAME_DATA_PARCEL);
 
@@ -470,5 +478,10 @@ public class GameActivity extends AppCompatActivity {
     protected void onClickGoalView() {
         //Add after first release
         //showGoalScreen();
+    }
+
+    @OnClick(R.id.toolbar_close)
+    protected void onClickToolbarClose() {
+        finish();
     }
 }

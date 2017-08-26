@@ -335,20 +335,15 @@ public class FireDatabaseTransactions {
         );
     }
 
-    public void verifyRole(final String role, final String userId, final String encodedPassword, final Returnable<Boolean> returnable) {
+    public void verifyRole(final String role, final String userId, final Returnable<Boolean> returnable) {
         fireDatabaseHelper.getRecord(
-                String.class,
+                Boolean.class,
                 new String[]{
                         "secured",
                         userId,
                         role
                 },
-                new Returnable<String>() {
-                    @Override
-                    public void onResult(String data) {
-                        returnable.onResult(data != null && data.equals(encodedPassword));
-                    }
-                },
+                returnable,
                 new Returnable<DatabaseError>() {
                     @Override
                     public void onResult(DatabaseError data) {

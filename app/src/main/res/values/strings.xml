@@ -9,4 +9,11 @@
     <string name="create_game_dialog_title">Create a new game</string>
     <string name="ok">OK</string>
     <string name="edit_goal_dialog_title">Edit this goal</string>
+    <string name="info_text">The weconomy experience is a simulation of the new economy that is emerging at the moment. Click here to read more.</string>
+    <string name="about_text">Deze app is gemaakt door Guts4Roses in samenwerking met Teachwithapps</string>
+    <string name="guts4roses_link">http://guts4roses.org</string>
+    <string name="teachwithapps_link">http://teachwithapps.com</string>
+    <string name="how_does_it_work">How does it work?</string>
+    <string name="about_this_app">About this app</string>
+    <string name="app_version_info">Version %1$s</string>
 </resources>
