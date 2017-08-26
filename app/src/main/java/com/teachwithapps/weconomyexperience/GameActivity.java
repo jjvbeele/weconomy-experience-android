@@ -346,6 +346,7 @@ public class GameActivity extends AppCompatActivity {
                 });
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.edit_scheduled_instruction_dialog_title);
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, int which) {

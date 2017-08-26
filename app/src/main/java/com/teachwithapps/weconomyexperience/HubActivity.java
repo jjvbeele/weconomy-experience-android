@@ -132,7 +132,10 @@ public class HubActivity extends AppCompatActivity {
             public void onResult(Boolean data) {
                 Log.d(TAG, "admin? " + data);
                 SharedPreferences preferences = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE);
-                preferences.edit().putBoolean(Constants.PREF_ADMIN, data).apply();
+                preferences
+                        .edit()
+                        .putBoolean(Constants.PREF_ADMIN, data != null ? data : false)
+                        .apply();
 
                 enableAdminLayout(data);
             }

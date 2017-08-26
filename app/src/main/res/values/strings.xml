@@ -18,6 +18,7 @@
     <string name="app_version_info">Version %1$s</string>
     <string name="explanation_link">http://guts4roses.org/simulation</string>
     <string name="cancel">CANCEL</string>
+    <string name="edit_scheduled_instruction_dialog_title">Edit this instruction</string>
 
     <string-array name="available_days_array">
         <item>1</item>

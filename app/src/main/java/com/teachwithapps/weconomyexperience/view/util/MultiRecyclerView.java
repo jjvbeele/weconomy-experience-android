@@ -57,25 +57,6 @@ public class MultiRecyclerView<DT> extends LinearLayout {
         dataMapContentInserted(column, 0);
     }
 
-    public void removeData(int column, DT data) {
-    }
-
-    public void updateData(int column, int index) {
-
-    }
-
-    public int indexOf(int column, DT data) {
-//        List<DT> dataList = dataMap.get(column);
-//        for(int i = 0; i < dataList.size(); i++) {
-//            if(dataComparator.compare(data, dataList.get(i)) == 0) {
-//                dataList.remove(i);
-//                dataMapContentRemoved(column, i);
-//            }
-//        }
-
-        return 0;
-    }
-
     /**
      * Method to be called when the map's child content changed
      *
