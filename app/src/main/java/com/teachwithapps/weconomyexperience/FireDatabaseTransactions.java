@@ -283,7 +283,7 @@ public class FireDatabaseTransactions {
         getGoalCount(gameId, new Returnable<Long>() {
             @Override
             public void onResult(Long data) {
-                if(data > 0) {
+                if (data > 0) {
                     fireDatabaseHelper.getRecordsList(
                             GoalData.class,
                             new String[]{
@@ -333,5 +333,27 @@ public class FireDatabaseTransactions {
                     }
                 }
         );
+    }
+
+    public void verifyRole(final String role, final String userId, final String encodedPassword, final Returnable<Boolean> returnable) {
+        fireDatabaseHelper.getRecord(
+                String.class,
+                new String[]{
+                        "secured",
+                        userId,
+                        role
+                },
+                new Returnable<String>() {
+                    @Override
+                    public void onResult(String data) {
+                        returnable.onResult(data != null && data.equals(encodedPassword));
+                    }
+                },
+                new Returnable<DatabaseError>() {
+                    @Override
+                    public void onResult(DatabaseError data) {
+                        Log.e(TAG, "Can't fetch security role", data.toException());
+                    }
+                });
     }
 }

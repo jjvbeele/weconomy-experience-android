@@ -6,6 +6,7 @@
     <string name="day_text">Day %d</string>
     <string name="goal_dialog_title">Goal list</string>
     <string name="create_goal_dialog_title">Create a new goal</string>
+    <string name="create_game_dialog_title">Create a new game</string>
     <string name="ok">OK</string>
     <string name="edit_goal_dialog_title">Edit this goal</string>
 </resources>

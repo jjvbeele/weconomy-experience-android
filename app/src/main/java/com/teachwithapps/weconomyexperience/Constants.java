@@ -18,6 +18,8 @@ public class Constants {
     public static final String KEY_INSTRUCTION_INDEX_IN_SCHEDULE = "instruction_index_in_schedule";
     public static final String KEY_GAME_DATA_PARCEL = "game_data_parcel";
     public static final String KEY_INSTRUCTION_PARCEL = "instruction_parcel";
+    public static final String DEFAULT_SHARED_PREFERENCES = "default_shared_preferences";
+    public static final String PREF_ADMIN = "pref_admin";
 
     public static @DrawableRes int getProductIcon(String inputType) {
         if(inputType != null) {
