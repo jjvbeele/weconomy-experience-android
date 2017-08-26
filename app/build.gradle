@@ -2,14 +2,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
 android {
-    signingConfigs {
-        config {
-            keyAlias 'weconomy_key'
-            keyPassword 'pwd_4_weconomy'
-            storeFile file('keystore.jks')
-            storePassword 'pwd_4_weconomy'
-        }
-    }
     compileSdkVersion 25
     buildToolsVersion "26.0.0"
     defaultConfig {
