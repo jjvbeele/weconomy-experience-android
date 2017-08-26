@@ -35,15 +35,22 @@ public class AppNavigationDrawer extends NavigationDrawer {
         appVersionInfoTextView.setText(activity.getString(R.string.app_version_info, BuildConfig.VERSION_NAME));
     }
 
+    @OnClick(R.id.info_text)
+    protected void onClickInfoText() {
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(activity.getString(R.string.explanation_link)));
+        activity.startActivity(i);
+    }
+
     @OnClick(R.id.guts4roses_link)
-    protected void guts4rosesLink() {
+    protected void onClickGuts4rosesLink() {
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(activity.getString(R.string.guts4roses_link)));
         activity.startActivity(i);
     }
 
     @OnClick(R.id.teachwithapps_link)
-    protected void teachwithappsLink() {
+    protected void onClickTeachwithappsLink() {
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(activity.getString(R.string.teachwithapps_link)));
         activity.startActivity(i);

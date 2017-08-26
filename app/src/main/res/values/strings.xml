@@ -16,4 +16,5 @@
     <string name="how_does_it_work">How does it work?</string>
     <string name="about_this_app">About this app</string>
     <string name="app_version_info">Version %1$s</string>
+    <string name="explanation_link">http://guts4roses.org/simulation</string>
 </resources>

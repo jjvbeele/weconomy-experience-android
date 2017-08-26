@@ -6,6 +6,7 @@
     android:layout_gravity="left"
     android:background="@color/colorPrimaryDark"
     android:fitsSystemWindows="true"
+    android:clickable="true"
     android:paddingTop="20dp">
 
     <TextView
