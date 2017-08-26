@@ -2,11 +2,11 @@
 <resources>
     <color name="colorPrimary">#00aeb1</color>
     <color name="colorPrimaryDark">#246263</color>
-    <color name="colorAccent">#ffcbaf</color>
+    <color name="colorAccent">#ffa270</color>
     <color name="dark_gray">#394847</color>
     <color name="white_blue">#c3f3ee</color>
-    <color name="scheduled_instruction">#aafffc</color>
-    <color name="scheduled_instruction_higlight">#88ccc7</color>
+    <color name="scheduled_instruction">#75b9b4</color>
+    <color name="scheduled_instruction_higlight">#4a938d</color>
     <color name="light_gray">#abc6c5</color>
     <color name="dark_overlay">#a0000000</color>
     <color name="white">#ffffff</color>
