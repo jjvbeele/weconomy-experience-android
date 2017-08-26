@@ -14,49 +14,52 @@
         android:paddingBottom="20dp"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
-        android:visibility="gone"
         android:paddingTop="20dp"
         android:text="LOG IN"
         android:textColor="@color/white_blue"
-        android:textSize="24sp" />
+        android:textSize="24sp"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/info_button"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:layout_below="@+id/login_button"
+        android:gravity="center_vertical"
         android:paddingBottom="20dp"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:paddingTop="20dp"
         android:text="INFO"
         android:textColor="@color/white_blue"
-        android:textSize="24sp" />
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/about_button"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:layout_below="@+id/info_button"
+        android:gravity="center_vertical"
         android:paddingBottom="20dp"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:paddingTop="20dp"
         android:text="ABOUT"
         android:textColor="@color/white_blue"
-        android:textSize="24sp" />
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/admin_button"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:layout_alignParentBottom="true"
+        android:gravity="center_vertical"
         android:paddingBottom="20dp"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:paddingTop="20dp"
         android:text="ADMIN"
         android:textColor="@color/colorAccent"
-        android:textSize="24sp" />
+        android:textSize="14sp" />
 
 </RelativeLayout>
