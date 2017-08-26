@@ -351,4 +351,9 @@ public class FireDatabaseTransactions {
                     }
                 });
     }
+
+    public void rescheduleScheduledInstruction(String gameId, ScheduledInstructionData scheduledInstructionData) {
+        removeScheduledInstruction(gameId, scheduledInstructionData);
+        updateScheduledInstruction(gameId, scheduledInstructionData);
+    }
 }

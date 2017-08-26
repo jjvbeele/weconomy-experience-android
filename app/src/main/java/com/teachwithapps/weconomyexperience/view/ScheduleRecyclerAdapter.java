@@ -2,7 +2,6 @@ package com.teachwithapps.weconomyexperience.view;
 
 import android.support.annotation.DrawableRes;
 import android.support.v7.widget.RecyclerView;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +17,6 @@ import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
 import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
-import com.teachwithapps.weconomyexperience.util.SerializableSparseArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +94,7 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    ((GameActivity) itemView.getContext()).removeData(scheduledInstructionData);
+                    ((GameActivity) itemView.getContext()).longClickScheduledInstruction(scheduledInstructionData);
                     return true;
                 }
             });

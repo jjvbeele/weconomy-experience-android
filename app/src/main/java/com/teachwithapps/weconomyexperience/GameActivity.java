@@ -12,8 +12,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseUser;
@@ -29,7 +31,6 @@ import com.teachwithapps.weconomyexperience.util.Log;
 import com.teachwithapps.weconomyexperience.view.AppNavigationDrawer;
 import com.teachwithapps.weconomyexperience.view.ScheduleRecyclerAdapter;
 import com.teachwithapps.weconomyexperience.view.util.MultiRecyclerView;
-import com.teachwithapps.weconomyexperience.view.util.NavigationDrawer;
 
 import org.parceler.Parcels;
 
@@ -325,8 +326,54 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    public void removeData(ScheduledInstructionData data) {
-        fireDatabaseTransactions.removeScheduledInstruction(gameData.getId(), data);
+    public void longClickScheduledInstruction(final ScheduledInstructionData data) {
+        final View scheduledInstructionEditDialog = LayoutInflater.from(this).inflate(R.layout.edit_scheduled_instruction_dialog, null);
+        Spinner daySpinner = ((Spinner) scheduledInstructionEditDialog.findViewById(R.id.day_spinner));
+        daySpinner.setSelection(data.getDay() - 1);
+        daySpinner.setOnItemSelectedListener(
+                new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        String[] dayArray = getResources().getStringArray(R.array.available_days_array);
+                        int selectedDay = Integer.valueOf(dayArray[position]);
+                        data.setDay(selectedDay);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setView(scheduledInstructionEditDialog);
+        final Dialog dialog = builder.show();
+
+        scheduledInstructionEditDialog
+                .findViewById(R.id.remove_schedule_button)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        fireDatabaseTransactions.removeScheduledInstruction(gameData.getId(), data);
+                        dialog.dismiss();
+                    }
+                });
+
+        scheduledInstructionEditDialog
+                .findViewById(R.id.move_scheduled_button)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        fireDatabaseTransactions.rescheduleScheduledInstruction(gameData.getId(), data);
+                        dialog.dismiss();
+                    }
+                });
     }
 
     public void getPlayerById(String playerId, Returnable<PlayerData> callback) {
