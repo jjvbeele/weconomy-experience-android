@@ -30,6 +30,8 @@ public class GameRecyclerAdapter extends RecyclerView.Adapter<GameRecyclerAdapte
     private OnClickListener removeGameListener;
     private OnClickListener clickGameListener;
 
+    private boolean admin;
+
     public GameRecyclerAdapter(Map<String, GameData> gameDataList, OnClickListener clickGameListener, OnClickListener removeGameListener) {
         this.gameDataMap = gameDataList;
         this.clickGameListener = clickGameListener;
@@ -74,6 +76,11 @@ public class GameRecyclerAdapter extends RecyclerView.Adapter<GameRecyclerAdapte
         return gameDataMap.size();
     }
 
+    public void updateAdmin(boolean admin) {
+        this.admin = admin;
+        notifyDataSetChanged();
+    }
+
     class GameViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.text_game_name)
@@ -90,6 +97,11 @@ public class GameRecyclerAdapter extends RecyclerView.Adapter<GameRecyclerAdapte
 
         public void setData(String gameName) {
             gameNameTextView.setText(gameName);
+            if(admin) {
+                deleteGameButton.setVisibility(View.VISIBLE);
+            } else {
+                deleteGameButton.setVisibility(View.GONE);
+            }
         }
 
         public void setOnGameDelete(View.OnClickListener deleteGameListener) {

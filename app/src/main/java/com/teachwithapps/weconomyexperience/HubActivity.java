@@ -134,6 +134,7 @@ public class HubActivity extends AppCompatActivity {
         } else {
             startNewGameButton.setVisibility(View.GONE);
         }
+        ((GameRecyclerAdapter) gameRecyclerView.getAdapter()).updateAdmin(enabled);
     }
 
     private void setupNavigationDrawable() {
