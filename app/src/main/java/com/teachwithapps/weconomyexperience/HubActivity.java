@@ -130,11 +130,12 @@ public class HubActivity extends AppCompatActivity {
         fireDatabaseTransactions.verifyRole("admin", fireAuthHelper.getUser().getUid(), new Returnable<Boolean>() {
             @Override
             public void onResult(Boolean data) {
+                if(data == null) { data = false; }
                 Log.d(TAG, "admin? " + data);
                 SharedPreferences preferences = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE);
                 preferences
                         .edit()
-                        .putBoolean(Constants.PREF_ADMIN, data != null ? data : false)
+                        .putBoolean(Constants.PREF_ADMIN, data)
                         .apply();
 
                 enableAdminLayout(data);
