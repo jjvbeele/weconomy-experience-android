@@ -53,6 +53,9 @@ public class GameActivity extends AppCompatActivity {
     @BindView(R.id.drawer_layout)
     protected DrawerLayout drawerLayout;
 
+    @BindView(R.id.toolbar_title)
+    protected TextView toolbarTitle;
+
     @BindView(R.id.schedule_recycler_view)
     protected MultiRecyclerView<ScheduledInstructionData> scheduleRecyclerView;
 
@@ -91,6 +94,8 @@ public class GameActivity extends AppCompatActivity {
         new AppNavigationDrawer(this, drawerLayout);
 
         gameData = getIntentData(getIntent(), savedInstanceState, Constants.KEY_GAME_DATA_PARCEL);
+
+        toolbarTitle.setText(gameData.getName());
 
         //initialize instructiondatamap, this will hold the instructions for the visible schedule
         scheduledInstructionDataMap = new ArrayList<>();
