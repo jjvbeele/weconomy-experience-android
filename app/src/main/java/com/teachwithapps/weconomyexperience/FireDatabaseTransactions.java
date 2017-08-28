@@ -259,7 +259,7 @@ public class FireDatabaseTransactions {
                     @Override
                     public void onChildRemoved(ScheduledInstructionData data) {
                         updateLoadingState(callback, LoadState.LOADING_DONE);
-                        callback.onChildAdded(data);
+                        callback.onChildRemoved(data);
                     }
 
                     @Override

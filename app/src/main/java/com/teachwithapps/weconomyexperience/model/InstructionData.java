@@ -21,7 +21,7 @@ public class InstructionData extends FireData {
     @PropertyName("output")
     private int output;
 
-    @PropertyName("labour")
+    @PropertyName("setLabour")
     private int labour;
 
     @PropertyName("input_type")

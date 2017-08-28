@@ -128,17 +128,17 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
             handlePlayerDataFromIds(scheduledInstructionData.getLabourList(), labourViewList);
         }
 
-        private void handlePlayerDataFromIds(final Map<String, String> playerIdList, final List<ImageView> iconList) {
-            for (String i : playerIdList.keySet()) {
-                final Integer key = Integer.parseInt(i);
+        private void handlePlayerDataFromIds(final List<String> playerIdList, final List<ImageView> iconList) {
+            for(int i = 0; i < playerIdList.size(); i++) {
+                final int index = i;
                 ((GameActivity) itemView.getContext()).getPlayerById(
-                        playerIdList.get(i),
+                        playerIdList.get(index),
                         new Returnable<PlayerData>() {
                             @Override
                             public void onResult(PlayerData data) {
                                 Picasso.with(itemView.getContext())
                                         .load(data.getPhotoUrl())
-                                        .into(iconList.get(key));
+                                        .into(iconList.get(index));
                             }
                         }
                 );

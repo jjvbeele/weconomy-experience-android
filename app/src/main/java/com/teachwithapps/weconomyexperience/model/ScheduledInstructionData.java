@@ -7,7 +7,9 @@ import com.teachwithapps.weconomyexperience.firebase.FireData;
 
 import org.parceler.Parcel;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,9 +25,9 @@ public class ScheduledInstructionData extends FireData {
     @PropertyName("day")
     private int day;
     @PropertyName("labour_list")
-    private Map<String, String> labourList;
+    private Map<String, String> labourMap;
     @PropertyName("claim_list")
-    private Map<String, String> claimList;
+    private Map<String, String> claimMap;
 
     //ignored for json parsing
     @Exclude
@@ -45,29 +47,75 @@ public class ScheduledInstructionData extends FireData {
     }
 
     @PropertyName("labour_list")
-    public Map<String, String> getLabourList() {
-        if (labourList == null) {
-            labourList = new HashMap<>();
+    public Map<String, String> getLabourMap() {
+        if (labourMap == null) {
+            labourMap = new HashMap<>();
         }
+        return labourMap;
+    }
+
+    @Exclude
+    public List<String> getLabourList() {
+        List<String> labourList = new ArrayList<>();
+        labourList.addAll(getLabourMap().values());
         return labourList;
     }
 
     @PropertyName("labour_list")
-    public void setLabourList(Map<String, String> labourList) {
-        this.labourList = labourList;
+    public void setLabourMap(Map<String, String> labourMap) {
+        this.labourMap = labourMap;
+    }
+
+    @Exclude
+    public void setLabour(int index, String playerId) {
+        //we add "0" as a workaround to force deserialization to String instead of integer
+        //Otherwise, it is treated as a sparse array instead of a map
+        //The 0 will later be lost when parsing back to an integer
+        getLabourMap().put("0" + String.valueOf(index), playerId);
+    }
+
+    @Exclude
+    public void removeLabour(int index) {
+        //we add "0" as a workaround to force deserialization to String instead of integer
+        //Otherwise, it is treated as a sparse array instead of a map
+        //The 0 will later be lost when parsing back to an integer
+        getLabourMap().remove("0" + String.valueOf(index));
     }
 
     @PropertyName("claim_list")
-    public Map<String, String> getClaimList() {
-        if (claimList == null) {
-            claimList = new HashMap<>();
+    public Map<String, String> getClaimMap() {
+        if (claimMap == null) {
+            claimMap = new HashMap<>();
         }
-        return claimList;
+        return claimMap;
+    }
+
+    @Exclude
+    public List<String> getClaimList() {
+        List<String> claimlist = new ArrayList<>();
+        claimlist.addAll(getClaimMap().values());
+        return claimlist;
     }
 
     @PropertyName("claim_list")
-    public void setClaimList(Map<String, String> claimList) {
-        this.claimList = claimList;
+    public void setClaimMap(Map<String, String> claimMap) {
+        this.claimMap = claimMap;
+    }
+
+    @Exclude
+    public void setClaim(int index, String playerId) {
+        //we add "0" as a workaround to force deserialization to String instead of integer
+        //Otherwise, it is treated as a sparse array instead of a map
+        //The 0 will later be lost when parsing back to an integer
+        getClaimMap().put("0" + String.valueOf(index), playerId);
+    }
+
+    @Exclude
+    public void removeClaim(int index) {
+        //we add "0" as a workaround to force deserialization to String instead of integer
+        //Otherwise, it is treated as a sparse array instead of a map
+        //The 0 will later be lost when parsing back to an integer
+        getClaimMap().remove("0" + String.valueOf(index));
     }
 
     @PropertyName("day")
@@ -94,7 +142,7 @@ public class ScheduledInstructionData extends FireData {
     public void setData(ScheduledInstructionData data) {
         this.instructionKey = data.instructionKey;
         this.day = data.day;
-        this.labourList = data.labourList;
-        this.claimList = data.claimList;
+        this.labourMap = data.labourMap;
+        this.claimMap = data.claimMap;
     }
 }

@@ -36,7 +36,6 @@ import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -329,12 +328,15 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     }
 
     private void removeScheduledInstruction(final ScheduledInstructionData data) {
+        //- 1 because days start at 1, arrays start at 0
         int column = data.getDay() - 1;
         List<ScheduledInstructionData> scheduledInstructionList =
                 scheduledInstructionDataMap.get(column);
+
         for (int i = 0; i < scheduledInstructionList.size(); i++) {
             ScheduledInstructionData scheduledInstruction = scheduledInstructionList.get(i);
             Log.d(TAG, "Comparing " + data.getId() + " == " + scheduledInstruction.getId());
+
             if (scheduledInstruction.getId().equals(data.getId())) {
                 Log.d(TAG, "Remove data " + data.getId());
                 scheduledInstructionList.remove(i);
@@ -405,47 +407,58 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     public void setLabour(final ScheduledInstructionData scheduledInstructionData, final int index) {
         showPlayerSelectionScreen(
-                "Select a player to assign for labour",
+                "Select a player to assign for setLabour",
                 new Returnable<PlayerData>() {
                     @Override
                     public void onResult(PlayerData playerData) {
-                        Map<String, String> labourArray = scheduledInstructionData.getLabourList();
-                        //we add "0" as a workaround to force deserialization to String instead of integer
-                        //Otherwise, it is treated as a sparse array instead of a map
-                        //The 0 will later be lost when parsing back to an integer
-                        labourArray.put("0" + String.valueOf(index), playerData.getId());
-                        scheduledInstructionData.setLabourList(labourArray);
+                        if (playerData == null) {
+                            scheduledInstructionData.removeLabour(index);
+                        } else {
+                            scheduledInstructionData.setLabour(index, playerData.getId());
+                        }
+
                         fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionData);
                     }
-                });
+                },
+                scheduledInstructionData.getDay(),
+                true);
     }
 
     public void setClaim(final ScheduledInstructionData scheduledInstructionData, final int index) {
         showPlayerSelectionScreen(
-                "Select a player to claim output for",
+                "Select a player to setClaim output for",
                 new Returnable<PlayerData>() {
                     @Override
                     public void onResult(PlayerData playerData) {
-                        Map<String, String> claimArray = scheduledInstructionData.getClaimList();
-                        //we add "0" as a workaround to force deserialization to String instead of integer
-                        //Otherwise, it is treated as a sparse array instead of a map
-                        //The 0 will later be lost when parsing back to an integer
-                        claimArray.put("0" + String.valueOf(index), playerData.getId());
-                        scheduledInstructionData.setClaimList(claimArray);
+                        if (playerData == null) {
+                            scheduledInstructionData.removeClaim(index);
+                        } else {
+                            scheduledInstructionData.setClaim(index, playerData.getId());
+                        }
                         fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionData);
                     }
-                });
+                },
+                scheduledInstructionData.getDay(),
+                false);
     }
 
-    private void showPlayerSelectionScreen(final String title, final Returnable<PlayerData> returnable) {
+    private void showPlayerSelectionScreen(final String title, final Returnable<PlayerData> returnable, final int day, final boolean sort) {
         fireDatabaseTransactions.getPlayersInGame(
                 gameData.getId(),
                 new Returnable<List<PlayerData>>() {
                     @Override
                     public void onResult(final List<PlayerData> playerDataList) {
-                        final CharSequence[] playerNames = new CharSequence[playerDataList.size()];
+
+                        if (sort) {
+                            sortPlayersForLabourSelection(playerDataList);
+                        }
+
+                        //fill the string array for the selection dialog
+                        //we add remove player on top
+                        final CharSequence[] playerNames = new CharSequence[playerDataList.size() + 1];
+                        playerNames[0] = "Remove player";
                         for (int i = 0; i < playerDataList.size(); i++) {
-                            playerNames[i] = playerDataList.get(i).getName();
+                            playerNames[i + 1] = playerDataList.get(i).getName();
                         }
 
                         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(GameActivity.this);
@@ -455,10 +468,37 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        returnable.onResult(playerDataList.get(which));
+                                        //0 is remove player
+                                        if (which == 0) {
+                                            returnable.onResult(null);
+                                        } else {
+                                            returnable.onResult(playerDataList.get(which - 1));
+                                        }
                                     }
                                 });
                         dialogBuilder.show();
+                    }
+
+                    /**
+                     * Removes players in the given list when they are already scheduled on the given day
+                     * @param playerDataList
+                     */
+                    private void sortPlayersForLabourSelection(List<PlayerData> playerDataList) {
+                        Log.d(TAG, "Sorting player selection");
+                        List<ScheduledInstructionData> scheduledInstructionDataList = scheduledInstructionDataMap.get(day - 1);
+                        for (ScheduledInstructionData scheduledInstructionData : scheduledInstructionDataList) {
+                            List<String> labourList = scheduledInstructionData.getLabourList();
+                            Log.d(TAG, "labourList size " + labourList.size() + " playerlist size " + playerDataList.size());
+
+                            List<PlayerData> snapshotPlayerList = new ArrayList<>(playerDataList);
+                            for (PlayerData playerData : snapshotPlayerList) {
+                                String playerId = playerData.getId();
+                                Log.d(TAG, "Checking day " + day + ", " + playerId + ", in labourlist? " + labourList.contains(playerId));
+                                if (labourList.contains(playerId)) {
+                                    playerDataList.remove(playerData);
+                                }
+                            }
+                        }
                     }
                 }
         );
