@@ -151,21 +151,29 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
                         i);
             }
 
-            handlePlayerDataFromIds(scheduledInstructionData.getClaimList(), claimViewList);
-            handlePlayerDataFromIds(scheduledInstructionData.getLabourList(), labourViewList);
+            handlePlayerDataFromIds(scheduledInstructionData.getClaimMap(), claimViewList);
+            handlePlayerDataFromIds(scheduledInstructionData.getLabourMap(), labourViewList);
         }
 
-        private void handlePlayerDataFromIds(final List<String> playerIdList, final List<ImageView> iconList) {
-            for(int i = 0; i < playerIdList.size(); i++) {
+        /**
+         * Handle iconlist, assign player avatars on the icons in the respective player map
+         * Needs to be a map (instead of a list) to retain order
+         * @param playerIdMap
+         * @param iconList
+         */
+        private void handlePlayerDataFromIds(final Map<String, String> playerIdMap, final List<ImageView> iconList) {
+            for(int i = 0; i < playerIdMap.keySet().size(); i++) {
                 final int index = i;
+                final String keyString = (String)playerIdMap.keySet().toArray()[index];
+                String playerId = playerIdMap.get(keyString);
                 ((GameActivity) itemView.getContext()).getPlayerById(
-                        playerIdList.get(index),
+                        playerId,
                         new Returnable<PlayerData>() {
                             @Override
                             public void onResult(PlayerData data) {
                                 Picasso.with(itemView.getContext())
                                         .load(data.getPhotoUrl())
-                                        .into(iconList.get(index));
+                                        .into(iconList.get(Integer.parseInt(keyString)));
                             }
                         }
                 );
