@@ -489,16 +489,13 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
                      * @param playerDataList
                      */
                     private void sortPlayersForLabourSelection(List<PlayerData> playerDataList) {
-                        Log.d(TAG, "Sorting player selection");
                         List<ScheduledInstructionData> scheduledInstructionDataList = scheduledInstructionDataMap.get(day - 1);
                         for (ScheduledInstructionData scheduledInstructionData : scheduledInstructionDataList) {
                             List<String> labourList = scheduledInstructionData.getLabourList();
-                            Log.d(TAG, "labourList size " + labourList.size() + " playerlist size " + playerDataList.size());
 
                             List<PlayerData> snapshotPlayerList = new ArrayList<>(playerDataList);
                             for (PlayerData playerData : snapshotPlayerList) {
                                 String playerId = playerData.getId();
-                                Log.d(TAG, "Checking day " + day + ", " + playerId + ", in labourlist? " + labourList.contains(playerId));
                                 if (labourList.contains(playerId)) {
                                     playerDataList.remove(playerData);
                                 }
@@ -509,21 +506,32 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         );
     }
 
+    /**
+     * Removes players from the scheduledinstructiondata if they already are assigned to a labour elsewhere
+     * @param column
+     * @param scheduledInstructionToCheck
+     */
     private void checkLabour(int column, ScheduledInstructionData scheduledInstructionToCheck) {
         List<ScheduledInstructionData> scheduledInstructionDataList = scheduledInstructionDataMap.get(column);
         for (ScheduledInstructionData scheduledInstructionData : scheduledInstructionDataList) {
+            if(scheduledInstructionData == scheduledInstructionToCheck) {
+                continue;
+            }
+
             List<String> labourList = scheduledInstructionData.getLabourList();
 
             Map<String, String> labourMapToCheck = scheduledInstructionToCheck.getLabourMap();
-            Map<String, String> labourMapSnapshotToCheck = new HashMap<>();
+            Map<String, String> labourMapSnapshotToCheck = new HashMap<>(labourMapToCheck); //prevents concurrent modifications
             for (String key : labourMapSnapshotToCheck.keySet()) {
                 String playerId = labourMapToCheck.get(key);
-                Log.d(TAG, "Checking day " + column + ", " + playerId + ", in labourlist? " + labourList.contains(playerId));
                 if (labourList.contains(playerId)) {
+                    Log.d(TAG, "playerId " + playerId + " exists in " + scheduledInstructionData.getId());
                     labourMapToCheck.remove(key);
                 }
             }
         }
+
+        fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionToCheck);
     }
 
     private void updateGoalCount() {
