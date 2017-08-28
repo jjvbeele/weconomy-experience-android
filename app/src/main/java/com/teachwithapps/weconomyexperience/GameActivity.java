@@ -83,6 +83,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         public void userReady(FirebaseUser firebaseUser) {
             registerPlayer();
             observeSchedule();
+            loadingView.setVisibility(View.GONE);
         }
     };
 
@@ -126,6 +127,10 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
                 scheduledInstructionDataMap,
                 adapterFactory
         );
+
+        //show loading view, will be hidden when user is ready
+        //firedatabasetransactions can show and hide it again
+        loadingView.setVisibility(View.VISIBLE);
 
         //set up firebase helper classes
         fireDatabaseTransactions = new FireDatabaseTransactions();
