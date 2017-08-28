@@ -121,20 +121,34 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
             //set labour icons
             for (int i = 0; i < instructionData.getLabour(); i++) {
                 if (i % 2 == 0) {
-                    addInfoImage(inflater, labourCol1, Constants.getLabourIcon(), PROPERTY_LABOUR, i);
+                    addInfoImage(inflater, labourCol1, Constants.getLabourIcon(), true, PROPERTY_LABOUR, i);
                 } else {
-                    addInfoImage(inflater, labourCol2, Constants.getLabourIcon(), PROPERTY_LABOUR, i);
+                    addInfoImage(inflater, labourCol2, Constants.getLabourIcon(), true, PROPERTY_LABOUR, i);
                 }
             }
 
             //set input icons
+            boolean inputReady = true;
             for (int i = 0; i < instructionData.getInput(); i++) {
-                addInfoImage(inflater, inputCol, Constants.getProductIcon(instructionData.getInputType()), PROPERTY_INPUT, i);
+                addInfoImage(
+                        inflater,
+                        inputCol,
+                        Constants.getProductIcon(instructionData.getInputType()),
+                        inputReady,
+                        PROPERTY_INPUT,
+                        i);
             }
 
             //set output icons
+            boolean outputReady = instructionData.getLabour() == scheduledInstructionData.getLabourList().size();
             for (int i = 0; i < instructionData.getOutput(); i++) {
-                addInfoImage(inflater, outputCol, Constants.getProductIcon(instructionData.getOutputType()), PROPERTY_CLAIM, i);
+                addInfoImage(
+                        inflater,
+                        outputCol,
+                        Constants.getProductIcon(instructionData.getOutputType()),
+                        outputReady,
+                        PROPERTY_CLAIM,
+                        i);
             }
 
             handlePlayerDataFromIds(scheduledInstructionData.getClaimList(), claimViewList);
@@ -166,7 +180,13 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
             ((GameActivity) itemView.getContext()).setClaim(scheduledInstructionData, index);
         }
 
-        private void addInfoImage(LayoutInflater inflater, ViewGroup row, @DrawableRes int drawableId, final int propertyType, final int index) {
+        private void addInfoImage(
+                LayoutInflater inflater,
+                ViewGroup row,
+                @DrawableRes int drawableId,
+                final boolean ready,
+                final int propertyType,
+                final int index) {
             final ImageView imageView = (ImageView) inflater.inflate(R.layout.imageview_info_scheduled_instruction, row, false);
             imageView.setImageResource(drawableId);
             imageView.setOnClickListener(new View.OnClickListener() {
@@ -188,6 +208,12 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
 
             if (propertyType == PROPERTY_CLAIM) {
                 claimViewList.add(imageView);
+            }
+
+            if(ready) {
+                imageView.setAlpha(1f);
+            } else {
+                imageView.setAlpha(0.4f);
             }
         }
     }

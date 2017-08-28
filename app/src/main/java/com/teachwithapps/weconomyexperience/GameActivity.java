@@ -437,7 +437,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     public void setLabour(final ScheduledInstructionData scheduledInstructionData, final int index) {
         showPlayerSelectionScreen(
-                "Select a player to assign for setLabour",
+                getString(R.string.labour_select_player),
                 new Returnable<PlayerData>() {
                     @Override
                     public void onResult(PlayerData playerData) {
@@ -456,7 +456,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     public void setClaim(final ScheduledInstructionData scheduledInstructionData, final int index) {
         showPlayerSelectionScreen(
-                "Select a player to setClaim output for",
+                getString(R.string.claim_select_player),
                 new Returnable<PlayerData>() {
                     @Override
                     public void onResult(PlayerData playerData) {
