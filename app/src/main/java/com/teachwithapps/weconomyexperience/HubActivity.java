@@ -17,16 +17,13 @@ import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 
-import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.google.firebase.auth.FirebaseUser;
 import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
 import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
 import com.teachwithapps.weconomyexperience.firebase.util.ReturnableChange;
 import com.teachwithapps.weconomyexperience.model.GameData;
-import com.teachwithapps.weconomyexperience.util.SecurityUtil;
 import com.teachwithapps.weconomyexperience.view.AppNavigationDrawer;
 import com.teachwithapps.weconomyexperience.view.GameRecyclerAdapter;
-import com.teachwithapps.weconomyexperience.view.util.NavigationDrawer;
 
 import org.parceler.Parcels;
 
@@ -43,7 +40,7 @@ import static com.teachwithapps.weconomyexperience.firebase.FireAuthHelper.RC_SI
  * Created by mint on 26-7-17.
  */
 
-public class HubActivity extends AppCompatActivity {
+public class HubActivity extends AppCompatActivity implements FireDatabaseTransactions.OnLoadingListener {
 
     private static final String TAG = HubActivity.class.getName();
 
@@ -57,7 +54,8 @@ public class HubActivity extends AppCompatActivity {
     @BindView(R.id.button_start_new_game)
     protected View startNewGameButton;
 
-    private MaterialMenuDrawable materialMenu;
+    @BindView(R.id.loading_view)
+    protected View loadingView;
 
     //hub game attributes
     private Map<String, GameData> gameDataMap;
@@ -104,6 +102,8 @@ public class HubActivity extends AppCompatActivity {
         fireDatabaseTransactions = new FireDatabaseTransactions();
         fireAuthHelper = new FireAuthHelper(this);
         fireAuthHelper.withUser(this, fireAuthCallback);
+
+        fireDatabaseTransactions.setOnLoadingListener(this);
     }
 
     private void setupLayout() {
@@ -119,7 +119,7 @@ public class HubActivity extends AppCompatActivity {
         gameRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         boolean admin = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE).getBoolean(Constants.PREF_ADMIN, false);
-        if(!admin) {
+        if (!admin) {
             checkAdminRole();
         } else {
             enableAdminLayout(true);
@@ -130,7 +130,9 @@ public class HubActivity extends AppCompatActivity {
         fireDatabaseTransactions.verifyRole("admin", fireAuthHelper.getUser().getUid(), new Returnable<Boolean>() {
             @Override
             public void onResult(Boolean data) {
-                if(data == null) { data = false; }
+                if (data == null) {
+                    data = false;
+                }
                 Log.d(TAG, "admin? " + data);
                 SharedPreferences preferences = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE);
                 preferences
@@ -177,6 +179,10 @@ public class HubActivity extends AppCompatActivity {
         fireDatabaseTransactions.observeHubGames(
                 new ReturnableChange<String>() {
                     @Override
+                    public void onResult(String data) {
+                    }
+
+                    @Override
                     public void onChildAdded(String data) {
                         getGameData(data);
                         Log.d(TAG, "add " + data);
@@ -184,7 +190,6 @@ public class HubActivity extends AppCompatActivity {
 
                     @Override
                     public void onChildChanged(String data) {
-
                     }
 
                     @Override
@@ -196,7 +201,6 @@ public class HubActivity extends AppCompatActivity {
 
                     @Override
                     public void onChildMoved(String data) {
-
                     }
                 }
         );
@@ -256,5 +260,15 @@ public class HubActivity extends AppCompatActivity {
     @OnClick(R.id.button_start_new_game)
     protected void startNewGame() {
         showCreateGameScreen();
+    }
+
+    @Override
+    public void onLoadingChanged(Returnable<?> callback, FireDatabaseTransactions.LoadState loadState) {
+        if (loadState == FireDatabaseTransactions.LoadState.LOADING_STARTED) {
+            loadingView.setVisibility(View.VISIBLE);
+
+        } else {
+            loadingView.setVisibility(View.GONE);
+        }
     }
 }

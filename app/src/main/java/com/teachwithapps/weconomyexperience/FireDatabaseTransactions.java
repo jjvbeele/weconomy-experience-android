@@ -11,6 +11,7 @@ import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 import com.teachwithapps.weconomyexperience.util.Log;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,9 +24,41 @@ public class FireDatabaseTransactions {
     private static final String TAG = FireDatabaseTransactions.class.getName();
 
     private FireDatabaseHelper fireDatabaseHelper;
+    public enum LoadState {
+        LOADING_STARTED,
+        LOADING_DONE
+    }
+
+    public interface OnLoadingListener {
+        void onLoadingChanged(Returnable<?> callback, LoadState loadState);
+    }
+
+    private WeakReference<OnLoadingListener> onLoadingListenerRef;
+
 
     public FireDatabaseTransactions() {
         this.fireDatabaseHelper = new FireDatabaseHelper();
+    }
+
+    /**
+     * Listen to loading states
+     * @param onLoadingListener
+     */
+    public void setOnLoadingListener(OnLoadingListener onLoadingListener) {
+        this.onLoadingListenerRef = new WeakReference<>(onLoadingListener);
+    }
+
+    /**
+     * Update loading states
+     * @param loadState
+     */
+    private void updateLoadingState(Returnable<?> callback, LoadState loadState) {
+        if(onLoadingListenerRef != null) {
+            OnLoadingListener onLoadingListener = onLoadingListenerRef.get();
+            if (onLoadingListener != null) {
+                onLoadingListener.onLoadingChanged(callback, loadState);
+            }
+        }
     }
 
     /**
@@ -101,7 +134,8 @@ public class FireDatabaseTransactions {
     /**
      * Retrieves a list of hub game ids
      **/
-    public void observeHubGames(ReturnableChange<String> callback) {
+    public void observeHubGames(final ReturnableChange<String> callback) {
+        updateLoadingState(callback, LoadState.LOADING_STARTED);
         fireDatabaseHelper.observeChild(
                 String.class,
                 new String[]{"hub"},
@@ -109,6 +143,7 @@ public class FireDatabaseTransactions {
                 new Returnable<DatabaseError>() {
                     @Override
                     public void onResult(DatabaseError data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
                         Log.e(TAG, "Error retrieving hub data", data.toException());
                     }
                 });
@@ -120,14 +155,22 @@ public class FireDatabaseTransactions {
      * @param gameId
      * @param callback
      */
-    public void getGameData(String gameId, Returnable<GameData> callback) {
+    public void getGameData(String gameId, final Returnable<GameData> callback) {
+        updateLoadingState(callback, LoadState.LOADING_STARTED);
         fireDatabaseHelper.getRecord(
                 GameData.class,
                 new String[]{"games", gameId},
-                callback,
+                new Returnable<GameData>() {
+                    @Override
+                    public void onResult(GameData data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
+                        callback.onResult(data);
+                    }
+                },
                 new Returnable<DatabaseError>() {
                     @Override
                     public void onResult(DatabaseError error) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
                         if (error != null) {
                             Log.e(TAG, "Error retrieving game data", error.toException());
 
@@ -195,21 +238,54 @@ public class FireDatabaseTransactions {
     }
 
     public void observeSchedule(String[] locationArray,
-                                ReturnableChange<ScheduledInstructionData> onReturnChange) {
+                                final ReturnableChange<ScheduledInstructionData> callback) {
+        updateLoadingState(callback, LoadState.LOADING_STARTED);
         fireDatabaseHelper.observeChild(
                 ScheduledInstructionData.class,
                 locationArray,
-                onReturnChange,
+                new ReturnableChange<ScheduledInstructionData>() {
+                    @Override
+                    public void onChildAdded(ScheduledInstructionData data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
+                        callback.onChildAdded(data);
+                    }
+
+                    @Override
+                    public void onChildChanged(ScheduledInstructionData data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
+                        callback.onChildChanged(data);
+                    }
+
+                    @Override
+                    public void onChildRemoved(ScheduledInstructionData data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
+                        callback.onChildAdded(data);
+                    }
+
+                    @Override
+                    public void onChildMoved(ScheduledInstructionData data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
+                        callback.onChildMoved(data);
+                    }
+
+                    @Override
+                    public void onResult(ScheduledInstructionData data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
+                        callback.onResult(data);
+                    }
+                },
                 new Returnable<DatabaseError>() {
                     @Override
                     public void onResult(DatabaseError data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
                         Log.e(TAG, "Can't observe schedule", data.toException());
                     }
                 }
         );
     }
 
-    public void getPlayersInGame(String gameId, Returnable<List<PlayerData>> onReturn) {
+    public void getPlayersInGame(String gameId, final Returnable<List<PlayerData>> callback) {
+        updateLoadingState(callback, LoadState.LOADING_STARTED);
         fireDatabaseHelper.getRecordsList(
                 PlayerData.class,
                 new String[]{
@@ -217,10 +293,17 @@ public class FireDatabaseTransactions {
                         gameId,
                         "players"
                 },
-                onReturn,
+                new Returnable<List<PlayerData>>() {
+                    @Override
+                    public void onResult(List<PlayerData> data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
+                        callback.onResult(data);
+                    }
+                },
                 new Returnable<DatabaseError>() {
                     @Override
                     public void onResult(DatabaseError data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
                         Log.e(TAG, "Can't retrieve player list", data.toException());
                     }
                 }
@@ -335,7 +418,8 @@ public class FireDatabaseTransactions {
         );
     }
 
-    public void verifyRole(final String role, final String userId, final Returnable<Boolean> returnable) {
+    public void verifyRole(final String role, final String userId, final Returnable<Boolean> callback) {
+        updateLoadingState(callback, LoadState.LOADING_STARTED);
         fireDatabaseHelper.getRecord(
                 Boolean.class,
                 new String[]{
@@ -343,10 +427,17 @@ public class FireDatabaseTransactions {
                         userId,
                         role
                 },
-                returnable,
+                new Returnable<Boolean>() {
+                    @Override
+                    public void onResult(Boolean data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
+                        callback.onResult(data);
+                    }
+                },
                 new Returnable<DatabaseError>() {
                     @Override
                     public void onResult(DatabaseError data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
                         Log.e(TAG, "Can't fetch security role", data.toException());
                     }
                 });

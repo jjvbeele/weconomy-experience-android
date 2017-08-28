@@ -46,7 +46,7 @@ import butterknife.OnClick;
  * Created by mint on 1-8-17.
  */
 
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends AppCompatActivity implements FireDatabaseTransactions.OnLoadingListener {
 
     private static final String TAG = GameActivity.class.getName();
 
@@ -64,6 +64,9 @@ public class GameActivity extends AppCompatActivity {
 
     @BindView(R.id.goal_view)
     protected TextView goalView;
+
+    @BindView(R.id.loading_view)
+    protected View loadingView;
 
     private GameData gameData;
 
@@ -128,6 +131,8 @@ public class GameActivity extends AppCompatActivity {
         fireDatabaseTransactions = new FireDatabaseTransactions();
         fireAuthHelper = new FireAuthHelper(this);
         fireAuthHelper.withUser(this, fireAuthCallback);
+
+        fireDatabaseTransactions.setOnLoadingListener(this);
 
         updateGoalCount();
     }
@@ -263,6 +268,10 @@ public class GameActivity extends AppCompatActivity {
                 },
                 new ReturnableChange<ScheduledInstructionData>() {
                     @Override
+                    public void onResult(ScheduledInstructionData data) {
+                    }
+
+                    @Override
                     public void onChildAdded(final ScheduledInstructionData data) {
                         addScheduledInstruction(data);
                     }
@@ -279,7 +288,6 @@ public class GameActivity extends AppCompatActivity {
 
                     @Override
                     public void onChildMoved(ScheduledInstructionData data) {
-
                     }
                 }
         );
@@ -536,5 +544,15 @@ public class GameActivity extends AppCompatActivity {
     @OnClick(R.id.toolbar_close)
     protected void onClickToolbarClose() {
         finish();
+    }
+
+    @Override
+    public void onLoadingChanged(Returnable<?> callback, FireDatabaseTransactions.LoadState loadState) {
+        if (loadState == FireDatabaseTransactions.LoadState.LOADING_STARTED) {
+            loadingView.setVisibility(View.VISIBLE);
+
+        } else {
+            loadingView.setVisibility(View.GONE);
+        }
     }
 }

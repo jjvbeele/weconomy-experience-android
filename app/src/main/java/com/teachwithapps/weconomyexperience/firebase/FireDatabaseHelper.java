@@ -11,6 +11,7 @@ import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
 import com.teachwithapps.weconomyexperience.firebase.util.ReturnableChange;
 import com.teachwithapps.weconomyexperience.util.Log;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
