@@ -24,9 +24,9 @@
         android:id="@+id/top_cell"
         android:layout_width="0dp"
         android:layout_height="60dp"
-        android:padding="4dp"
         android:background="@color/scheduled_instruction_highlight"
         android:gravity="center"
+        android:padding="4dp"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -35,8 +35,8 @@
         <ImageView
             android:id="@+id/input_image"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:adjustViewBounds="true"
             android:scaleType="centerInside"
             android:src="@drawable/ic_package" />
@@ -44,9 +44,9 @@
         <ImageView
             android:id="@+id/arrow"
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_margin="10dp"
             android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
             android:adjustViewBounds="true"
             android:scaleType="centerInside"
             android:src="@drawable/ic_arrow_forward" />
@@ -54,8 +54,8 @@
         <ImageView
             android:id="@+id/output_image"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:adjustViewBounds="true"
             android:scaleType="centerInside"
             android:src="@drawable/ic_package" />
@@ -87,16 +87,24 @@
 
     </LinearLayout>
 
+    <View
+        android:id="@+id/labour_divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/scheduled_instruction_highlight"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/labour_grid" />
+
     <LinearLayout
         android:id="@+id/input_output_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:baselineAligned="false"
         android:orientation="horizontal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/labour_grid">
+        app:layout_constraintTop_toBottomOf="@+id/labour_divider">
 
         <LinearLayout
             android:id="@+id/input_col"
@@ -104,6 +112,11 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/scheduled_instruction_highlight" />
 
         <LinearLayout
             android:id="@+id/output_col"
