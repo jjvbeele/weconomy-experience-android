@@ -1,6 +1,5 @@
 package com.teachwithapps.weconomyexperience;
 
-import android.os.Parcelable;
 import android.support.annotation.DrawableRes;
 
 /**
@@ -28,6 +27,10 @@ public class Constants {
                     return R.drawable.ic_flour;
                 case "bread":
                     return R.drawable.ic_bread;
+                case "party":
+                    return R.drawable.ic_party;
+                case "construct":
+                    return R.drawable.ic_construct;
                 default:
                     return R.drawable.ic_package;
             }
