@@ -35,7 +35,9 @@ import com.teachwithapps.weconomyexperience.view.util.MultiRecyclerView;
 import org.parceler.Parcels;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -236,13 +238,16 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     /**
      * Add an instruction to the schedule
      *
-     * @param day                      day visible on the screen to add the instruction to
+     * @param column                      day visible on the screen to add the instruction to
      * @param scheduledInstructionData instruction to be added
      */
-    private void addInstructionToSchedule(int day, ScheduledInstructionData scheduledInstructionData) {
-        List<ScheduledInstructionData> instructionDataList = scheduledInstructionDataMap.get(day);
+    private void addInstructionToSchedule(int column, ScheduledInstructionData scheduledInstructionData) {
+        List<ScheduledInstructionData> instructionDataList = scheduledInstructionDataMap.get(column);
         instructionDataList.add(0, scheduledInstructionData);
-        scheduleRecyclerView.dataMapContentInserted(day, 0);
+
+        checkLabour(column, scheduledInstructionData);
+
+        scheduleRecyclerView.dataMapContentInserted(column, 0);
     }
 
     private void addInstructionToLibrary(InstructionData instructionData) {
@@ -306,8 +311,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
                     @Override
                     public void onResult(InstructionData instructionData) {
                         data.bindInstructionData(instructionData);
-                        int day = data.getDay() - 1;
-                        addInstructionToSchedule(day, data);
+                        int column = data.getDay() - 1;
+                        addInstructionToSchedule(column, data);
                     }
                 });
     }
@@ -502,6 +507,23 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
                     }
                 }
         );
+    }
+
+    private void checkLabour(int column, ScheduledInstructionData scheduledInstructionToCheck) {
+        List<ScheduledInstructionData> scheduledInstructionDataList = scheduledInstructionDataMap.get(column);
+        for (ScheduledInstructionData scheduledInstructionData : scheduledInstructionDataList) {
+            List<String> labourList = scheduledInstructionData.getLabourList();
+
+            Map<String, String> labourMapToCheck = scheduledInstructionToCheck.getLabourMap();
+            Map<String, String> labourMapSnapshotToCheck = new HashMap<>();
+            for (String key : labourMapSnapshotToCheck.keySet()) {
+                String playerId = labourMapToCheck.get(key);
+                Log.d(TAG, "Checking day " + column + ", " + playerId + ", in labourlist? " + labourList.contains(playerId));
+                if (labourList.contains(playerId)) {
+                    labourMapToCheck.remove(key);
+                }
+            }
+        }
     }
 
     private void updateGoalCount() {
