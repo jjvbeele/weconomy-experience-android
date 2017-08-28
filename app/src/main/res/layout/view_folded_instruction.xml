@@ -11,7 +11,7 @@
         android:id="@+id/top_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/scheduled_instruction_higlight"
+        android:background="@color/scheduled_instruction_highlight"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -48,7 +48,7 @@
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:adjustViewBounds="true"
-        android:background="@color/scheduled_instruction_higlight"
+        android:background="@color/scheduled_instruction_highlight"
         android:padding="4dp"
         android:scaleType="centerInside"
         android:src="@drawable/ic_chef"

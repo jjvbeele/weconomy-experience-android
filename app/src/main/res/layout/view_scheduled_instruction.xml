@@ -20,17 +20,47 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
+    <LinearLayout
         android:id="@+id/top_cell"
         android:layout_width="0dp"
         android:layout_height="60dp"
-        android:adjustViewBounds="true"
-        android:background="@color/scheduled_instruction_higlight"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_chef"
+        android:padding="4dp"
+        android:background="@color/scheduled_instruction_highlight"
+        android:gravity="center"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
+        app:layout_constraintTop_toBottomOf="@+id/title">
+
+        <ImageView
+            android:id="@+id/input_image"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_package" />
+
+        <ImageView
+            android:id="@+id/arrow"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_margin="10dp"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_arrow_forward" />
+
+        <ImageView
+            android:id="@+id/output_image"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_package" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/labour_grid"

@@ -72,7 +72,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     private GameData gameData;
 
-    private int maxVisibleColumn = 4;
+    private int maxVisibleColumn = 3;
     private int minVisibleColumn = 0;
     private int daysCount = maxVisibleColumn - minVisibleColumn + 1;
 

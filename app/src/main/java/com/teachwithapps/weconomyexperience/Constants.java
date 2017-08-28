@@ -32,7 +32,7 @@ public class Constants {
                     return R.drawable.ic_package;
             }
         } else {
-            return R.drawable.ic_package;
+            return R.drawable.ic_empty;
         }
     }
 

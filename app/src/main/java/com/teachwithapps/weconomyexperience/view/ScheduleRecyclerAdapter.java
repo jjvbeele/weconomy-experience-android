@@ -75,6 +75,12 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
         @BindView(R.id.output_col)
         protected LinearLayout outputCol;
 
+        @BindView(R.id.input_image)
+        protected ImageView inputImageView;
+
+        @BindView(R.id.output_image)
+        protected ImageView outputImageView;
+
         private ScheduledInstructionData scheduledInstructionData;
 
         private List<ImageView> claimViewList;
@@ -109,6 +115,10 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
             labourViewList = new ArrayList<>();
             claimViewList = new ArrayList<>();
 
+            inputImageView.setImageResource(Constants.getProductIcon(instructionData.getInputType()));
+            outputImageView.setImageResource(Constants.getProductIcon(instructionData.getOutputType()));
+
+            //set labour icons
             for (int i = 0; i < instructionData.getLabour(); i++) {
                 if (i % 2 == 0) {
                     addInfoImage(inflater, labourCol1, Constants.getLabourIcon(), PROPERTY_LABOUR, i);
@@ -116,10 +126,13 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
                     addInfoImage(inflater, labourCol2, Constants.getLabourIcon(), PROPERTY_LABOUR, i);
                 }
             }
+
+            //set input icons
             for (int i = 0; i < instructionData.getInput(); i++) {
                 addInfoImage(inflater, inputCol, Constants.getProductIcon(instructionData.getInputType()), PROPERTY_INPUT, i);
             }
 
+            //set output icons
             for (int i = 0; i < instructionData.getOutput(); i++) {
                 addInfoImage(inflater, outputCol, Constants.getProductIcon(instructionData.getOutputType()), PROPERTY_CLAIM, i);
             }
