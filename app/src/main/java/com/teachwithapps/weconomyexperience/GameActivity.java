@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -71,7 +72,9 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     private GameData gameData;
 
-    private int numberOfVisibleDays = 4;
+    private int maxVisibleColumn = 4;
+    private int minVisibleColumn = 0;
+    private int daysCount = maxVisibleColumn - minVisibleColumn + 1;
 
     private List<List<ScheduledInstructionData>> scheduledInstructionDataMap;
 
@@ -105,12 +108,12 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         //initialize instructiondatamap, this will hold the instructions for the visible schedule
         scheduledInstructionDataMap = new ArrayList<>();
 
-        for (int i = 0; i < numberOfVisibleDays; i++) {
+        for (int i = 0; i < daysCount; i++) {
             scheduledInstructionDataMap.add(i, new ArrayList<ScheduledInstructionData>());
         }
 
         //fill the schedule for the number of visible days
-        for (int i = 1; i <= numberOfVisibleDays; i++) {
+        for (int i = 1; i <= daysCount; i++) {
             addDayToSchedule(i); //we start at day 1
         }
 
@@ -183,7 +186,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
         if (requestCode == Constants.REQUEST_CODE_SELECT_INSTRUCTION) {
             if (resultCode == Constants.RESULT_CODE_OK) {
-                int instructionIndexInView = data.getIntExtra(Constants.KEY_INSTRUCTION_INDEX_IN_SCHEDULE, -1);
+                int instructionIndexInView = data.getIntExtra(Constants.KEY_INSTRUCTION_DAY, -1);
                 InstructionData instructionData = Parcels.unwrap(data.getParcelableExtra(Constants.KEY_INSTRUCTION_PARCEL));
 
                 if (instructionIndexInView > 0 && instructionData != null) {
@@ -203,16 +206,16 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     /**
      * Add a day to the schedule visible on the screen
      *
-     * @param indexInView index of the visible screen
+     * @param day index of the visible screen
      */
-    private void addDayToSchedule(final int indexInView) {
+    private void addDayToSchedule(final int day) {
         View dayCell = LayoutInflater.from(this).inflate(R.layout.view_schedule_day, daysRowLayout, false);
 
-        ((TextView) dayCell.findViewById(R.id.day_text)).setText(getString(R.string.day_text, indexInView));
+        ((TextView) dayCell.findViewById(R.id.day_text)).setText(getString(R.string.day_text, day));
         dayCell.findViewById(R.id.add_instruction_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showSelectInstructionScreen(indexInView);
+                showSelectInstructionScreen(day);
             }
         });
 
@@ -230,7 +233,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     private void showSelectInstructionScreen(int indexInView) {
         Intent intent = new Intent(GameActivity.this, SelectInstructionActivity.class);
-        intent.putExtra(Constants.KEY_INSTRUCTION_INDEX_IN_SCHEDULE, indexInView);
+        intent.putExtra(Constants.KEY_INSTRUCTION_DAY, indexInView);
         intent.putExtra(Constants.KEY_INSTRUCTION_LIBRARY_KEY, gameData.getInstructionLibraryKey());
         startActivityForResult(intent, Constants.REQUEST_CODE_SELECT_INSTRUCTION);
     }
@@ -238,10 +241,13 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     /**
      * Add an instruction to the schedule
      *
-     * @param column                      day visible on the screen to add the instruction to
+     * @param column                   day visible on the screen to add the instruction to
      * @param scheduledInstructionData instruction to be added
      */
     private void addInstructionToSchedule(int column, ScheduledInstructionData scheduledInstructionData) {
+        if (column < minVisibleColumn || column > maxVisibleColumn) {
+            return;
+        }
         List<ScheduledInstructionData> instructionDataList = scheduledInstructionDataMap.get(column);
         instructionDataList.add(0, scheduledInstructionData);
 
@@ -320,6 +326,9 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     private void updateScheduledInstruction(final ScheduledInstructionData data) {
         //get instructiondata by key and add to the scheduledInstruction datamap
         int column = data.getDay() - 1;
+        if (column < minVisibleColumn || column > maxVisibleColumn) {
+            return;
+        }
         final List<ScheduledInstructionData> scheduledInstructionDataList = scheduledInstructionDataMap.get(column);
 
         for (int i = 0; i < scheduledInstructionDataList.size(); i++) {
@@ -335,6 +344,9 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     private void removeScheduledInstruction(final ScheduledInstructionData data) {
         //- 1 because days start at 1, arrays start at 0
         int column = data.getDay() - 1;
+        if (column < minVisibleColumn || column > maxVisibleColumn) {
+            return;
+        }
         List<ScheduledInstructionData> scheduledInstructionList =
                 scheduledInstructionDataMap.get(column);
 
@@ -352,15 +364,28 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     }
 
     public void longClickScheduledInstruction(final ScheduledInstructionData data) {
+        showEditScheduledInstructionScreen(data);
+    }
+
+    private void showEditScheduledInstructionScreen(final ScheduledInstructionData data) {
         final View scheduledInstructionEditDialog = LayoutInflater.from(this).inflate(R.layout.edit_scheduled_instruction_dialog, null);
         Spinner daySpinner = ((Spinner) scheduledInstructionEditDialog.findViewById(R.id.day_spinner));
+
+        final String[] daysArray = new String[daysCount];
+        for (int i = 0; i < daysCount; i++) {
+            daysArray[i] = String.valueOf(i + 1);
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, daysArray);
+        daySpinner.setAdapter(adapter);
+
         daySpinner.setSelection(data.getDay() - 1);
         daySpinner.setOnItemSelectedListener(
                 new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        String[] dayArray = getResources().getStringArray(R.array.available_days_array);
-                        int selectedDay = Integer.valueOf(dayArray[position]);
+                        int selectedDay = Integer.valueOf(daysArray[position]);
                         data.setDay(selectedDay);
                     }
 
@@ -508,13 +533,17 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     /**
      * Removes players from the scheduledinstructiondata if they already are assigned to a labour elsewhere
+     *
      * @param column
      * @param scheduledInstructionToCheck
      */
     private void checkLabour(int column, ScheduledInstructionData scheduledInstructionToCheck) {
+        if (column < minVisibleColumn || column > maxVisibleColumn) {
+            return;
+        }
         List<ScheduledInstructionData> scheduledInstructionDataList = scheduledInstructionDataMap.get(column);
         for (ScheduledInstructionData scheduledInstructionData : scheduledInstructionDataList) {
-            if(scheduledInstructionData == scheduledInstructionToCheck) {
+            if (scheduledInstructionData == scheduledInstructionToCheck) {
                 continue;
             }
 

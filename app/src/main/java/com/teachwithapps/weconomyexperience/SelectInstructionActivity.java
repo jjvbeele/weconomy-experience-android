@@ -91,7 +91,7 @@ public class SelectInstructionActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         instructionLibraryKey = getIntent().getStringExtra(Constants.KEY_INSTRUCTION_LIBRARY_KEY);
-        instructionIndexInSchedule = getIntent().getIntExtra(Constants.KEY_INSTRUCTION_INDEX_IN_SCHEDULE, -1);
+        instructionIndexInSchedule = getIntent().getIntExtra(Constants.KEY_INSTRUCTION_DAY, -1);
 
         if (instructionIndexInSchedule < 0) {
             finish();
@@ -107,7 +107,7 @@ public class SelectInstructionActivity extends AppCompatActivity {
         Parcelable instructionParcelable = Parcels.wrap(instructionData);
 
         Intent instructionIntent = new Intent();
-        instructionIntent.putExtra(Constants.KEY_INSTRUCTION_INDEX_IN_SCHEDULE, instructionIndexInSchedule);
+        instructionIntent.putExtra(Constants.KEY_INSTRUCTION_DAY, instructionIndexInSchedule);
         instructionIntent.putExtra(Constants.KEY_INSTRUCTION_PARCEL, instructionParcelable);
         setResult(Constants.RESULT_CODE_OK, instructionIntent);
         finish();
