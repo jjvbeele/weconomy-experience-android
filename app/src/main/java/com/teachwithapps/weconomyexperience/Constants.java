@@ -20,8 +20,10 @@ public class Constants {
     public static final String DEFAULT_SHARED_PREFERENCES = "default_shared_preferences";
     public static final String PREF_ADMIN = "pref_admin";
 
-    public static @DrawableRes int getProductIcon(String inputType) {
-        if(inputType != null) {
+    public static
+    @DrawableRes
+    int getProductIcon(String inputType) {
+        if (inputType != null) {
             switch (inputType) {
                 case "flour":
                     return R.drawable.ic_flour;
@@ -29,8 +31,16 @@ public class Constants {
                     return R.drawable.ic_bread;
                 case "party":
                     return R.drawable.ic_party;
-                case "construct":
-                    return R.drawable.ic_construct;
+                case "recreation_park":
+                    return R.drawable.ic_recreation_park;
+                case "laboratory":
+                    return R.drawable.ic_laboratory;
+                case "university":
+                    return R.drawable.ic_university;
+                case "hot_air_balloon":
+                    return R.drawable.ic_hot_air_balloon;
+                case "tools":
+                    return R.drawable.ic_tools;
                 default:
                     return R.drawable.ic_package;
             }
@@ -39,7 +49,9 @@ public class Constants {
         }
     }
 
-    public static @DrawableRes int getLabourIcon() {
+    public static
+    @DrawableRes
+    int getLabourIcon() {
         return R.drawable.ic_shovel;
     }
 }

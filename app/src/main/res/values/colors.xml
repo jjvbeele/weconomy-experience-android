@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#b58551</color>
     <color name="colorPrimaryDark">#785735</color>
-    <color name="colorAccent">#c6ff70</color>
+    <color name="colorAccent">#ffbb3b</color>
     <color name="dark_gray">#787169</color>
     <color name="white_blue">#f2e7da</color>
     <color name="scheduled_instruction">#d6b99a</color>
@@ -11,4 +11,6 @@
     <color name="dark_overlay">#a0000000</color>
     <color name="white">#ffffff</color>
     <color name="dark_loading">#88000000</color>
+    <color name="transparent">#00ffffff</color>
+    <color name="textDark">#000000</color>
 </resources>

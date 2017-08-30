@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
@@ -23,6 +24,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by mint on 7-8-17.
@@ -32,11 +34,11 @@ public class SelectInstructionActivity extends AppCompatActivity {
 
     private static final String TAG = SelectInstructionActivity.class.getName();
 
-    @BindView(R.id.select_instruction_button)
-    protected View selectInstructionButton;
-
     @BindView(R.id.instruction_recycler)
     protected RecyclerView instructionRecycler;
+
+    @BindView(R.id.toolbar_title)
+    protected TextView toolbarTitle;
 
     private int instructionIndexInSchedule;
     private String instructionLibraryKey;
@@ -90,6 +92,8 @@ public class SelectInstructionActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        toolbarTitle.setText(getString(R.string.select_instruction));
+
         instructionLibraryKey = getIntent().getStringExtra(Constants.KEY_INSTRUCTION_LIBRARY_KEY);
         instructionIndexInSchedule = getIntent().getIntExtra(Constants.KEY_INSTRUCTION_DAY, -1);
 
@@ -110,6 +114,11 @@ public class SelectInstructionActivity extends AppCompatActivity {
         instructionIntent.putExtra(Constants.KEY_INSTRUCTION_DAY, instructionIndexInSchedule);
         instructionIntent.putExtra(Constants.KEY_INSTRUCTION_PARCEL, instructionParcelable);
         setResult(Constants.RESULT_CODE_OK, instructionIntent);
+        finish();
+    }
+
+    @OnClick(R.id.toolbar_close)
+    protected void onClickClose() {
         finish();
     }
 }

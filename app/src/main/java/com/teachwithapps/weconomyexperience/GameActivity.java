@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.constraint.solver.Goal;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +31,7 @@ import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
 import com.teachwithapps.weconomyexperience.util.Log;
 import com.teachwithapps.weconomyexperience.view.AppNavigationDrawer;
+import com.teachwithapps.weconomyexperience.view.GoalListAdapter;
 import com.teachwithapps.weconomyexperience.view.ScheduleRecyclerAdapter;
 import com.teachwithapps.weconomyexperience.view.util.MultiRecyclerView;
 
@@ -694,21 +696,21 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
                             goalTextArray[i] = goalDataList.get(i).getText();
                         }
 
-                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(GameActivity.this);
+                        final GoalListAdapter goalDataAdapter = new GoalListAdapter(GameActivity.this, goalDataList);
+
+                            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(GameActivity.this);
                         dialogBuilder.setTitle(getString(R.string.goal_dialog_title));
-                        dialogBuilder.setItems(
-                                goalTextArray,
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        if (which == 0) {
-                                            showCreateGoalScreen();
-                                            dialog.dismiss();
-                                        } else {
-                                            showEditGoalScreen(goalDataList.get(which));
-                                        }
-                                    }
-                                });
+                        dialogBuilder.setAdapter(goalDataAdapter, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (which == 0) {
+                                    showCreateGoalScreen();
+                                    dialog.dismiss();
+                                } else {
+                                    showEditGoalScreen(goalDataList.get(which));
+                                }
+                            }
+                        });
                         dialogBuilder.show();
                     }
                 }
@@ -755,8 +757,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     @OnClick(R.id.goal_view)
     protected void onClickGoalView() {
-        //Add after first release
-        //showGoalScreen();
+        showGoalScreen();
     }
 
     @OnClick(R.id.toolbar_close)

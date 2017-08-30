@@ -68,9 +68,6 @@ public class FoldedInstructionRecyclerAdapter extends RecyclerView.Adapter<Folde
         @BindView(R.id.output_row)
         protected LinearLayout outputRow;
 
-        @BindView(R.id.select_button)
-        protected View selectButton;
-
         public InstructionViewHolder(View itemView) {
             super(itemView);
 
@@ -81,7 +78,7 @@ public class FoldedInstructionRecyclerAdapter extends RecyclerView.Adapter<Folde
             titleTextView.setText(instructionData.getText());
 
             //relay button click to parent listener
-            selectButton.setOnClickListener(new View.OnClickListener() {
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     onClickListener.onClick(instructionData);

@@ -95,6 +95,9 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
         public void setData(final ScheduledInstructionData scheduledInstructionData) {
             this.scheduledInstructionData = scheduledInstructionData;
             InstructionData instructionData = scheduledInstructionData.getBindedInstructionData();
+            if(instructionData == null) {
+                return;
+            }
             titleTextView.setText(instructionData.getText());
 
             itemView.setOnLongClickListener(new View.OnLongClickListener() {

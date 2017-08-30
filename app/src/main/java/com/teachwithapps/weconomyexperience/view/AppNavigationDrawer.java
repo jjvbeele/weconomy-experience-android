@@ -55,4 +55,11 @@ public class AppNavigationDrawer extends NavigationDrawer {
         i.setData(Uri.parse(activity.getString(R.string.teachwithapps_link)));
         activity.startActivity(i);
     }
+
+    @OnClick(R.id.icons_link)
+    protected void onClickIconsLink() {
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(activity.getString(R.string.icons_link)));
+        activity.startActivity(i);
+    }
 }

@@ -6,7 +6,7 @@
     android:clickable="true"
     android:layout_gravity="center"
     android:layout_weight="1"
-    android:layout_margin="8dp"
+    android:layout_margin="4dp"
     android:adjustViewBounds="true"
     android:scaleType="centerInside"
     android:src="@drawable/ic_shovel" />

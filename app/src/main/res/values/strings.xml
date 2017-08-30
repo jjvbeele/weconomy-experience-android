@@ -10,7 +10,7 @@
     <string name="ok">OK</string>
     <string name="edit_goal_dialog_title">Edit this goal</string>
     <string name="info_text">The weconomy experience is a simulation of the new economy that is emerging at the moment. Click to read more.</string>
-    <string name="about_text">This app is made by Guts4Roses in collaboration with Teachwithapps</string>
+    <string name="about_text">This app is made by Guts4Roses in collaboration with Teachwithapps. Various icons from flaticon.com.</string>
     <string name="guts4roses_link">http://guts4roses.org</string>
     <string name="teachwithapps_link">http://teachwithapps.com</string>
     <string name="how_does_it_work">How does it work?</string>
@@ -21,4 +21,7 @@
     <string name="edit_scheduled_instruction_dialog_title">Edit this instruction</string>
     <string name="labour_select_player">Select a player to assign for labour</string>
     <string name="claim_select_player">Select a player to claim output for</string>
+    <string name="select_instruction">Select Instruction</string>
+    <string name="enter_game_title">Enter this game\'s title</string>
+    <string name="icons_link">https://flaticon.com</string>
 </resources>

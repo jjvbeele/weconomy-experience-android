@@ -5,8 +5,8 @@
     android:layout_height="match_parent"
     android:layout_gravity="left"
     android:background="@color/colorPrimaryDark"
-    android:fitsSystemWindows="true"
     android:clickable="true"
+    android:fitsSystemWindows="true"
     android:paddingTop="20dp">
 
     <TextView
@@ -67,9 +67,9 @@
         android:gravity="center_vertical"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
+        android:paddingTop="20dp"
         android:text="@string/guts4roses_link"
         android:textColor="@color/colorAccent"
-        android:paddingTop="20dp"
         android:textSize="12sp" />
 
     <TextView
@@ -80,21 +80,34 @@
         android:gravity="center_vertical"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
+        android:paddingTop="20dp"
         android:text="@string/teachwithapps_link"
         android:textColor="@color/colorAccent"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/icons_link"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/teachwithapps_link"
+        android:gravity="center_vertical"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         android:paddingTop="20dp"
+        android:text="@string/icons_link"
+        android:textColor="@color/colorAccent"
         android:textSize="12sp" />
 
     <TextView
         android:id="@+id/version"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:layout_alignParentBottom="true"
         android:gravity="center_vertical"
-        android:paddingBottom="20dp"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
-        android:paddingTop="20dp"
         android:text="@string/app_version_info"
         android:textColor="@color/white_blue"
         android:textSize="10sp" />

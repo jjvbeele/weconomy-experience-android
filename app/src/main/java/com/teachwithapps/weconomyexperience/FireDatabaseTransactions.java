@@ -261,50 +261,50 @@ public class FireDatabaseTransactions {
                 new ReturnableChange<ScheduledInstructionData>() {
                     @Override
                     public void onChildAdded(ScheduledInstructionData data) {
-                        updateLoadingState(callback, LoadState.LOADING_DONE);
                         bindInstructionToScheduledInstruction(instructionLibraryKey, data, new Returnable<ScheduledInstructionData>() {
                             @Override
                             public void onResult(ScheduledInstructionData data) {
                                 callback.onChildAdded(data);
+                                updateLoadingState(callback, LoadState.LOADING_DONE);
                             }
                         });
                     }
 
                     @Override
                     public void onChildChanged(ScheduledInstructionData data) {
-                        updateLoadingState(callback, LoadState.LOADING_DONE);
                         bindInstructionToScheduledInstruction(instructionLibraryKey, data, new Returnable<ScheduledInstructionData>() {
                             @Override
                             public void onResult(ScheduledInstructionData data) {
                                 callback.onChildChanged(data);
+                                updateLoadingState(callback, LoadState.LOADING_DONE);
                             }
                         });
                     }
 
                     @Override
                     public void onChildRemoved(ScheduledInstructionData data) {
-                        updateLoadingState(callback, LoadState.LOADING_DONE);
                         callback.onChildRemoved(data);
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
                     }
 
                     @Override
                     public void onChildMoved(ScheduledInstructionData data) {
-                        updateLoadingState(callback, LoadState.LOADING_DONE);
                         bindInstructionToScheduledInstruction(instructionLibraryKey, data, new Returnable<ScheduledInstructionData>() {
                             @Override
                             public void onResult(ScheduledInstructionData data) {
                                 callback.onChildMoved(data);
+                                updateLoadingState(callback, LoadState.LOADING_DONE);
                             }
                         });
                     }
 
                     @Override
                     public void onResult(ScheduledInstructionData data) {
-                        updateLoadingState(callback, LoadState.LOADING_DONE);
                         bindInstructionToScheduledInstruction(instructionLibraryKey, data, new Returnable<ScheduledInstructionData>() {
                             @Override
                             public void onResult(ScheduledInstructionData data) {
                                 callback.onResult(data);
+                                updateLoadingState(callback, LoadState.LOADING_DONE);
                             }
                         });
                     }
@@ -312,8 +312,8 @@ public class FireDatabaseTransactions {
                 new Returnable<DatabaseError>() {
                     @Override
                     public void onResult(DatabaseError data) {
-                        updateLoadingState(callback, LoadState.LOADING_DONE);
                         Log.e(TAG, "Can't observe schedule", data.toException());
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
                     }
                 }
         );
