@@ -284,20 +284,46 @@ public class FireDatabaseTransactions {
         );
     }
 
-    public void getPlayersInGame(String gameId, final Returnable<List<PlayerData>> callback) {
+    public void getPlayersInGame(String gameId, final ReturnableChange<PlayerData> callback) {
         updateLoadingState(callback, LoadState.LOADING_STARTED);
-        fireDatabaseHelper.getRecordsList(
+        fireDatabaseHelper.observeChild(
                 PlayerData.class,
                 new String[]{
                         "games",
                         gameId,
                         "players"
                 },
-                new Returnable<List<PlayerData>>() {
+                new ReturnableChange<PlayerData>() {
                     @Override
-                    public void onResult(List<PlayerData> data) {
+                    public void onChildAdded(PlayerData data) {
                         updateLoadingState(callback, LoadState.LOADING_DONE);
-                        callback.onResult(data);
+                        callback.onChildAdded(data);
+                    }
+
+                    @Override
+                    public void onChildChanged(PlayerData data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
+                        callback.onChildChanged(data);
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(PlayerData data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
+                        callback.onChildRemoved(data);
+
+                    }
+
+                    @Override
+                    public void onChildMoved(PlayerData data) {
+                        updateLoadingState(callback, LoadState.LOADING_DONE);
+                        callback.onChildMoved(data);
+
+                    }
+
+                    @Override
+                    public void onResult(PlayerData data) {
+
                     }
                 },
                 new Returnable<DatabaseError>() {
@@ -418,6 +444,24 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Reschedules an instruction on the schedule from one day to another.
+     * The instruction is always inserted at the top, but the order is not maintained in the firebase
+     * Consecutive calls may put the instruction in a different order
+     * @param gameId
+     * @param scheduledInstructionData
+     */
+    public void rescheduleScheduledInstruction(String gameId, ScheduledInstructionData scheduledInstructionData) {
+        removeScheduledInstruction(gameId, scheduledInstructionData);
+        updateScheduledInstruction(gameId, scheduledInstructionData);
+    }
+
+    /**
+     * Returns true or false wether or not the player is registered as an administrator
+     * @param role
+     * @param userId
+     * @param callback
+     */
     public void verifyRole(final String role, final String userId, final Returnable<Boolean> callback) {
         updateLoadingState(callback, LoadState.LOADING_STARTED);
         fireDatabaseHelper.getRecord(
@@ -441,10 +485,5 @@ public class FireDatabaseTransactions {
                         Log.e(TAG, "Can't fetch security role", data.toException());
                     }
                 });
-    }
-
-    public void rescheduleScheduledInstruction(String gameId, ScheduledInstructionData scheduledInstructionData) {
-        removeScheduledInstruction(gameId, scheduledInstructionData);
-        updateScheduledInstruction(gameId, scheduledInstructionData);
     }
 }

@@ -158,25 +158,20 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
         /**
          * Handle iconlist, assign player avatars on the icons in the respective player map
          * Needs to be a map (instead of a list) to retain order
-         * @param playerIdMap
-         * @param iconList
+         * @param playerIdMap a map where playerId is connected to an index from the labour or claim array
+         * @param iconList list of icons where the indices are respective to the index array in the playerIdMap
          */
         private void handlePlayerDataFromIds(final Map<String, String> playerIdMap, final List<ImageView> iconList) {
             for(int i = 0; i < playerIdMap.keySet().size(); i++) {
                 final int index = i;
                 final String keyString = (String)playerIdMap.keySet().toArray()[index];
                 String playerId = playerIdMap.get(keyString);
-                ((GameActivity) itemView.getContext()).getPlayerById(
-                        playerId,
-                        new Returnable<PlayerData>() {
-                            @Override
-                            public void onResult(PlayerData data) {
-                                Picasso.with(itemView.getContext())
-                                        .load(data.getPhotoUrl())
-                                        .into(iconList.get(Integer.parseInt(keyString)));
-                            }
-                        }
-                );
+                PlayerData playerData = ((GameActivity) itemView.getContext()).getPlayerById(playerId);
+                if(playerData != null) {
+                    Picasso.with(itemView.getContext())
+                            .load(playerData.getPhotoUrl())
+                            .into(iconList.get(Integer.parseInt(keyString)));
+                }
             }
         }
 

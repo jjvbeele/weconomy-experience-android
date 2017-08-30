@@ -70,6 +70,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     @BindView(R.id.loading_view)
     protected View loadingView;
 
+    private List<PlayerData> playerDataList;
+
     private GameData gameData;
 
     private int maxVisibleColumn = 3;
@@ -86,6 +88,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         @Override
         public void userReady(FirebaseUser firebaseUser) {
             registerPlayer();
+            observePlayers();
             observeSchedule();
             loadingView.setVisibility(View.GONE);
         }
@@ -101,6 +104,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
         new AppNavigationDrawer(this, drawerLayout);
 
+        playerDataList = new ArrayList<>();
         gameData = getIntentData(getIntent(), savedInstanceState, Constants.KEY_GAME_DATA_PARCEL);
 
         toolbarTitle.setText(gameData.getName());
@@ -204,6 +208,30 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     }
 
     /**
+     * Handle long click on instructions on the schedule
+     * Routing call for the schedule widget
+     * @param data
+     */
+    public void longClickScheduledInstruction(final ScheduledInstructionData data) {
+        showEditScheduledInstructionScreen(data);
+    }
+
+    /**
+     * Retrieves player data from the playerlist
+     * Routing call for schedule widget
+     * @param playerId
+     */
+    public PlayerData getPlayerById(String playerId) {
+        for(PlayerData playerData : playerDataList) {
+            if(playerData.getId().equals(playerId)) {
+                return playerData;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Add a day to the schedule visible on the screen
      *
      * @param day index of the visible screen
@@ -222,6 +250,12 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         daysRowLayout.addView(dayCell);
     }
 
+    /**
+     * Registers an instruction to the schedule, this call will push an instruction to the firebase
+     * When that procedure is successful, addScheduledInstruction is called to add it to the view
+     * @param instructionIndexView
+     * @param instructionData
+     */
     private void registerInstructionToSchedule(int instructionIndexView, InstructionData instructionData) {
         ScheduledInstructionData scheduledInstructionData = new ScheduledInstructionData();
         scheduledInstructionData.setInstructionKey(instructionData.getId());
@@ -229,13 +263,6 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
         //push it to the firebase
         fireDatabaseTransactions.registerInstructionToSchedule(gameData.getId(), scheduledInstructionData);
-    }
-
-    private void showSelectInstructionScreen(int indexInView) {
-        Intent intent = new Intent(GameActivity.this, SelectInstructionActivity.class);
-        intent.putExtra(Constants.KEY_INSTRUCTION_DAY, indexInView);
-        intent.putExtra(Constants.KEY_INSTRUCTION_LIBRARY_KEY, gameData.getInstructionLibraryKey());
-        startActivityForResult(intent, Constants.REQUEST_CODE_SELECT_INSTRUCTION);
     }
 
     /**
@@ -256,10 +283,17 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         scheduleRecyclerView.dataMapContentInserted(column, 0);
     }
 
+    /**
+     * Add an instruction to the instruction library attached to this game
+     * @param instructionData
+     */
     private void addInstructionToLibrary(InstructionData instructionData) {
         fireDatabaseTransactions.addInstructionToLibrary(gameData.getId(), instructionData);
     }
 
+    /**
+     * Register this player (created through the FireAuthHelper class) to the current game, if not already registered
+     */
     private void registerPlayer() {
         FirebaseUser user = fireAuthHelper.getUser();
         Uri photoUrl = user.getPhotoUrl();
@@ -308,6 +342,10 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         );
     }
 
+    /**
+     * Add an instruction to the schedule
+     * @param data
+     */
     private void addScheduledInstruction(final ScheduledInstructionData data) {
         //get instructiondata by key and add to the scheduledInstruction datamap
         fireDatabaseTransactions.getInstructionFromLibrary(
@@ -323,6 +361,10 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
                 });
     }
 
+    /**
+     * Updates a instruction on the schedule
+     * @param data
+     */
     private void updateScheduledInstruction(final ScheduledInstructionData data) {
         //get instructiondata by key and add to the scheduledInstruction datamap
         int column = data.getDay() - 1;
@@ -341,6 +383,10 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         }
     }
 
+    /**
+     * Removes a instruction from the schedule
+     * @param data
+     */
     private void removeScheduledInstruction(final ScheduledInstructionData data) {
         //- 1 because days start at 1, arrays start at 0
         int column = data.getDay() - 1;
@@ -363,10 +409,69 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         }
     }
 
-    public void longClickScheduledInstruction(final ScheduledInstructionData data) {
-        showEditScheduledInstructionScreen(data);
+    /**
+     * Marks a labour with a player
+     * @param scheduledInstructionData
+     * @param index
+     */
+    public void setLabour(final ScheduledInstructionData scheduledInstructionData, final int index) {
+        showPlayerSelectionScreen(
+                getString(R.string.labour_select_player),
+                new Returnable<PlayerData>() {
+                    @Override
+                    public void onResult(PlayerData playerData) {
+                        if (playerData == null) {
+                            scheduledInstructionData.removeLabour(index);
+                        } else {
+                            scheduledInstructionData.setLabour(index, playerData.getId());
+                        }
+
+                        fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionData);
+                    }
+                },
+                scheduledInstructionData.getDay(),
+                true);
     }
 
+    /**
+     * Marks a claim with a player
+     * @param scheduledInstructionData
+     * @param index
+     */
+    public void setClaim(final ScheduledInstructionData scheduledInstructionData, final int index) {
+        showPlayerSelectionScreen(
+                getString(R.string.claim_select_player),
+                new Returnable<PlayerData>() {
+                    @Override
+                    public void onResult(PlayerData playerData) {
+                        if (playerData == null) {
+                            scheduledInstructionData.removeClaim(index);
+                        } else {
+                            scheduledInstructionData.setClaim(index, playerData.getId());
+                        }
+                        fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionData);
+                    }
+                },
+                scheduledInstructionData.getDay(),
+                false);
+    }
+
+    /**
+     * Shows the screen to select an instruction
+     * @param indexInView
+     */
+    private void showSelectInstructionScreen(int indexInView) {
+        Intent intent = new Intent(GameActivity.this, SelectInstructionActivity.class);
+        intent.putExtra(Constants.KEY_INSTRUCTION_DAY, indexInView);
+        intent.putExtra(Constants.KEY_INSTRUCTION_LIBRARY_KEY, gameData.getInstructionLibraryKey());
+        startActivityForResult(intent, Constants.REQUEST_CODE_SELECT_INSTRUCTION);
+    }
+
+    /**
+     * Shows screen for editting a scheduled instruction
+     * The instruction can be removed or moved to another day here
+     * @param data
+     */
     private void showEditScheduledInstructionScreen(final ScheduledInstructionData data) {
         final View scheduledInstructionEditDialog = LayoutInflater.from(this).inflate(R.layout.edit_scheduled_instruction_dialog, null);
         Spinner daySpinner = ((Spinner) scheduledInstructionEditDialog.findViewById(R.id.day_spinner));
@@ -427,105 +532,107 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
                 });
     }
 
-    public void getPlayerById(String playerId, Returnable<PlayerData> callback) {
-        fireDatabaseTransactions.getPlayerById(
-                gameData.getId(),
-                playerId,
-                callback
-        );
-    }
+    /**
+     * Shows a screen with a list of players, optionally sorted depending on context (for labour)
+     * A player can be selected and is returned to the callback
+     * @param title
+     * @param callback
+     * @param day
+     * @param sort
+     */
+    private void showPlayerSelectionScreen(final String title, final Returnable<PlayerData> callback, final int day, final boolean sort) {
 
-    public void setLabour(final ScheduledInstructionData scheduledInstructionData, final int index) {
-        showPlayerSelectionScreen(
-                getString(R.string.labour_select_player),
-                new Returnable<PlayerData>() {
+        final List<PlayerData> sortedPlayerDataList = (sort) ?
+                sortPlayersForLabourSelection(playerDataList, day) :
+                new ArrayList<>(playerDataList);
+
+        //fill the string array for the selection dialog
+        //we add remove player on top
+        final CharSequence[] playerNames = new CharSequence[sortedPlayerDataList.size() + 1];
+        playerNames[0] = "Remove player";
+        for (int i = 0; i < sortedPlayerDataList.size(); i++) {
+            playerNames[i + 1] = sortedPlayerDataList.get(i).getName();
+        }
+
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(GameActivity.this);
+        dialogBuilder.setTitle(title);
+        dialogBuilder.setItems(
+                playerNames,
+                new DialogInterface.OnClickListener() {
                     @Override
-                    public void onResult(PlayerData playerData) {
-                        if (playerData == null) {
-                            scheduledInstructionData.removeLabour(index);
+                    public void onClick(DialogInterface dialog, int which) {
+                        //0 is remove player
+                        if (which == 0) {
+                            callback.onResult(null);
                         } else {
-                            scheduledInstructionData.setLabour(index, playerData.getId());
+                            callback.onResult(sortedPlayerDataList.get(which - 1));
                         }
-
-                        fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionData);
                     }
-                },
-                scheduledInstructionData.getDay(),
-                true);
+                });
+        dialogBuilder.show();
+
     }
 
-    public void setClaim(final ScheduledInstructionData scheduledInstructionData, final int index) {
-        showPlayerSelectionScreen(
-                getString(R.string.claim_select_player),
-                new Returnable<PlayerData>() {
-                    @Override
-                    public void onResult(PlayerData playerData) {
-                        if (playerData == null) {
-                            scheduledInstructionData.removeClaim(index);
-                        } else {
-                            scheduledInstructionData.setClaim(index, playerData.getId());
-                        }
-                        fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionData);
-                    }
-                },
-                scheduledInstructionData.getDay(),
-                false);
+    /**
+     * Removes players in the given list when they are already scheduled on the given day
+     *
+     * @param playerDataList
+     */
+    private List<PlayerData> sortPlayersForLabourSelection(List<PlayerData> playerDataList, int day) {
+        List<PlayerData> sortedPlayerDataList = new ArrayList<>(playerDataList);
+        List<ScheduledInstructionData> scheduledInstructionDataList = scheduledInstructionDataMap.get(day - 1);
+        for (ScheduledInstructionData scheduledInstructionData : scheduledInstructionDataList) {
+            List<String> labourList = scheduledInstructionData.getLabourList();
+
+            List<PlayerData> snapshotPlayerList = new ArrayList<>(sortedPlayerDataList);
+            for (PlayerData playerData : snapshotPlayerList) {
+                String playerId = playerData.getId();
+                if (labourList.contains(playerId)) {
+                    sortedPlayerDataList.remove(playerData);
+                }
+            }
+        }
+        return sortedPlayerDataList;
     }
 
-    private void showPlayerSelectionScreen(final String title, final Returnable<PlayerData> returnable, final int day, final boolean sort) {
+    /**
+     * Observes changes in the player list for this game
+     */
+    private void observePlayers() {
         fireDatabaseTransactions.getPlayersInGame(
                 gameData.getId(),
-                new Returnable<List<PlayerData>>() {
+                new ReturnableChange<PlayerData>() {
                     @Override
-                    public void onResult(final List<PlayerData> playerDataList) {
-
-                        if (sort) {
-                            sortPlayersForLabourSelection(playerDataList);
-                        }
-
-                        //fill the string array for the selection dialog
-                        //we add remove player on top
-                        final CharSequence[] playerNames = new CharSequence[playerDataList.size() + 1];
-                        playerNames[0] = "Remove player";
-                        for (int i = 0; i < playerDataList.size(); i++) {
-                            playerNames[i + 1] = playerDataList.get(i).getName();
-                        }
-
-                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(GameActivity.this);
-                        dialogBuilder.setTitle(title);
-                        dialogBuilder.setItems(
-                                playerNames,
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        //0 is remove player
-                                        if (which == 0) {
-                                            returnable.onResult(null);
-                                        } else {
-                                            returnable.onResult(playerDataList.get(which - 1));
-                                        }
-                                    }
-                                });
-                        dialogBuilder.show();
+                    public void onChildAdded(PlayerData data) {
+                        playerDataList.add(data);
                     }
 
-                    /**
-                     * Removes players in the given list when they are already scheduled on the given day
-                     * @param playerDataList
-                     */
-                    private void sortPlayersForLabourSelection(List<PlayerData> playerDataList) {
-                        List<ScheduledInstructionData> scheduledInstructionDataList = scheduledInstructionDataMap.get(day - 1);
-                        for (ScheduledInstructionData scheduledInstructionData : scheduledInstructionDataList) {
-                            List<String> labourList = scheduledInstructionData.getLabourList();
-
-                            List<PlayerData> snapshotPlayerList = new ArrayList<>(playerDataList);
-                            for (PlayerData playerData : snapshotPlayerList) {
-                                String playerId = playerData.getId();
-                                if (labourList.contains(playerId)) {
-                                    playerDataList.remove(playerData);
-                                }
+                    @Override
+                    public void onChildChanged(PlayerData playerData) {
+                        for(PlayerData needle : playerDataList) {
+                            if(needle.getId().equals(playerData.getId())) {
+                                playerDataList.set(playerDataList.indexOf(needle), playerData);
+                                return;
                             }
                         }
+                    }
+
+                    @Override
+                    public void onChildRemoved(PlayerData playerData) {
+                        for(PlayerData needle : playerDataList) {
+                            if(needle.getId().equals(playerData.getId())) {
+                                playerDataList.remove(playerDataList.indexOf(needle));
+                                return;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildMoved(PlayerData playerData) {
+                    }
+
+                    @Override
+                    public void onResult(final PlayerData playerData) {
                     }
                 }
         );
@@ -563,6 +670,9 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         fireDatabaseTransactions.updateScheduledInstruction(gameData.getId(), scheduledInstructionToCheck);
     }
 
+    /**
+     * Requests the number of goals registered to this game and updates the textview with the result
+     */
     private void updateGoalCount() {
         fireDatabaseTransactions.getGoalCount(
                 gameData.getId(),
@@ -575,6 +685,9 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         );
     }
 
+    /**
+     * Displays the goal screen where players can view, mark and create their goals
+     */
     private void showGoalScreen() {
         fireDatabaseTransactions.getGoalsInGame(
                 gameData.getId(),
@@ -609,6 +722,9 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         );
     }
 
+    /**
+     * Shows the create goal screen where players can create their goals
+     */
     private void showCreateGoalScreen() {
         final View createGoalView = LayoutInflater.from(this).inflate(R.layout.view_create_goal, null);
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(GameActivity.this);
@@ -627,6 +743,10 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         dialog.show();
     }
 
+    /**
+     * Shows the edit goal screen where players can edit their goals
+     * @param goalData
+     */
     private void showEditGoalScreen(GoalData goalData) {
         final View createGoalView = LayoutInflater.from(this).inflate(R.layout.view_edit_goal, null);
 
