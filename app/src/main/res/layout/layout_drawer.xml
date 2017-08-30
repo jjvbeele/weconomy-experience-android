@@ -18,7 +18,7 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:text="@string/how_does_it_work"
-        android:textColor="@color/white_blue"
+        android:textColor="@color/white_gray"
         android:textSize="22sp" />
 
     <TextView
@@ -30,7 +30,7 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:text="@string/info_text"
-        android:textColor="@color/white_blue"
+        android:textColor="@color/white_gray"
         android:textSize="12sp" />
 
     <TextView
@@ -44,7 +44,7 @@
         android:layout_marginTop="20dp"
         android:gravity="center_vertical"
         android:text="@string/about_this_app"
-        android:textColor="@color/white_blue"
+        android:textColor="@color/white_gray"
         android:textSize="22sp" />
 
     <TextView
@@ -56,7 +56,7 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:text="@string/about_text"
-        android:textColor="@color/white_blue"
+        android:textColor="@color/white_gray"
         android:textSize="12sp" />
 
     <TextView
@@ -109,7 +109,7 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:text="@string/app_version_info"
-        android:textColor="@color/white_blue"
+        android:textColor="@color/white_gray"
         android:textSize="10sp" />
 
 </RelativeLayout>

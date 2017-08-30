@@ -24,4 +24,5 @@
     <string name="select_instruction">Select Instruction</string>
     <string name="enter_game_title">Enter this game\'s title</string>
     <string name="icons_link">https://flaticon.com</string>
+    <string name="view_goals">Currently selected goals</string>
 </resources>

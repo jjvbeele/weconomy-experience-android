@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.constraint.solver.Goal;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -25,13 +23,12 @@ import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
 import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
 import com.teachwithapps.weconomyexperience.firebase.util.ReturnableChange;
 import com.teachwithapps.weconomyexperience.model.GameData;
-import com.teachwithapps.weconomyexperience.model.GoalData;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
 import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
+import com.teachwithapps.weconomyexperience.util.IntentUtil;
 import com.teachwithapps.weconomyexperience.util.Log;
 import com.teachwithapps.weconomyexperience.view.AppNavigationDrawer;
-import com.teachwithapps.weconomyexperience.view.GoalListAdapter;
 import com.teachwithapps.weconomyexperience.view.ScheduleRecyclerAdapter;
 import com.teachwithapps.weconomyexperience.view.util.MultiRecyclerView;
 
@@ -107,7 +104,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         new AppNavigationDrawer(this, drawerLayout);
 
         playerDataList = new ArrayList<>();
-        gameData = getIntentData(getIntent(), savedInstanceState, Constants.KEY_GAME_DATA_PARCEL);
+        gameData = IntentUtil.getParcelsIntentData(getIntent(), savedInstanceState, Constants.KEY_GAME_DATA_PARCEL);
 
         toolbarTitle.setText(gameData.getName());
 
@@ -150,34 +147,6 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         fireDatabaseTransactions.setOnLoadingListener(this);
 
         updateGoalCount();
-    }
-
-    /**
-     * Helper method to load intent and savedinstancestate data if available
-     *
-     * @param intent             intent of the activity with parameters passed from the calling parent activity
-     * @param savedInstanceState savedinstancestate bundle to retrieve parameters when activity is recreated
-     * @param key                key of the data
-     * @param <T>                data to return
-     * @return returns data of type T
-     */
-    private <T> T getIntentData(Intent intent, Bundle savedInstanceState, String key) {
-        T data = null;
-
-        //get parcel
-        if (intent.hasExtra(key)) {
-            //get from intent given by calling activity
-            data = Parcels.unwrap(getIntent().getParcelableExtra(key));
-
-        } else if (savedInstanceState != null && savedInstanceState.containsKey(key)) {
-            //get from savedinstancestate saved when activity is recreated by the app
-            data = Parcels.unwrap(savedInstanceState.getParcelable(key));
-
-        } else {
-            Log.d(TAG, "Can't find key " + key + " in intent or savedinstancestate bundle");
-        }
-
-        return data;
     }
 
     @Override
@@ -684,75 +653,9 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
      * Displays the goal screen where players can view, mark and create their goals
      */
     private void showGoalScreen() {
-        fireDatabaseTransactions.getGoalsInGame(
-                gameData.getId(),
-                new Returnable<List<GoalData>>() {
-                    @Override
-                    public void onResult(final List<GoalData> goalDataList) {
-                        Log.d(TAG, "Show goals screen");
-                        goalDataList.add(0, new GoalData("Create new goal"));
-                        final CharSequence[] goalTextArray = new CharSequence[goalDataList.size()];
-                        for (int i = 0; i < goalDataList.size(); i++) {
-                            goalTextArray[i] = goalDataList.get(i).getText();
-                        }
-
-                        final GoalListAdapter goalDataAdapter = new GoalListAdapter(GameActivity.this, goalDataList);
-
-                            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(GameActivity.this);
-                        dialogBuilder.setTitle(getString(R.string.goal_dialog_title));
-                        dialogBuilder.setAdapter(goalDataAdapter, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                if (which == 0) {
-                                    showCreateGoalScreen();
-                                    dialog.dismiss();
-                                } else {
-                                    showEditGoalScreen(goalDataList.get(which));
-                                }
-                            }
-                        });
-                        dialogBuilder.show();
-                    }
-                }
-        );
-    }
-
-    /**
-     * Shows the create goal screen where players can create their goals
-     */
-    private void showCreateGoalScreen() {
-        final View createGoalView = LayoutInflater.from(this).inflate(R.layout.view_create_goal, null);
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(GameActivity.this);
-        dialogBuilder.setTitle(getString(R.string.create_goal_dialog_title));
-        dialogBuilder.setView(createGoalView);
-        dialogBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String goalText = ((EditText) createGoalView.findViewById(R.id.goal_text)).getText().toString();
-                fireDatabaseTransactions.addGoalToGame(gameData.getId(), goalText);
-                updateGoalCount();
-                dialog.dismiss();
-            }
-        });
-        Dialog dialog = dialogBuilder.create();
-        dialog.show();
-    }
-
-    /**
-     * Shows the edit goal screen where players can edit their goals
-     *
-     * @param goalData
-     */
-    private void showEditGoalScreen(GoalData goalData) {
-        final View createGoalView = LayoutInflater.from(this).inflate(R.layout.view_edit_goal, null);
-
-        ((TextView) createGoalView.findViewById(R.id.goal_text)).setText(goalData.getText());
-
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(GameActivity.this);
-        dialogBuilder.setTitle(getString(R.string.edit_goal_dialog_title));
-        dialogBuilder.setView(createGoalView);
-        Dialog dialog = dialogBuilder.create();
-        dialog.show();
+        Intent intent = new Intent(GameActivity.this, ViewGoalsActivity.class);
+        intent.putExtra(Constants.KEY_GAME_DATA_PARCEL, Parcels.wrap(gameData));
+        startActivity(intent);
     }
 
     @OnClick(R.id.goal_view)

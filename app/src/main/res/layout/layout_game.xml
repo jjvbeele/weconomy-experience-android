@@ -6,15 +6,15 @@
     android:orientation="vertical">
 
     <TextView
-        android:visibility="gone"
         android:id="@+id/goal_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/dark_gray"
-        android:padding="10dp"
+        android:padding="12dp"
+        android:drawableRight="@drawable/ic_view_list"
         android:text="@string/goals_text"
-        android:textColor="@color/white_blue"
-        android:textSize="14sp" />
+        android:textColor="@color/white_gray"
+        android:textSize="16sp" />
 
     <LinearLayout
         android:id="@+id/days_row"

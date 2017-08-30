@@ -15,11 +15,19 @@
       },
       "oauth_client": [
         {
-          "client_id": "958733613222-kjiu2tp23flrfujfr5sk838ae54minno.apps.googleusercontent.com",
+          "client_id": "958733613222-q5dv6bt6ppm527pns1sgukrstbldmtbj.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.teachwithapps.weconomyexperience",
             "certificate_hash": "e55d0f38507dcb442473640ff80f6c2341868a29"
+          }
+        },
+        {
+          "client_id": "958733613222-e71h8o71tigge6bafbl80mig6rs2t7g3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teachwithapps.weconomyexperience",
+            "certificate_hash": "1d2ade6268a3968bfe3a92e0ccc86fa90164f5aa"
           }
         },
         {

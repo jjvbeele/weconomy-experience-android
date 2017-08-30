@@ -9,7 +9,7 @@ import android.support.annotation.DrawableRes;
 public class Constants {
 
     public static final int RESULT_CODE_OK = 1001;
-    public static final int RESULT_CODE_CANCELLED = 1002;
+    public static final int RESULT_CODE_CANCELED = 1002;
 
     public static final int REQUEST_CODE_SELECT_INSTRUCTION = 2001;
 
