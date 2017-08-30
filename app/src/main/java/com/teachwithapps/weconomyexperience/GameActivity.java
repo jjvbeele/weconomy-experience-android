@@ -563,7 +563,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
      * Observes changes in the player list for this game
      */
     private void observePlayers() {
-        fireDatabaseTransactions.getPlayersInGame(
+        fireDatabaseTransactions.observePlayersInGame(
                 gameData.getId(),
                 new ReturnableChange<PlayerData>() {
                     @Override
@@ -638,7 +638,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
      * Requests the number of goals registered to this game and updates the textview with the result
      */
     private void updateGoalCount() {
-        fireDatabaseTransactions.getGoalCount(
+        fireDatabaseTransactions.getSelectedGoalCount(
                 gameData.getId(),
                 new Returnable<Long>() {
                     @Override

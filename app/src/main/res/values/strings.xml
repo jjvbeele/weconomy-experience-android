@@ -27,4 +27,5 @@
     <string name="view_goals">Currently selected goals</string>
     <string name="app_too_old">The app is too old for this game. Please visit the Playstore to update the app</string>
     <string name="app_too_old_title">App is too old</string>
+    <string name="select_goal">Select a goal</string>
 </resources>

@@ -6,10 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.teachwithapps.weconomyexperience.R;
-import com.teachwithapps.weconomyexperience.model.GoalData;
+import com.teachwithapps.weconomyexperience.ViewGoalsActivity;
+import com.teachwithapps.weconomyexperience.model.SelectedGoalData;
 
 import java.util.List;
 
@@ -22,9 +25,9 @@ import butterknife.ButterKnife;
 
 public class GoalRecyclerAdapter extends RecyclerView.Adapter<GoalRecyclerAdapter.GoalViewHolder> {
 
-    private List<GoalData> goalDataList;
+    private List<SelectedGoalData> goalDataList;
 
-    public GoalRecyclerAdapter(List<GoalData> goalDataList) {
+    public GoalRecyclerAdapter(List<SelectedGoalData> goalDataList) {
         this.goalDataList = goalDataList;
     }
 
@@ -52,19 +55,35 @@ public class GoalRecyclerAdapter extends RecyclerView.Adapter<GoalRecyclerAdapte
         @BindView(R.id.goal_text)
         protected TextView goalText;
 
+        @BindView(R.id.player_name)
+        protected TextView playerNameText;
+
+        @BindView(R.id.avatar)
+        protected ImageView avatar;
+
         public GoalViewHolder(View itemView) {
             super(itemView);
 
             ButterKnife.bind(this, itemView);
         }
 
-        public void setData(final GoalData goalData) {
-            goalText.setText(goalData.getText());
-            goalCheck.setChecked(goalData.isCompleted());
+        public void setData(final SelectedGoalData selectedGoalData) {
+            Picasso.with(itemView.getContext()).load(selectedGoalData.getPlayerData().getPhotoUrl()).into(avatar);
+            goalText.setText(selectedGoalData.getGoalData().getText());
+            goalCheck.setChecked(selectedGoalData.isRealized());
             goalCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    goalData.setCompleted(isChecked);
+                    selectedGoalData.setRealized(isChecked);
+                }
+            });
+            playerNameText.setText(selectedGoalData.getPlayerData().getName());
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    ((ViewGoalsActivity)itemView.getContext()).onLongClickSelectedGoal(selectedGoalData);
+                    return false;
                 }
             });
         }

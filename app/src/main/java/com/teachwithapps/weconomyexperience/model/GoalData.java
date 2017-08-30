@@ -16,10 +16,10 @@ import org.parceler.Parcel;
 public class GoalData extends FireData {
 
     private String text;
+    private String type;
 
-    private boolean completed;
-
-    public GoalData() {}
+    public GoalData() {
+    }
 
     public GoalData(String text) {
         this.text = text;
@@ -36,13 +36,13 @@ public class GoalData extends FireData {
         this.text = text;
     }
 
-    @PropertyName("completed")
-    public boolean isCompleted() {
-        return completed;
+    @PropertyName("type")
+    public String getType() {
+        return type;
     }
 
     @PropertyName("completed")
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
+    public void setType(String type) {
+        this.type = type;
     }
 }
