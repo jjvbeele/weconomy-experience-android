@@ -19,6 +19,9 @@ public class GameData extends FireData {
     @PropertyName("instruction_library_key")
     private String instructionLibraryKey;
 
+    @PropertyName("version")
+    private String version;
+
     public GameData() {
     }
 
@@ -45,5 +48,15 @@ public class GameData extends FireData {
     @PropertyName("instruction_library_key")
     public void setInstructionLibraryKey(String instructionLibraryKey) {
         this.instructionLibraryKey = instructionLibraryKey;
+    }
+
+    @PropertyName("version")
+    public String getVersion() {
+        return version;
+    }
+
+    @PropertyName("version")
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

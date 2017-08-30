@@ -11,6 +11,8 @@ android {
         versionCode 4
         versionName "1.0.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "double", "FIREBASE_VERSION_CODE", "1.0"
     }
 
     buildTypes {
