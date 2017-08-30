@@ -91,16 +91,31 @@ public class FoldedInstructionRecyclerAdapter extends RecyclerView.Adapter<Folde
             inputRow.removeAllViews();
             outputRow.removeAllViews();
 
-            for(int i = 0; i < instructionData.getLabour(); i++) {
-                addInfoImage(inflater, labourRow, Constants.getLabourIcon());
+            if(instructionData.getLabour() == 0) {
+                addInfoImage(inflater, labourRow, R.drawable.ic_empty);
+
+            } else {
+                for (int i = 0; i < instructionData.getLabour(); i++) {
+                    addInfoImage(inflater, labourRow, Constants.getLabourIcon());
+                }
             }
 
-            for(int i = 0; i < instructionData.getInput(); i++) {
-                addInfoImage(inflater, inputRow, Constants.getProductIcon(instructionData.getInputType()));
+            if(instructionData.getInput() == 0) {
+                addInfoImage(inflater, inputRow, R.drawable.ic_empty);
+
+            } else {
+                for (int i = 0; i < instructionData.getInput(); i++) {
+                    addInfoImage(inflater, inputRow, Constants.getProductIcon(instructionData.getInputType()));
+                }
             }
 
-            for(int i = 0; i < instructionData.getOutput(); i++) {
-                addInfoImage(inflater, outputRow, Constants.getProductIcon(instructionData.getOutputType()));
+            if(instructionData.getOutput() == 0) {
+                addInfoImage(inflater, outputRow, R.drawable.ic_empty);
+
+            } else {
+                for (int i = 0; i < instructionData.getOutput(); i++) {
+                    addInfoImage(inflater, outputRow, Constants.getProductIcon(instructionData.getOutputType()));
+                }
             }
         }
 
