@@ -210,6 +210,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     /**
      * Handle long click on instructions on the schedule
      * Routing call for the schedule widget
+     *
      * @param data
      */
     public void longClickScheduledInstruction(final ScheduledInstructionData data) {
@@ -219,11 +220,12 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     /**
      * Retrieves player data from the playerlist
      * Routing call for schedule widget
+     *
      * @param playerId
      */
     public PlayerData getPlayerById(String playerId) {
-        for(PlayerData playerData : playerDataList) {
-            if(playerData.getId().equals(playerId)) {
+        for (PlayerData playerData : playerDataList) {
+            if (playerData.getId().equals(playerId)) {
                 return playerData;
             }
         }
@@ -251,40 +253,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     }
 
     /**
-     * Registers an instruction to the schedule, this call will push an instruction to the firebase
-     * When that procedure is successful, addScheduledInstruction is called to add it to the view
-     * @param instructionIndexView
-     * @param instructionData
-     */
-    private void registerInstructionToSchedule(int instructionIndexView, InstructionData instructionData) {
-        ScheduledInstructionData scheduledInstructionData = new ScheduledInstructionData();
-        scheduledInstructionData.setInstructionKey(instructionData.getId());
-        scheduledInstructionData.setDay(instructionIndexView);
-
-        //push it to the firebase
-        fireDatabaseTransactions.registerInstructionToSchedule(gameData.getId(), scheduledInstructionData);
-    }
-
-    /**
-     * Add an instruction to the schedule
-     *
-     * @param column                   day visible on the screen to add the instruction to
-     * @param scheduledInstructionData instruction to be added
-     */
-    private void addInstructionToSchedule(int column, ScheduledInstructionData scheduledInstructionData) {
-        if (column < minVisibleColumn || column > maxVisibleColumn) {
-            return;
-        }
-        List<ScheduledInstructionData> instructionDataList = scheduledInstructionDataMap.get(column);
-        instructionDataList.add(0, scheduledInstructionData);
-
-        checkLabour(column, scheduledInstructionData);
-
-        scheduleRecyclerView.dataMapContentInserted(column, 0);
-    }
-
-    /**
      * Add an instruction to the instruction library attached to this game
+     *
      * @param instructionData
      */
     private void addInstructionToLibrary(InstructionData instructionData) {
@@ -306,11 +276,28 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     }
 
     /**
+     * Registers an instruction to the schedule, this call will push an instruction to the firebase
+     * When that procedure is successful, addInstructionToSchedule is called to add it to the view
+     *
+     * @param instructionIndexView
+     * @param instructionData
+     */
+    private void registerInstructionToSchedule(int instructionIndexView, InstructionData instructionData) {
+        ScheduledInstructionData scheduledInstructionData = new ScheduledInstructionData();
+        scheduledInstructionData.setInstructionKey(instructionData.getId());
+        scheduledInstructionData.setDay(instructionIndexView);
+
+        //push it to the firebase
+        fireDatabaseTransactions.registerInstructionToSchedule(gameData.getId(), scheduledInstructionData);
+    }
+
+    /**
      * Observes the schedule and any change on the firebase database will be processed into
      * the schedule view widget
      */
     private void observeSchedule() {
         fireDatabaseTransactions.observeSchedule(
+                gameData.getInstructionLibraryKey(),
                 new String[]{
                         "game_schedules",
                         gameData.getId()
@@ -322,7 +309,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
                     @Override
                     public void onChildAdded(final ScheduledInstructionData data) {
-                        addScheduledInstruction(data);
+                        addInstructionToSchedule(data);
                     }
 
                     @Override
@@ -344,25 +331,25 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     /**
      * Add an instruction to the schedule
-     * @param data
+     *
+     * @param data instruction to be added
      */
-    private void addScheduledInstruction(final ScheduledInstructionData data) {
-        //get instructiondata by key and add to the scheduledInstruction datamap
-        fireDatabaseTransactions.getInstructionFromLibrary(
-                gameData.getInstructionLibraryKey(),
-                data.getInstructionKey(),
-                new Returnable<InstructionData>() {
-                    @Override
-                    public void onResult(InstructionData instructionData) {
-                        data.bindInstructionData(instructionData);
-                        int column = data.getDay() - 1;
-                        addInstructionToSchedule(column, data);
-                    }
-                });
+    private void addInstructionToSchedule(ScheduledInstructionData data) {
+        int column = data.getDay() - 1;
+        if (column < minVisibleColumn || column > maxVisibleColumn) {
+            return;
+        }
+        List<ScheduledInstructionData> instructionDataList = scheduledInstructionDataMap.get(column);
+        instructionDataList.add(0, data);
+
+        checkLabour(column, data);
+
+        scheduleRecyclerView.dataMapContentInserted(column, 0);
     }
 
     /**
      * Updates a instruction on the schedule
+     *
      * @param data
      */
     private void updateScheduledInstruction(final ScheduledInstructionData data) {
@@ -385,6 +372,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     /**
      * Removes a instruction from the schedule
+     *
      * @param data
      */
     private void removeScheduledInstruction(final ScheduledInstructionData data) {
@@ -411,6 +399,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     /**
      * Marks a labour with a player
+     *
      * @param scheduledInstructionData
      * @param index
      */
@@ -435,6 +424,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     /**
      * Marks a claim with a player
+     *
      * @param scheduledInstructionData
      * @param index
      */
@@ -458,6 +448,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     /**
      * Shows the screen to select an instruction
+     *
      * @param indexInView
      */
     private void showSelectInstructionScreen(int indexInView) {
@@ -470,6 +461,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     /**
      * Shows screen for editting a scheduled instruction
      * The instruction can be removed or moved to another day here
+     *
      * @param data
      */
     private void showEditScheduledInstructionScreen(final ScheduledInstructionData data) {
@@ -535,6 +527,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     /**
      * Shows a screen with a list of players, optionally sorted depending on context (for labour)
      * A player can be selected and is returned to the callback
+     *
      * @param title
      * @param callback
      * @param day
@@ -609,8 +602,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
                     @Override
                     public void onChildChanged(PlayerData playerData) {
-                        for(PlayerData needle : playerDataList) {
-                            if(needle.getId().equals(playerData.getId())) {
+                        for (PlayerData needle : playerDataList) {
+                            if (needle.getId().equals(playerData.getId())) {
                                 playerDataList.set(playerDataList.indexOf(needle), playerData);
                                 return;
                             }
@@ -619,8 +612,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
                     @Override
                     public void onChildRemoved(PlayerData playerData) {
-                        for(PlayerData needle : playerDataList) {
-                            if(needle.getId().equals(playerData.getId())) {
+                        for (PlayerData needle : playerDataList) {
+                            if (needle.getId().equals(playerData.getId())) {
                                 playerDataList.remove(playerDataList.indexOf(needle));
                                 return;
                             }
@@ -745,6 +738,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     /**
      * Shows the edit goal screen where players can edit their goals
+     *
      * @param goalData
      */
     private void showEditGoalScreen(GoalData goalData) {

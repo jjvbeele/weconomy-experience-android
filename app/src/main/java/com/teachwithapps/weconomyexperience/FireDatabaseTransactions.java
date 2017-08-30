@@ -24,6 +24,7 @@ public class FireDatabaseTransactions {
     private static final String TAG = FireDatabaseTransactions.class.getName();
 
     private FireDatabaseHelper fireDatabaseHelper;
+
     public enum LoadState {
         LOADING_STARTED,
         LOADING_DONE
@@ -42,6 +43,7 @@ public class FireDatabaseTransactions {
 
     /**
      * Listen to loading states
+     *
      * @param onLoadingListener
      */
     public void setOnLoadingListener(OnLoadingListener onLoadingListener) {
@@ -50,10 +52,11 @@ public class FireDatabaseTransactions {
 
     /**
      * Update loading states
+     *
      * @param loadState
      */
     private void updateLoadingState(Returnable<?> callback, LoadState loadState) {
-        if(onLoadingListenerRef != null) {
+        if (onLoadingListenerRef != null) {
             OnLoadingListener onLoadingListener = onLoadingListenerRef.get();
             if (onLoadingListener != null) {
                 onLoadingListener.onLoadingChanged(callback, loadState);
@@ -237,9 +240,21 @@ public class FireDatabaseTransactions {
         );
     }
 
-    public void observeSchedule(String[] locationArray,
-                                final ReturnableChange<ScheduledInstructionData> callback) {
+    /**
+     * Observes changes in the schedule
+     * When scheduled instructions are added or changed, the retrieved scheduled instruction is
+     * bound to the instruction data from the instruction library
+     * @param instructionLibraryKey
+     * @param locationArray
+     * @param callback
+     */
+    public void observeSchedule(
+            final String instructionLibraryKey,
+            final String[] locationArray,
+            final ReturnableChange<ScheduledInstructionData> callback) {
+
         updateLoadingState(callback, LoadState.LOADING_STARTED);
+
         fireDatabaseHelper.observeChild(
                 ScheduledInstructionData.class,
                 locationArray,
@@ -247,13 +262,23 @@ public class FireDatabaseTransactions {
                     @Override
                     public void onChildAdded(ScheduledInstructionData data) {
                         updateLoadingState(callback, LoadState.LOADING_DONE);
-                        callback.onChildAdded(data);
+                        bindInstructionToScheduledInstruction(instructionLibraryKey, data, new Returnable<ScheduledInstructionData>() {
+                            @Override
+                            public void onResult(ScheduledInstructionData data) {
+                                callback.onChildAdded(data);
+                            }
+                        });
                     }
 
                     @Override
                     public void onChildChanged(ScheduledInstructionData data) {
                         updateLoadingState(callback, LoadState.LOADING_DONE);
-                        callback.onChildChanged(data);
+                        bindInstructionToScheduledInstruction(instructionLibraryKey, data, new Returnable<ScheduledInstructionData>() {
+                            @Override
+                            public void onResult(ScheduledInstructionData data) {
+                                callback.onChildChanged(data);
+                            }
+                        });
                     }
 
                     @Override
@@ -265,13 +290,23 @@ public class FireDatabaseTransactions {
                     @Override
                     public void onChildMoved(ScheduledInstructionData data) {
                         updateLoadingState(callback, LoadState.LOADING_DONE);
-                        callback.onChildMoved(data);
+                        bindInstructionToScheduledInstruction(instructionLibraryKey, data, new Returnable<ScheduledInstructionData>() {
+                            @Override
+                            public void onResult(ScheduledInstructionData data) {
+                                callback.onChildMoved(data);
+                            }
+                        });
                     }
 
                     @Override
                     public void onResult(ScheduledInstructionData data) {
                         updateLoadingState(callback, LoadState.LOADING_DONE);
-                        callback.onResult(data);
+                        bindInstructionToScheduledInstruction(instructionLibraryKey, data, new Returnable<ScheduledInstructionData>() {
+                            @Override
+                            public void onResult(ScheduledInstructionData data) {
+                                callback.onResult(data);
+                            }
+                        });
                     }
                 },
                 new Returnable<DatabaseError>() {
@@ -282,6 +317,29 @@ public class FireDatabaseTransactions {
                     }
                 }
         );
+    }
+
+    /**
+     * Bind the instruction data to the scheduled instruction
+     *
+     * @param data
+     * @param callback
+     */
+    private void bindInstructionToScheduledInstruction(
+            final String instructionLibraryKey,
+            final ScheduledInstructionData data,
+            final Returnable<ScheduledInstructionData> callback) {
+        //get instructiondata by key and add to the scheduledInstruction datamap
+        getInstructionFromLibrary(
+                instructionLibraryKey,
+                data.getInstructionKey(),
+                new Returnable<InstructionData>() {
+                    @Override
+                    public void onResult(InstructionData instructionData) {
+                        data.bindInstructionData(instructionData);
+                        callback.onResult(data);
+                    }
+                });
     }
 
     public void getPlayersInGame(String gameId, final ReturnableChange<PlayerData> callback) {
@@ -448,6 +506,7 @@ public class FireDatabaseTransactions {
      * Reschedules an instruction on the schedule from one day to another.
      * The instruction is always inserted at the top, but the order is not maintained in the firebase
      * Consecutive calls may put the instruction in a different order
+     *
      * @param gameId
      * @param scheduledInstructionData
      */
@@ -458,6 +517,7 @@ public class FireDatabaseTransactions {
 
     /**
      * Returns true or false wether or not the player is registered as an administrator
+     *
      * @param role
      * @param userId
      * @param callback
