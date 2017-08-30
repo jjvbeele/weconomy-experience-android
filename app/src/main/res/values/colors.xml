@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#00aeb1</color>
-    <color name="colorPrimaryDark">#246263</color>
-    <color name="colorAccent">#ffa270</color>
-    <color name="dark_gray">#394847</color>
-    <color name="white_blue">#c3f3ee</color>
-    <color name="scheduled_instruction">#75b9b4</color>
-    <color name="scheduled_instruction_highlight">#4a938d</color>
-    <color name="light_gray">#abc6c5</color>
+    <color name="colorPrimary">#b58551</color>
+    <color name="colorPrimaryDark">#785735</color>
+    <color name="colorAccent">#c6ff70</color>
+    <color name="dark_gray">#787169</color>
+    <color name="white_blue">#f2e7da</color>
+    <color name="scheduled_instruction">#d6b99a</color>
+    <color name="scheduled_instruction_topcell">#b58551</color>
+    <color name="light_gray">#c2beba</color>
     <color name="dark_overlay">#a0000000</color>
     <color name="white">#ffffff</color>
     <color name="dark_loading">#88000000</color>
