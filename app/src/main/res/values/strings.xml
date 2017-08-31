@@ -2,7 +2,7 @@
     <string name="app_name">Weconomy Experience</string>
     <string name="hub_title">Beschikbare Spellen</string>
     <string name="start_new_game">start nieuw spel</string>
-    <string name="goals_text">Goals: %d</string>
+    <string name="goals_text">%1$d goals, %2$d completed</string>
     <string name="day_text">Day %d</string>
     <string name="goal_dialog_title">Goal list</string>
     <string name="create_goal_dialog_title">Create a new goal</string>

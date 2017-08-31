@@ -26,6 +26,7 @@ import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
 import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
+import com.teachwithapps.weconomyexperience.model.SelectedGoalData;
 import com.teachwithapps.weconomyexperience.util.IntentUtil;
 import com.teachwithapps.weconomyexperience.util.Log;
 import com.teachwithapps.weconomyexperience.view.AppNavigationDrawer;
@@ -71,6 +72,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     private List<PlayerData> playerDataList;
 
+    private List<SelectedGoalData> selectedGoalList;
+
     private GameData gameData;
 
     private int maxVisibleColumn = 3;
@@ -89,6 +92,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
             registerPlayer();
             observePlayers();
             observeSchedule();
+            observeGoalCount();
             loadingView.setVisibility(View.GONE);
         }
     };
@@ -100,6 +104,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         setContentView(R.layout.activity_game);
 
         ButterKnife.bind(this);
+
+        selectedGoalList = new ArrayList<>();
 
         new AppNavigationDrawer(this, drawerLayout);
 
@@ -635,15 +641,62 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     }
 
     /**
-     * Requests the number of goals registered to this game and updates the textview with the result
+     * Updates the textview with theamount of selected goals and realised goals
      */
     private void updateGoalCount() {
-        fireDatabaseTransactions.getSelectedGoalCount(
+        int realisedGoalCount = 0;
+        for(SelectedGoalData selectedGoalData : selectedGoalList) {
+            Log.d(TAG, "realised? " + selectedGoalData.getRealised());
+            if(selectedGoalData.getRealised()) {
+                realisedGoalCount ++;
+            }
+        }
+        goalView.setText(getString(R.string.goals_text, selectedGoalList.size(), realisedGoalCount));
+    }
+
+    private void observeGoalCount() {
+        fireDatabaseTransactions.observeSelectedGoalsInGame(
                 gameData.getId(),
-                new Returnable<Long>() {
+                gameData.getLibraryKey(),
+                new ReturnableChange<SelectedGoalData>() {
                     @Override
-                    public void onResult(Long count) {
-                        goalView.setText(getString(R.string.goals_text, count));
+                    public void onChildAdded(SelectedGoalData data) {
+                        selectedGoalList.add(data);
+                        updateGoalCount();
+                    }
+
+                    @Override
+                    public void onChildChanged(SelectedGoalData data) {
+                        for(SelectedGoalData selectedGoalData : selectedGoalList) {
+                            if(selectedGoalData.getId().equals(data.getId())) {
+                                int index = selectedGoalList.indexOf(selectedGoalData);
+                                selectedGoalList.remove(index);
+                                selectedGoalList.add(index, data);
+                                updateGoalCount();
+                                return;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildRemoved(SelectedGoalData data) {
+                        for(SelectedGoalData selectedGoalData : selectedGoalList) {
+                            if(selectedGoalData.getId().equals(data.getId())) {
+                                selectedGoalList.remove(selectedGoalData);
+                                updateGoalCount();
+                                return;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildMoved(SelectedGoalData data) {
+
+                    }
+
+                    @Override
+                    public void onResult(SelectedGoalData data) {
+
                     }
                 }
         );

@@ -16,8 +16,8 @@ import org.parceler.Parcel;
 @Parcel
 public class SelectedGoalData extends FireData {
 
-    @PropertyName("realized")
-    private boolean realized;
+    @PropertyName("realised")
+    private boolean realised;
 
     @PropertyName("goal_id")
     private String goalId;
@@ -54,14 +54,14 @@ public class SelectedGoalData extends FireData {
         this.playerId = playerId;
     }
 
-    @PropertyName("completed")
-    public boolean isRealized() {
-        return realized;
+    @PropertyName("realised")
+    public boolean getRealised() {
+        return realised;
     }
 
-    @PropertyName("completed")
-    public void setRealized(boolean realized) {
-        this.realized = realized;
+    @PropertyName("realised")
+    public void setRealised(boolean realised) {
+        this.realised = realised;
     }
 
     @Exclude

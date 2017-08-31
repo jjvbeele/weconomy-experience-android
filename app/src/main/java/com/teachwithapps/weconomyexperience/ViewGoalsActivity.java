@@ -124,15 +124,15 @@ public class ViewGoalsActivity extends AppCompatActivity {
 
                     @Override
                     public void onChildChanged(SelectedGoalData data) {
-                        for (SelectedGoalData needle : selectedGoalList) {
-                            if (needle.getId().equals(data.getId())) {
-                                int index = selectedGoalList.indexOf(needle);
-                                selectedGoalList.remove(index);
-                                selectedGoalList.add(index, data);
-                                goalRecycler.getAdapter().notifyItemChanged(index);
-                                return;
-                            }
-                        }
+//                        for (SelectedGoalData needle : selectedGoalList) {
+//                            if (needle.getId().equals(data.getId())) {
+//                                int index = selectedGoalList.indexOf(needle);
+//                                selectedGoalList.remove(index);
+//                                selectedGoalList.add(index, data);
+//                                goalRecycler.getAdapter().notifyItemChanged(index);
+//                                return;
+//                            }
+//                        }
                     }
 
                     @Override
@@ -304,45 +304,12 @@ public class ViewGoalsActivity extends AppCompatActivity {
                 SelectedGoalData selectedGoalData = new SelectedGoalData();
                 selectedGoalData.setGoalId(goalData.getId());
                 selectedGoalData.setPlayerId("player_id_" + fireAuthHelper.getUser().getUid());
-                selectedGoalData.setRealized(false);
+                selectedGoalData.setRealised(false);
                 fireDatabaseTransactions.addGoalToSelectedGoals(gameData.getId(), selectedGoalData);
             }
         });
         builder.show();
 
-    }
-
-    private void observeGoalsInGame() {
-        fireDatabaseTransactions.observeAvailableGoalsInGame(
-                gameData.getId(),
-                gameData.getLibraryKey(),
-                new ReturnableChange<GoalData>() {
-                    @Override
-                    public void onChildAdded(GoalData data) {
-
-                    }
-
-                    @Override
-                    public void onChildChanged(GoalData data) {
-
-                    }
-
-                    @Override
-                    public void onChildRemoved(GoalData data) {
-
-                    }
-
-                    @Override
-                    public void onChildMoved(GoalData data) {
-
-                    }
-
-                    @Override
-                    public void onResult(GoalData data) {
-
-                    }
-                }
-        );
     }
 
     @OnClick(R.id.add_goal)
