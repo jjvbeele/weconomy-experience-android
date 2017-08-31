@@ -115,11 +115,13 @@ public class FireDatabaseTransactions {
         );
 
         //No custom instructionlibrary? Create a copy of the default library
-        if (gameData.getInstructionLibraryKey() == null) {
+        if (gameData.getLibraryKey() == null) {
             //push the new library and obtain the firebase key (location)
-            final String instructionLibraryKey = fireDatabaseHelper.pushRecord(
+            final String instructionLibrary = fireDatabaseHelper.pushRecord(
                     "library_id_",
-                    new String[]{"instruction_libraries"},
+                    new String[]{
+                            "libraries"
+                    },
                     gameData.getId()
             );
 
@@ -127,16 +129,18 @@ public class FireDatabaseTransactions {
             fireDatabaseHelper.getRecordsAsync(
                     InstructionData.class,
                     new String[]{
-                            "insruction_libraries",
-                            "default_library"
+                            "libraries",
+                            "default_library",
+                            "instructions"
                     },
                     new Returnable<InstructionData>() {
                         @Override
                         public void onResult(InstructionData data) {
                             fireDatabaseHelper.addRecord(
                                     new String[]{
-                                            "instruction_libraries",
-                                            instructionLibraryKey
+                                            "libraries",
+                                            instructionLibrary,
+                                            "instructions"
                                     },
                                     data.getId(),
                                     data
@@ -217,19 +221,24 @@ public class FireDatabaseTransactions {
         fireDatabaseHelper.pushRecord(
                 "library_id_",
                 new String[]{
-                        "instruction_libraries",
-                        instructionLibraryName
+                        "libraries",
+                        instructionLibraryName,
+                        "instructions"
                 },
                 instructionData
         );
     }
 
     public void getInstructionsFromLibrary(
-            String instructionLibraryKey,
+            String libraryKey,
             Returnable<List<InstructionData>> callback) {
         fireDatabaseHelper.getRecordsList(
                 InstructionData.class,
-                new String[]{"instruction_libraries", instructionLibraryKey},
+                new String[]{
+                        "libraries",
+                        libraryKey,
+                        "instructions"
+                },
                 callback,
                 new Returnable<DatabaseError>() {
                     @Override
@@ -273,12 +282,12 @@ public class FireDatabaseTransactions {
      * When scheduled instructions are added or changed, the retrieved scheduled instruction is
      * bound to the instruction data from the instruction library
      *
-     * @param instructionLibraryKey
+     * @param libraryKey
      * @param locationArray
      * @param callback
      */
     public void observeSchedule(
-            final String instructionLibraryKey,
+            final String libraryKey,
             final String[] locationArray,
             final ReturnableChange<ScheduledInstructionData> callback) {
 
@@ -290,7 +299,7 @@ public class FireDatabaseTransactions {
                 new ReturnableChange<ScheduledInstructionData>() {
                     @Override
                     public void onChildAdded(ScheduledInstructionData data) {
-                        bindInstructionToScheduledInstruction(instructionLibraryKey, data, new Returnable<ScheduledInstructionData>() {
+                        bindInstructionToScheduledInstruction(libraryKey, data, new Returnable<ScheduledInstructionData>() {
                             @Override
                             public void onResult(ScheduledInstructionData data) {
                                 callback.onChildAdded(data);
@@ -301,7 +310,7 @@ public class FireDatabaseTransactions {
 
                     @Override
                     public void onChildChanged(ScheduledInstructionData data) {
-                        bindInstructionToScheduledInstruction(instructionLibraryKey, data, new Returnable<ScheduledInstructionData>() {
+                        bindInstructionToScheduledInstruction(libraryKey, data, new Returnable<ScheduledInstructionData>() {
                             @Override
                             public void onResult(ScheduledInstructionData data) {
                                 callback.onChildChanged(data);
@@ -318,7 +327,7 @@ public class FireDatabaseTransactions {
 
                     @Override
                     public void onChildMoved(ScheduledInstructionData data) {
-                        bindInstructionToScheduledInstruction(instructionLibraryKey, data, new Returnable<ScheduledInstructionData>() {
+                        bindInstructionToScheduledInstruction(libraryKey, data, new Returnable<ScheduledInstructionData>() {
                             @Override
                             public void onResult(ScheduledInstructionData data) {
                                 callback.onChildMoved(data);
@@ -329,7 +338,7 @@ public class FireDatabaseTransactions {
 
                     @Override
                     public void onResult(ScheduledInstructionData data) {
-                        bindInstructionToScheduledInstruction(instructionLibraryKey, data, new Returnable<ScheduledInstructionData>() {
+                        bindInstructionToScheduledInstruction(libraryKey, data, new Returnable<ScheduledInstructionData>() {
                             @Override
                             public void onResult(ScheduledInstructionData data) {
                                 callback.onResult(data);
@@ -355,12 +364,12 @@ public class FireDatabaseTransactions {
      * @param callback
      */
     private void bindInstructionToScheduledInstruction(
-            final String instructionLibraryKey,
+            final String libraryKey,
             final ScheduledInstructionData data,
             final Returnable<ScheduledInstructionData> callback) {
         //get instructiondata by key and add to the scheduledInstruction datamap
         getInstructionFromLibrary(
-                instructionLibraryKey,
+                libraryKey,
                 data.getInstructionKey(),
                 new Returnable<InstructionData>() {
                     @Override
@@ -423,12 +432,13 @@ public class FireDatabaseTransactions {
         );
     }
 
-    public void getInstructionFromLibrary(String instructionLibraryKey, String instructionKey, Returnable<InstructionData> onReturnSuccess) {
+    public void getInstructionFromLibrary(String libraryKey, String instructionKey, Returnable<InstructionData> onReturnSuccess) {
         fireDatabaseHelper.getRecord(
                 InstructionData.class,
                 new String[]{
-                        "instruction_libraries",
-                        instructionLibraryKey,
+                        "libraries",
+                        libraryKey,
+                        "instructions",
                         instructionKey
                 },
                 onReturnSuccess,

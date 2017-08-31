@@ -2,6 +2,7 @@ package com.teachwithapps.weconomyexperience.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.PropertyName;
+import com.teachwithapps.weconomyexperience.BuildConfig;
 import com.teachwithapps.weconomyexperience.firebase.FireData;
 
 import org.parceler.Parcel;
@@ -16,8 +17,8 @@ public class GameData extends FireData {
     @PropertyName("name")
     private String name;
 
-    @PropertyName("instruction_library_key")
-    private String instructionLibraryKey;
+    @PropertyName("library_key")
+    private String libraryKey;
 
     @PropertyName("version")
     private String version;
@@ -27,7 +28,8 @@ public class GameData extends FireData {
 
     public GameData(String name, String libraryKey) {
         this.name = name;
-        this.instructionLibraryKey = libraryKey;
+        this.libraryKey = libraryKey;
+        this.version = String.valueOf(BuildConfig.FIREBASE_VERSION_CODE);
     }
 
     @PropertyName("name")
@@ -40,14 +42,14 @@ public class GameData extends FireData {
         this.name = name;
     }
 
-    @PropertyName("instruction_library_key")
-    public String getInstructionLibraryKey() {
-        return instructionLibraryKey;
+    @PropertyName("library_key")
+    public String getLibraryKey() {
+        return libraryKey;
     }
 
-    @PropertyName("instruction_library_key")
-    public void setInstructionLibraryKey(String instructionLibraryKey) {
-        this.instructionLibraryKey = instructionLibraryKey;
+    @PropertyName("library_key")
+    public void setLibraryKey(String libraryKey) {
+        this.libraryKey = libraryKey;
     }
 
     @PropertyName("version")

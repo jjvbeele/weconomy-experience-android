@@ -268,7 +268,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
      */
     private void observeSchedule() {
         fireDatabaseTransactions.observeSchedule(
-                gameData.getInstructionLibraryKey(),
+                gameData.getLibraryKey(),
                 new String[]{
                         "game_schedules",
                         gameData.getId()
@@ -425,7 +425,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     private void showSelectInstructionScreen(int indexInView) {
         Intent intent = new Intent(GameActivity.this, SelectInstructionActivity.class);
         intent.putExtra(Constants.KEY_INSTRUCTION_DAY, indexInView);
-        intent.putExtra(Constants.KEY_INSTRUCTION_LIBRARY_KEY, gameData.getInstructionLibraryKey());
+        intent.putExtra(Constants.KEY_LIBRARY_KEY, gameData.getLibraryKey());
         startActivityForResult(intent, Constants.REQUEST_CODE_SELECT_INSTRUCTION);
     }
 

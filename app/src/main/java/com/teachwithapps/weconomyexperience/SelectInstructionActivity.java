@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseUser;
@@ -41,7 +40,7 @@ public class SelectInstructionActivity extends AppCompatActivity {
     protected TextView toolbarTitle;
 
     private int instructionIndexInSchedule;
-    private String instructionLibraryKey;
+    private String libraryKey;
 
     private List<InstructionData> instructionDataList;
 
@@ -59,7 +58,7 @@ public class SelectInstructionActivity extends AppCompatActivity {
     private void loadInstructionLibrary() {
         setupInstructionRecycler();
         fireDatabaseTransactions.getInstructionsFromLibrary(
-                instructionLibraryKey,
+                libraryKey,
                 new Returnable<List<InstructionData>>() {
                     @Override
                     public void onResult(List<InstructionData> data) {
@@ -94,7 +93,7 @@ public class SelectInstructionActivity extends AppCompatActivity {
 
         toolbarTitle.setText(getString(R.string.select_instruction));
 
-        instructionLibraryKey = getIntent().getStringExtra(Constants.KEY_INSTRUCTION_LIBRARY_KEY);
+        libraryKey = getIntent().getStringExtra(Constants.KEY_LIBRARY_KEY);
         instructionIndexInSchedule = getIntent().getIntExtra(Constants.KEY_INSTRUCTION_DAY, -1);
 
         if (instructionIndexInSchedule < 0) {

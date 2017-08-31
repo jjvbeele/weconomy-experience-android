@@ -13,7 +13,7 @@ public class Constants {
 
     public static final int REQUEST_CODE_SELECT_INSTRUCTION = 2001;
 
-    public static final String KEY_INSTRUCTION_LIBRARY_KEY = "instruction_library_key";
+    public static final String KEY_LIBRARY_KEY = "library_key";
     public static final String KEY_INSTRUCTION_DAY = "instruction_index_in_schedule";
     public static final String KEY_GAME_DATA_PARCEL = "game_data_parcel";
     public static final String KEY_INSTRUCTION_PARCEL = "instruction_parcel";
