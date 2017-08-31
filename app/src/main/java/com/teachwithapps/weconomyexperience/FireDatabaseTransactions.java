@@ -53,6 +53,63 @@ public class FireDatabaseTransactions {
         );
     }
 
+    public void addGoalToAvailableGoals(
+            String gameId,
+            GoalData goalData) {
+        fireDatabaseHelper.addRecord(
+                new String[]{
+                        "game_goals",
+                        gameId,
+                        "available_goals"
+                },
+                goalData.getId(),
+                goalData.getId()
+        );
+    }
+
+    public void removeGoalFromAvailableGoals(
+            String gameId,
+            GoalData goalData) {
+        fireDatabaseHelper.removeRecord(
+                new String[]{
+                        "game_goals",
+                        gameId,
+                        "available_goals",
+                        goalData.getId()
+                }
+        );
+    }
+
+    public void observeGoalsFromLibrary(String libraryKey, ReturnableChange<GoalData> callback) {
+        fireDatabaseHelper.observeChild(
+                GoalData.class,
+                new String[]{
+                        "libraries",
+                        libraryKey,
+                        "goals"
+                },
+                callback,
+                new Returnable<DatabaseError>() {
+                    @Override
+                    public void onResult(DatabaseError data) {
+                        Log.e(TAG, "Can't retrieve library goals", data.toException());
+                    }
+                }
+        );
+    }
+
+    public void updateSelectedGoal(String gameId, SelectedGoalData selectedGoalData) {
+        fireDatabaseHelper.addRecord(
+                new String[]{
+                        "game_goals",
+                        gameId,
+                        "selected_goals"
+                },
+                selectedGoalData.getId(),
+                selectedGoalData
+        );
+    }
+
     public enum LoadState {
         LOADING_STARTED,
         LOADING_DONE
@@ -485,15 +542,70 @@ public class FireDatabaseTransactions {
         );
     }
 
-    public void getAvailableGoalsInGame(final String gameId, final Returnable<List<GoalData>> onReturn) {
-        fireDatabaseHelper.getRecordsList(
-                GoalData.class,
+    public void observeAvailableGoalsInGame(
+            final String gameId,
+            final String libraryKey,
+            final ReturnableChange<GoalData> callback) {
+        fireDatabaseHelper.observeChild(
+                String.class,
                 new String[]{
                         "game_goals",
                         gameId,
                         "available_goals"
                 },
-                onReturn,
+                new ReturnableChange<String>() {
+                    @Override
+                    public void onChildAdded(final String goalId) {
+                        getGoalFromLibraryById(
+                                libraryKey,
+                                goalId,
+                                new Returnable<GoalData>() {
+                                    @Override
+                                    public void onResult(GoalData data) {
+                                        callback.onChildAdded(data);
+                                    }
+                                }
+                        );
+                    }
+
+                    @Override
+                    public void onChildChanged(final String goalId) {
+                        getGoalFromLibraryById(
+                                libraryKey,
+                                goalId,
+                                new Returnable<GoalData>() {
+                                    @Override
+                                    public void onResult(GoalData data) {
+                                        callback.onChildChanged(data);
+                                    }
+                                }
+                        );
+                    }
+
+                    @Override
+                    public void onChildRemoved(final String goalId) {
+                        getGoalFromLibraryById(
+                                libraryKey,
+                                goalId,
+                                new Returnable<GoalData>() {
+                                    @Override
+                                    public void onResult(GoalData data) {
+                                        callback.onChildRemoved(data);
+                                    }
+                                }
+                        );
+                    }
+
+                    @Override
+                    public void onChildMoved(String goalId) {
+
+                    }
+
+                    @Override
+                    public void onResult(String goalId) {
+
+                    }
+                },
                 new Returnable<DatabaseError>() {
                     @Override
                     public void onResult(DatabaseError data) {
@@ -521,7 +633,11 @@ public class FireDatabaseTransactions {
         );
     }
 
-    public void observeSelectedGoalsInGame(final String gameId, final ReturnableChange<SelectedGoalData> callback) {
+    public void observeSelectedGoalsInGame(
+            final String gameId,
+            final String libraryKey,
+            final ReturnableChange<SelectedGoalData> callback) {
+
         fireDatabaseHelper.observeChild(
                 SelectedGoalData.class,
                 new String[]{
@@ -532,7 +648,7 @@ public class FireDatabaseTransactions {
                 new ReturnableChange<SelectedGoalData>() {
                     @Override
                     public void onChildAdded(SelectedGoalData data) {
-                        bindSelectedGoalData(gameId, data, new Returnable<SelectedGoalData>() {
+                        bindSelectedGoalData(gameId, libraryKey, data, new Returnable<SelectedGoalData>() {
                             @Override
                             public void onResult(SelectedGoalData data) {
                                 callback.onChildAdded(data);
@@ -542,7 +658,7 @@ public class FireDatabaseTransactions {
 
                     @Override
                     public void onChildChanged(SelectedGoalData data) {
-                        bindSelectedGoalData(gameId, data, new Returnable<SelectedGoalData>() {
+                        bindSelectedGoalData(gameId, libraryKey, data, new Returnable<SelectedGoalData>() {
                             @Override
                             public void onResult(SelectedGoalData data) {
                                 callback.onChildChanged(data);
@@ -572,13 +688,13 @@ public class FireDatabaseTransactions {
         );
     }
 
-    public void getGoalById(final String gameId, final String goalId, final Returnable<GoalData> callback) {
+    public void getGoalFromLibraryById(final String libraryKey, final String goalId, final Returnable<GoalData> callback) {
         fireDatabaseHelper.getRecord(
                 GoalData.class,
                 new String[]{
-                        "game_goals",
-                        gameId,
-                        "available_goals",
+                        "libraries",
+                        libraryKey,
+                        "goals",
                         goalId
                 },
                 callback,
@@ -591,13 +707,13 @@ public class FireDatabaseTransactions {
         );
     }
 
-    public void bindSelectedGoalData(final String gameId, final SelectedGoalData selectedGoalData, final Returnable<SelectedGoalData> callback) {
+    public void bindSelectedGoalData(final String gameId, final String libraryKey, final SelectedGoalData selectedGoalData, final Returnable<SelectedGoalData> callback) {
         getPlayerById(gameId, selectedGoalData.getPlayerId(), new Returnable<PlayerData>() {
             @Override
             public void onResult(PlayerData data) {
                 selectedGoalData.bindPlayerData(data);
 
-                getGoalById(gameId, selectedGoalData.getGoalId(), new Returnable<GoalData>() {
+                getGoalFromLibraryById(libraryKey, selectedGoalData.getGoalId(), new Returnable<GoalData>() {
                     @Override
                     public void onResult(GoalData goalData) {
                         selectedGoalData.bindGoalData(goalData);

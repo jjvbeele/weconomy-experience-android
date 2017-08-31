@@ -68,13 +68,22 @@ public class GoalRecyclerAdapter extends RecyclerView.Adapter<GoalRecyclerAdapte
         }
 
         public void setData(final SelectedGoalData selectedGoalData) {
-            Picasso.with(itemView.getContext()).load(selectedGoalData.getPlayerData().getPhotoUrl()).into(avatar);
-            goalText.setText(selectedGoalData.getGoalData().getText());
+            Picasso.with(itemView.getContext())
+                    .load(selectedGoalData.getPlayerData().getPhotoUrl())
+                    .into(avatar);
+
+            if (selectedGoalData.getGoalData() != null) {
+                goalText.setText(selectedGoalData
+                        .getGoalData()
+                        .getText());
+            }
+
             goalCheck.setChecked(selectedGoalData.isRealized());
             goalCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     selectedGoalData.setRealized(isChecked);
+                    ((ViewGoalsActivity)itemView.getContext()).onCheckSelectedGoal(selectedGoalData);
                 }
             });
             playerNameText.setText(selectedGoalData.getPlayerData().getName());
@@ -82,7 +91,7 @@ public class GoalRecyclerAdapter extends RecyclerView.Adapter<GoalRecyclerAdapte
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    ((ViewGoalsActivity)itemView.getContext()).onLongClickSelectedGoal(selectedGoalData);
+                    ((ViewGoalsActivity) itemView.getContext()).onLongClickSelectedGoal(selectedGoalData);
                     return false;
                 }
             });

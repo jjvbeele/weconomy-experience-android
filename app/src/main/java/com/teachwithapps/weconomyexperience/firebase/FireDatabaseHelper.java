@@ -111,21 +111,26 @@ public class FireDatabaseHelper {
                     @Override
                     public void onResult(final Long childCount) {
                         final List<T> list = new ArrayList<>();
-                        genericObserveRecord(
-                                dataResultClass,
-                                locationArray,
-                                new Returnable<T>() {
-                                    @Override
-                                    public void onResult(T data) {
-                                        list.add(data);
-                                        if (list.size() >= childCount) {
-                                            returnOnSuccess.onResult(list);
+                        if(childCount == 0) {
+                            returnOnSuccess.onResult(list);
+
+                        } else {
+                            genericObserveRecord(
+                                    dataResultClass,
+                                    locationArray,
+                                    new Returnable<T>() {
+                                        @Override
+                                        public void onResult(T data) {
+                                            list.add(data);
+                                            if (list.size() >= childCount) {
+                                                returnOnSuccess.onResult(list);
+                                            }
                                         }
-                                    }
-                                },
-                                returnOnFail,
-                                true,
-                                false);
+                                    },
+                                    returnOnFail,
+                                    true,
+                                    false);
+                        }
                     }
                 },
                 returnOnFail

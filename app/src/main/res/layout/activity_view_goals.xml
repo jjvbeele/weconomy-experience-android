@@ -23,7 +23,21 @@
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_margin="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
         android:src="@drawable/ic_add" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/discover_goal"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:visibility="gone"
+        android:layout_marginTop="20dp"
+        android:layout_toLeftOf="@+id/add_goal"
+        android:src="@drawable/ic_flare" />
 
 </RelativeLayout>

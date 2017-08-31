@@ -19,6 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginRight="8dp"
+        android:layout_toLeftOf="@+id/button_layout"
         android:layout_toRightOf="@+id/avatar"
         android:layout_weight="0"
         android:textSize="12sp"
@@ -29,18 +30,35 @@
         android:id="@+id/goal_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_toRightOf="@+id/avatar"
         android:layout_below="@+id/player_name"
+        android:layout_gravity="center_vertical"
+        android:layout_toLeftOf="@+id/button_layout"
+        android:layout_toRightOf="@+id/avatar"
         android:textSize="18sp"
         android:textStyle="bold"
         tools:text="Have two bread" />
 
-    <CheckBox
-        android:id="@+id/goal_check"
+    <LinearLayout
+        android:id="@+id/button_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true" />
+        android:layout_centerVertical="true"
+        android:layout_marginRight="10dp">
+
+        <CheckBox
+            android:id="@+id/goal_check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/ic_close_black" />
+
+    </LinearLayout>
 
 </RelativeLayout>
