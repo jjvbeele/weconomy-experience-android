@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.teachwithapps.weconomyexperience.Constants;
 import com.teachwithapps.weconomyexperience.R;
 import com.teachwithapps.weconomyexperience.ViewGoalsActivity;
 import com.teachwithapps.weconomyexperience.model.SelectedGoalData;
@@ -18,6 +19,9 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by mint on 30-8-17.
@@ -68,6 +72,10 @@ public class GoalRecyclerAdapter extends RecyclerView.Adapter<GoalRecyclerAdapte
         }
 
         public void setData(final SelectedGoalData selectedGoalData) {
+            boolean admin = itemView.getContext()
+                    .getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE)
+                    .getBoolean(Constants.PREF_ADMIN, false);
+
             Picasso.with(itemView.getContext())
                     .load(selectedGoalData.getPlayerData().getPhotoUrl())
                     .into(avatar);
@@ -83,7 +91,7 @@ public class GoalRecyclerAdapter extends RecyclerView.Adapter<GoalRecyclerAdapte
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     selectedGoalData.setRealized(isChecked);
-                    ((ViewGoalsActivity)itemView.getContext()).onCheckSelectedGoal(selectedGoalData);
+                    ((ViewGoalsActivity) itemView.getContext()).onCheckSelectedGoal(selectedGoalData);
                 }
             });
             playerNameText.setText(selectedGoalData.getPlayerData().getName());

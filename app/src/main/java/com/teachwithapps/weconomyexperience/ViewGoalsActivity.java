@@ -84,6 +84,8 @@ public class ViewGoalsActivity extends AppCompatActivity {
         boolean admin = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE).getBoolean(Constants.PREF_ADMIN, false);
         if (admin) {
             discoverGoalView.setVisibility(View.VISIBLE);
+        } else {
+            discoverGoalView.setVisibility(View.GONE);
         }
     }
 
