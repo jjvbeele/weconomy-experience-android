@@ -8,8 +8,8 @@ android {
         applicationId "com.teachwithapps.weconomyexperience"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 4
-        versionName "1.0.3"
+        versionCode 5
+        versionName "1.0.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField "double", "FIREBASE_VERSION_CODE", "1.0"
