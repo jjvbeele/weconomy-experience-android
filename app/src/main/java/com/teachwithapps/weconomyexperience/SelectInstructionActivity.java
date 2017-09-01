@@ -12,7 +12,10 @@ import android.widget.TextView;
 import com.google.firebase.auth.FirebaseUser;
 import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
 import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
+import com.teachwithapps.weconomyexperience.firebase.util.ReturnableChange;
+import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
+import com.teachwithapps.weconomyexperience.util.IntentUtil;
 import com.teachwithapps.weconomyexperience.util.Log;
 import com.teachwithapps.weconomyexperience.view.FoldedInstructionRecyclerAdapter;
 
@@ -42,7 +45,9 @@ public class SelectInstructionActivity extends AppCompatActivity {
     private int instructionIndexInSchedule;
     private String libraryKey;
 
-    private List<InstructionData> instructionDataList;
+    private GameData gameData;
+
+    private List<InstructionData> availableInstructionList;
 
     //firebase attributes
     private FireDatabaseTransactions fireDatabaseTransactions;
@@ -51,37 +56,10 @@ public class SelectInstructionActivity extends AppCompatActivity {
     private FireAuthHelper.FireAuthCallback fireAuthCallback = new FireAuthHelper.FireAuthCallback() {
         @Override
         public void userReady(FirebaseUser firebaseUser) {
-            loadInstructionLibrary();
+            setupInstructionRecycler();
+            observeAvailableInstructionsInGame();
         }
     };
-
-    private void loadInstructionLibrary() {
-        setupInstructionRecycler();
-        fireDatabaseTransactions.getInstructionsFromLibrary(
-                libraryKey,
-                new Returnable<List<InstructionData>>() {
-                    @Override
-                    public void onResult(List<InstructionData> data) {
-                        Log.d(TAG, "Load data " + data.size());
-                        instructionDataList.addAll(data);
-                        instructionRecycler.getAdapter().notifyDataSetChanged();
-                    }
-                });
-    }
-
-    private void setupInstructionRecycler() {
-        instructionDataList = new ArrayList<>();
-        instructionRecycler.setLayoutManager(new LinearLayoutManager(this));
-        instructionRecycler.setAdapter(new FoldedInstructionRecyclerAdapter(
-                instructionDataList,
-                new FoldedInstructionRecyclerAdapter.OnInstructionClickListener() {
-                    @Override
-                    public void onClick(InstructionData instructionData) {
-                        finishWithInstruction(instructionData);
-                    }
-                }
-        ));
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -90,6 +68,8 @@ public class SelectInstructionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_select_instruction);
 
         ButterKnife.bind(this);
+
+        gameData = IntentUtil.getParcelsIntentData(getIntent(), savedInstanceState, Constants.KEY_GAME_DATA_PARCEL);
 
         toolbarTitle.setText(getString(R.string.select_instruction));
 
@@ -104,6 +84,67 @@ public class SelectInstructionActivity extends AppCompatActivity {
         fireDatabaseTransactions = new FireDatabaseTransactions();
         fireAuthHelper = new FireAuthHelper(this);
         fireAuthHelper.withUser(this, fireAuthCallback);
+    }
+
+    private void observeAvailableInstructionsInGame() {
+        fireDatabaseTransactions.observeAvailableInstructionsInGame(
+                gameData.getId(),
+                gameData.getLibraryKey(),
+                new ReturnableChange<InstructionData>() {
+                    @Override
+                    public void onChildAdded(InstructionData data) {
+                        availableInstructionList.add(data);
+                        instructionRecycler.getAdapter().notifyItemInserted(availableInstructionList.size() - 1);
+                    }
+
+                    @Override
+                    public void onChildChanged(InstructionData data) {
+                        for (InstructionData needle : availableInstructionList) {
+                            if (needle.getId().equals(data.getId())) {
+                                int index = availableInstructionList.indexOf(needle);
+                                availableInstructionList.remove(index);
+                                availableInstructionList.add(index, data);
+                                instructionRecycler.getAdapter().notifyItemChanged(index);
+                                return;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildRemoved(InstructionData data) {
+                        for (InstructionData needle : availableInstructionList) {
+                            if (needle.getId().equals(data.getId())) {
+                                int index = availableInstructionList.indexOf(needle);
+                                availableInstructionList.remove(index);
+                                instructionRecycler.getAdapter().notifyItemRemoved(index);
+                                return;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildMoved(InstructionData data) {
+                    }
+
+                    @Override
+                    public void onResult(InstructionData data) {
+                    }
+                }
+        );
+    }
+
+    private void setupInstructionRecycler() {
+        availableInstructionList = new ArrayList<>();
+        instructionRecycler.setLayoutManager(new LinearLayoutManager(this));
+        instructionRecycler.setAdapter(new FoldedInstructionRecyclerAdapter(
+                availableInstructionList,
+                new FoldedInstructionRecyclerAdapter.OnInstructionClickListener() {
+                    @Override
+                    public void onClick(InstructionData instructionData) {
+                        finishWithInstruction(instructionData);
+                    }
+                }
+        ));
     }
 
     private void finishWithInstruction(InstructionData instructionData) {

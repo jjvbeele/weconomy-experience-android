@@ -70,6 +70,9 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     @BindView(R.id.loading_view)
     protected View loadingView;
 
+    @BindView(R.id.discover)
+    protected View discover;
+
     private List<PlayerData> playerDataList;
 
     private List<SelectedGoalData> selectedGoalList;
@@ -82,6 +85,9 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     private List<List<ScheduledInstructionData>> scheduledInstructionDataMap;
 
+    private List<InstructionData> availableInstructionList;
+    private List<InstructionData> libraryInstructionList;
+
     //firebase attributes
     private FireDatabaseTransactions fireDatabaseTransactions;
     private FireAuthHelper fireAuthHelper;
@@ -91,6 +97,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         public void userReady(FirebaseUser firebaseUser) {
             registerPlayer();
             observePlayers();
+            observeLibraryInstructions();
+            observeAvailableInstructionsInGame();
             observeSchedule();
             observeGoalCount();
             loadingView.setVisibility(View.GONE);
@@ -105,6 +113,15 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
         ButterKnife.bind(this);
 
+        boolean admin = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE).getBoolean(Constants.PREF_ADMIN, false);
+        if (admin) {
+            discover.setVisibility(View.VISIBLE);
+        } else {
+            discover.setVisibility(View.GONE);
+        }
+
+        availableInstructionList = new ArrayList<>();
+        libraryInstructionList = new ArrayList<>();
         selectedGoalList = new ArrayList<>();
 
         new AppNavigationDrawer(this, drawerLayout);
@@ -430,6 +447,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
      */
     private void showSelectInstructionScreen(int indexInView) {
         Intent intent = new Intent(GameActivity.this, SelectInstructionActivity.class);
+        intent.putExtra(Constants.KEY_GAME_DATA_PARCEL, Parcels.wrap(gameData));
         intent.putExtra(Constants.KEY_INSTRUCTION_DAY, indexInView);
         intent.putExtra(Constants.KEY_LIBRARY_KEY, gameData.getLibraryKey());
         startActivityForResult(intent, Constants.REQUEST_CODE_SELECT_INSTRUCTION);
@@ -645,10 +663,10 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
      */
     private void updateGoalCount() {
         int realisedGoalCount = 0;
-        for(SelectedGoalData selectedGoalData : selectedGoalList) {
+        for (SelectedGoalData selectedGoalData : selectedGoalList) {
             Log.d(TAG, "realised? " + selectedGoalData.getRealised());
-            if(selectedGoalData.getRealised()) {
-                realisedGoalCount ++;
+            if (selectedGoalData.getRealised()) {
+                realisedGoalCount++;
             }
         }
         goalView.setText(getString(R.string.goals_text, selectedGoalList.size(), realisedGoalCount));
@@ -667,8 +685,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
                     @Override
                     public void onChildChanged(SelectedGoalData data) {
-                        for(SelectedGoalData selectedGoalData : selectedGoalList) {
-                            if(selectedGoalData.getId().equals(data.getId())) {
+                        for (SelectedGoalData selectedGoalData : selectedGoalList) {
+                            if (selectedGoalData.getId().equals(data.getId())) {
                                 int index = selectedGoalList.indexOf(selectedGoalData);
                                 selectedGoalList.remove(index);
                                 selectedGoalList.add(index, data);
@@ -680,8 +698,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
                     @Override
                     public void onChildRemoved(SelectedGoalData data) {
-                        for(SelectedGoalData selectedGoalData : selectedGoalList) {
-                            if(selectedGoalData.getId().equals(data.getId())) {
+                        for (SelectedGoalData selectedGoalData : selectedGoalList) {
+                            if (selectedGoalData.getId().equals(data.getId())) {
                                 selectedGoalList.remove(selectedGoalData);
                                 updateGoalCount();
                                 return;
@@ -729,5 +747,141 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         } else {
             loadingView.setVisibility(View.GONE);
         }
+    }
+
+    private void observeLibraryInstructions() {
+        fireDatabaseTransactions.observeInstructionsFromLibrary(
+                gameData.getLibraryKey(),
+                new ReturnableChange<InstructionData>() {
+                    @Override
+                    public void onChildAdded(InstructionData data) {
+                        libraryInstructionList.add(data);
+                    }
+
+                    @Override
+                    public void onChildChanged(InstructionData data) {
+                        for (InstructionData needle : libraryInstructionList) {
+                            if (needle.getId().equals(data.getId())) {
+                                int index = libraryInstructionList.indexOf(needle);
+                                libraryInstructionList.remove(index);
+                                libraryInstructionList.add(index, data);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildRemoved(InstructionData data) {
+                        for (InstructionData needle : libraryInstructionList) {
+                            if (needle.getId().equals(data.getId())) {
+                                int index = libraryInstructionList.indexOf(needle);
+                                libraryInstructionList.remove(index);
+                                return;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildMoved(InstructionData data) {
+                    }
+
+                    @Override
+                    public void onResult(InstructionData data) {
+                    }
+                }
+        );
+    }
+
+    private void observeAvailableInstructionsInGame() {
+        fireDatabaseTransactions.observeAvailableInstructionsInGame(
+                gameData.getId(),
+                gameData.getLibraryKey(),
+                new ReturnableChange<InstructionData>() {
+                    @Override
+                    public void onChildAdded(InstructionData data) {
+                        availableInstructionList.add(data);
+                    }
+
+                    @Override
+                    public void onChildChanged(InstructionData data) {
+                        for (InstructionData needle : availableInstructionList) {
+                            if (needle.getId().equals(data.getId())) {
+                                int index = availableInstructionList.indexOf(needle);
+                                availableInstructionList.remove(index);
+                                availableInstructionList.add(index, data);
+                                return;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildRemoved(InstructionData data) {
+                        for (InstructionData needle : availableInstructionList) {
+                            if (needle.getId().equals(data.getId())) {
+                                int index = availableInstructionList.indexOf(needle);
+                                availableInstructionList.remove(index);
+                                return;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildMoved(InstructionData data) {
+                    }
+
+                    @Override
+                    public void onResult(InstructionData data) {
+                    }
+                }
+        );
+    }
+
+    private void showAdminInstructionMenu() {
+        String[] instructionArray = new String[libraryInstructionList.size()];
+        boolean[] discoveredInstructionArray = new boolean[libraryInstructionList.size()];
+
+        Log.d(TAG, "list size " + libraryInstructionList.size());
+
+        for (int i = 0; i < libraryInstructionList.size(); i++) {
+            InstructionData instructionData = libraryInstructionList.get(i);
+            instructionArray[i] = instructionData.getText();
+
+            Log.d(TAG, instructionData.getText());
+
+            discoveredInstructionArray[i] = false;
+            for (InstructionData availableInstructionData : availableInstructionList) {
+                boolean discovered = instructionData.getId().equals(availableInstructionData.getId());
+                if (discovered) {
+                    discoveredInstructionArray[i] = true;
+                    break;
+                }
+            }
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(GameActivity.this);
+        builder.setTitle(R.string.set_goal_discovery);
+        builder.setPositiveButton(R.string.done, null);
+        builder.setMultiChoiceItems(
+                instructionArray,
+                discoveredInstructionArray,
+                new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                        InstructionData instructionData = libraryInstructionList.get(which);
+
+                        if (isChecked) {
+                            fireDatabaseTransactions.addInstructionToAvailableInstructions(gameData.getId(), instructionData);
+
+                        } else {
+                            fireDatabaseTransactions.removeInstructionFromAvailableInstructions(gameData.getId(), instructionData);
+                        }
+                    }
+                }
+        );
+        builder.show();
+    }
+
+    @OnClick(R.id.discover)
+    protected void onClickDiscover() {
+        showAdminInstructionMenu();
     }
 }

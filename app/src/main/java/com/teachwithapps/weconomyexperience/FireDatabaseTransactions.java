@@ -25,91 +25,6 @@ public class FireDatabaseTransactions {
 
     private FireDatabaseHelper fireDatabaseHelper;
 
-    public void getSelectedGoalCount(String gameId, Returnable<Long> returnable) {
-        fireDatabaseHelper.getChildCount(
-                new String[]{
-                        "game_goals",
-                        gameId,
-                        "selected_goals"
-                },
-                returnable,
-                new Returnable<DatabaseError>() {
-                    @Override
-                    public void onResult(DatabaseError data) {
-                        Log.e(TAG, "Can't retrieve selected goals", data.toException());
-                    }
-                }
-        );
-    }
-
-    public void removeSelectedGoal(String gameId, String selectedGoalId) {
-        fireDatabaseHelper.removeRecord(
-                new String[]{
-                        "game_goals",
-                        gameId,
-                        "selected_goals",
-                        selectedGoalId
-                }
-        );
-    }
-
-    public void addGoalToAvailableGoals(
-            String gameId,
-            GoalData goalData) {
-        fireDatabaseHelper.addRecord(
-                new String[]{
-                        "game_goals",
-                        gameId,
-                        "available_goals"
-                },
-                goalData.getId(),
-                goalData.getId()
-        );
-    }
-
-    public void removeGoalFromAvailableGoals(
-            String gameId,
-            GoalData goalData) {
-        fireDatabaseHelper.removeRecord(
-                new String[]{
-                        "game_goals",
-                        gameId,
-                        "available_goals",
-                        goalData.getId()
-                }
-        );
-    }
-
-    public void observeGoalsFromLibrary(String libraryKey, ReturnableChange<GoalData> callback) {
-        fireDatabaseHelper.observeChild(
-                GoalData.class,
-                new String[]{
-                        "libraries",
-                        libraryKey,
-                        "goals"
-                },
-                callback,
-                new Returnable<DatabaseError>() {
-                    @Override
-                    public void onResult(DatabaseError data) {
-                        Log.e(TAG, "Can't retrieve library goals", data.toException());
-                    }
-                }
-        );
-    }
-
-    public void updateSelectedGoal(String gameId, SelectedGoalData selectedGoalData) {
-        fireDatabaseHelper.addRecord(
-                new String[]{
-                        "game_goals",
-                        gameId,
-                        "selected_goals"
-                },
-                selectedGoalData.getId(),
-                selectedGoalData
-        );
-    }
-
     public enum LoadState {
         LOADING_STARTED,
         LOADING_DONE
@@ -528,6 +443,143 @@ public class FireDatabaseTransactions {
                 });
     }
 
+    public void addInstructionToAvailableInstructions(
+            String gameId,
+            InstructionData instructionData) {
+        fireDatabaseHelper.addRecord(
+                new String[]{
+                        "game_instructions",
+                        gameId,
+                        "available_instructions"
+                },
+                instructionData.getId(),
+                instructionData.getId()
+        );
+    }
+
+    public void removeInstructionFromAvailableInstructions(
+            String gameId,
+            InstructionData instructionData) {
+        fireDatabaseHelper.removeRecord(
+                new String[]{
+                        "game_instructions",
+                        gameId,
+                        "available_instructions",
+                        instructionData.getId()
+                }
+        );
+    }
+
+    public void observeAvailableInstructionsInGame(
+            final String gameId,
+            final String libraryKey,
+            final ReturnableChange<InstructionData> callback) {
+        fireDatabaseHelper.observeChild(
+                String.class,
+                new String[]{
+                        "game_instructions",
+                        gameId,
+                        "available_instructions"
+                },
+                new ReturnableChange<String>() {
+                    @Override
+                    public void onChildAdded(final String instructionId) {
+                        getInstructionFromLibraryById(
+                                libraryKey,
+                                instructionId,
+                                new Returnable<InstructionData>() {
+                                    @Override
+                                    public void onResult(InstructionData data) {
+                                        callback.onChildAdded(data);
+                                    }
+                                }
+                        );
+                    }
+
+                    @Override
+                    public void onChildChanged(final String instructionId) {
+                        getInstructionFromLibraryById(
+                                libraryKey,
+                                instructionId,
+                                new Returnable<InstructionData>() {
+                                    @Override
+                                    public void onResult(InstructionData data) {
+                                        callback.onChildChanged(data);
+                                    }
+                                }
+                        );
+                    }
+
+                    @Override
+                    public void onChildRemoved(final String instructionId) {
+                        getInstructionFromLibraryById(
+                                libraryKey,
+                                instructionId,
+                                new Returnable<InstructionData>() {
+                                    @Override
+                                    public void onResult(InstructionData data) {
+                                        callback.onChildRemoved(data);
+                                    }
+                                }
+                        );
+                    }
+
+                    @Override
+                    public void onChildMoved(String goalId) {
+
+                    }
+
+                    @Override
+                    public void onResult(String goalId) {
+
+                    }
+                },
+                new Returnable<DatabaseError>() {
+                    @Override
+                    public void onResult(DatabaseError data) {
+                        Log.e(TAG, "Can't retrieve goal list", data.toException());
+                    }
+                }
+        );
+    }
+
+    public void getInstructionFromLibraryById(final String libraryKey, final String instructionId, final Returnable<InstructionData> callback) {
+        fireDatabaseHelper.getRecord(
+                InstructionData.class,
+                new String[]{
+                        "libraries",
+                        libraryKey,
+                        "instructions",
+                        instructionId
+                },
+                callback,
+                new Returnable<DatabaseError>() {
+                    @Override
+                    public void onResult(DatabaseError data) {
+                        Log.e(TAG, "Unable to retrieve goal data", data.toException());
+                    }
+                }
+        );
+    }
+
+    public void observeInstructionsFromLibrary(String libraryKey, ReturnableChange<InstructionData> callback) {
+        fireDatabaseHelper.observeChild(
+                InstructionData.class,
+                new String[]{
+                        "libraries",
+                        libraryKey,
+                        "instructions"
+                },
+                callback,
+                new Returnable<DatabaseError>() {
+                    @Override
+                    public void onResult(DatabaseError data) {
+                        Log.e(TAG, "Can't retrieve library goals", data.toException());
+                    }
+                }
+        );
+    }
+
     public void getPlayerById(String gameId, String playerId, Returnable<PlayerData> onReturn) {
         fireDatabaseHelper.getRecord(
                 PlayerData.class,
@@ -538,6 +590,61 @@ public class FireDatabaseTransactions {
                     public void onResult(DatabaseError data) {
                         Log.e(TAG, "Failed to retrieve player from firebase", data.toException());
                     }
+                }
+        );
+    }
+
+    public void getSelectedGoalCount(String gameId, Returnable<Long> returnable) {
+        fireDatabaseHelper.getChildCount(
+                new String[]{
+                        "game_goals",
+                        gameId,
+                        "selected_goals"
+                },
+                returnable,
+                new Returnable<DatabaseError>() {
+                    @Override
+                    public void onResult(DatabaseError data) {
+                        Log.e(TAG, "Can't retrieve selected goals", data.toException());
+                    }
+                }
+        );
+    }
+
+    public void removeSelectedGoal(String gameId, String selectedGoalId) {
+        fireDatabaseHelper.removeRecord(
+                new String[]{
+                        "game_goals",
+                        gameId,
+                        "selected_goals",
+                        selectedGoalId
+                }
+        );
+    }
+
+    public void addGoalToAvailableGoals(
+            String gameId,
+            GoalData goalData) {
+        fireDatabaseHelper.addRecord(
+                new String[]{
+                        "game_goals",
+                        gameId,
+                        "available_goals"
+                },
+                goalData.getId(),
+                goalData.getId()
+        );
+    }
+
+    public void removeGoalFromAvailableGoals(
+            String gameId,
+            GoalData goalData) {
+        fireDatabaseHelper.removeRecord(
+                new String[]{
+                        "game_goals",
+                        gameId,
+                        "available_goals",
+                        goalData.getId()
                 }
         );
     }
@@ -612,6 +719,36 @@ public class FireDatabaseTransactions {
                         Log.e(TAG, "Can't retrieve goal list", data.toException());
                     }
                 }
+        );
+    }
+
+    public void observeGoalsFromLibrary(String libraryKey, ReturnableChange<GoalData> callback) {
+        fireDatabaseHelper.observeChild(
+                GoalData.class,
+                new String[]{
+                        "libraries",
+                        libraryKey,
+                        "goals"
+                },
+                callback,
+                new Returnable<DatabaseError>() {
+                    @Override
+                    public void onResult(DatabaseError data) {
+                        Log.e(TAG, "Can't retrieve library goals", data.toException());
+                    }
+                }
+        );
+    }
+
+    public void updateSelectedGoal(String gameId, SelectedGoalData selectedGoalData) {
+        fireDatabaseHelper.addRecord(
+                new String[]{
+                        "game_goals",
+                        gameId,
+                        "selected_goals"
+                },
+                selectedGoalData.getId(),
+                selectedGoalData
         );
     }
 

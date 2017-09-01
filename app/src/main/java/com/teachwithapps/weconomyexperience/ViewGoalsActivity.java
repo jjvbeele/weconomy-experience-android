@@ -177,6 +177,7 @@ public class ViewGoalsActivity extends AppCompatActivity {
                                 int index = availableGoalList.indexOf(needle);
                                 availableGoalList.remove(index);
                                 availableGoalList.add(index, data);
+                                return;
                             }
                         }
                     }
@@ -219,6 +220,7 @@ public class ViewGoalsActivity extends AppCompatActivity {
                                 int index = libraryGoalList.indexOf(needle);
                                 libraryGoalList.remove(index);
                                 libraryGoalList.add(index, data);
+                                return;
                             }
                         }
                     }
@@ -269,6 +271,7 @@ public class ViewGoalsActivity extends AppCompatActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(ViewGoalsActivity.this);
         builder.setTitle(R.string.set_goal_discovery);
+        builder.setPositiveButton(R.string.done, null);
         builder.setMultiChoiceItems(
                 goalArray,
                 discoveredGoalArray,
@@ -297,6 +300,7 @@ public class ViewGoalsActivity extends AppCompatActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(ViewGoalsActivity.this);
         builder.setTitle(R.string.select_goal);
+        builder.setPositiveButton(R.string.done, null);
         builder.setItems(availableGoalArray, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
