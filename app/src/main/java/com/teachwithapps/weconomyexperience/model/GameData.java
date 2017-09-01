@@ -29,7 +29,7 @@ public class GameData extends FireData {
     public GameData(String name, String libraryKey) {
         this.name = name;
         this.libraryKey = libraryKey;
-        this.version = String.valueOf(BuildConfig.FIREBASE_VERSION_CODE);
+        this.version = String.valueOf(BuildConfig.FIREBASE_MAX_VERSION_CODE);
     }
 
     @PropertyName("name")

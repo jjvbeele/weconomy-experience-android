@@ -30,4 +30,6 @@
     <string name="select_goal">Select a goal</string>
     <string name="set_goal_discovery">Set discovered goals</string>
     <string name="done">DONE</string>
+    <string name="game_too_old_title">Game is too old</string>
+    <string name="game_too_old">The game is too old for this app. Please join another game.</string>
 </resources>

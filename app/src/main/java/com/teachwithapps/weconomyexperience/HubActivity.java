@@ -231,17 +231,25 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
      * @param gameData
      */
     private void clickHubGame(GameData gameData) {
-        if(Double.parseDouble(gameData.getVersion()) <= BuildConfig.FIREBASE_VERSION_CODE) {
-            Intent intent = new Intent(HubActivity.this, GameActivity.class);
-            intent.putExtra(Constants.KEY_GAME_DATA_PARCEL, Parcels.wrap(gameData));
-            startActivity(intent);
+        if (gameData.getVersion() == null ||
+                Double.parseDouble(gameData.getVersion()) < BuildConfig.FIREBASE_MIN_VERSION_CODE) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(getString(R.string.game_too_old_title));
+            builder.setMessage(getString(R.string.game_too_old));
+            builder.setPositiveButton(R.string.ok, null);
+            builder.show();
 
-        } else {
+        } else if (Double.parseDouble(gameData.getVersion()) > BuildConfig.FIREBASE_MAX_VERSION_CODE) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(getString(R.string.app_too_old_title));
             builder.setMessage(getString(R.string.app_too_old));
             builder.setPositiveButton(R.string.ok, null);
             builder.show();
+
+        } else {
+            Intent intent = new Intent(HubActivity.this, GameActivity.class);
+            intent.putExtra(Constants.KEY_GAME_DATA_PARCEL, Parcels.wrap(gameData));
+            startActivity(intent);
         }
     }
 
