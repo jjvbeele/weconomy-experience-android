@@ -38,7 +38,7 @@ public class FoldedInstructionRecyclerAdapter extends RecyclerView.Adapter<Folde
 
     @Override
     public InstructionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View scheduleInstructionView = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_folded_instruction, parent, false);
+        View scheduleInstructionView = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_listed_instruction, parent, false);
         InstructionViewHolder instructionViewHolder = new InstructionViewHolder(scheduleInstructionView);
         return instructionViewHolder;
     }

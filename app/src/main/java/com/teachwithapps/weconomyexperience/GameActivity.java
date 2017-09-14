@@ -65,8 +65,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     @BindView(R.id.days_row)
     protected LinearLayout daysRowLayout;
 
-    @BindView(R.id.goal_view)
-    protected TextView goalView;
+    @BindView(R.id.goal_text)
+    protected TextView goalText;
 
     @BindView(R.id.loading_view)
     protected View loadingView;
@@ -684,7 +684,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
                 realisedGoalCount++;
             }
         }
-        goalView.setText(getString(R.string.goals_text, selectedGoalList.size(), realisedGoalCount));
+        goalText.setText(getString(R.string.goals_text, selectedGoalList.size(), realisedGoalCount));
     }
 
     private void observeGoalCount() {
@@ -746,6 +746,11 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
     @OnClick(R.id.goal_view)
     protected void onClickGoalView() {
+        showGoalScreen();
+    }
+
+    @OnClick(R.id.goal_text)
+    protected void onClickGoalText() {
         showGoalScreen();
     }
 
