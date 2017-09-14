@@ -1,7 +1,10 @@
 package com.teachwithapps.weconomyexperience.view.schedulerecycler;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -14,7 +17,10 @@ import com.teachwithapps.weconomyexperience.R;
 public class ScheduledInstructionShadowBuilder extends View.DragShadowBuilder {
 
     // The drag shadow image, defined as a drawable thing
-    private static Drawable shadow;
+//    private static Drawable shadow;
+    private Canvas bufferCanvas;
+    private Bitmap bufferBitmap;
+    int width, height;
 
     // Defines the constructor for myDragShadowBuilder
     public ScheduledInstructionShadowBuilder(View v) {
@@ -22,8 +28,12 @@ public class ScheduledInstructionShadowBuilder extends View.DragShadowBuilder {
         // Stores the View parameter passed to myDragShadowBuilder.
         super(v);
 
+        bufferBitmap = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
+        bufferCanvas = new Canvas(bufferBitmap);
+        v.draw(bufferCanvas);
+
         // Creates a draggable image that will fill the Canvas provided by the system.
-        shadow = new ColorDrawable(v.getContext().getResources().getColor(R.color.shadow));
+//        shadow = v.getContext().getResources().getDrawable(R.drawable.scheduled_background);
     }
 
     // Defines a callback that sends the drag shadow dimensions and touch point back to the
@@ -31,7 +41,6 @@ public class ScheduledInstructionShadowBuilder extends View.DragShadowBuilder {
     @Override
     public void onProvideShadowMetrics(Point size, Point touch) {
         // Defines local variables
-        int width, height;
 
         // Sets the width of the shadow to half the width of the original View
         width = getView().getWidth() / 2;
@@ -42,7 +51,7 @@ public class ScheduledInstructionShadowBuilder extends View.DragShadowBuilder {
         // The drag shadow is a ColorDrawable. This sets its dimensions to be the same as the
         // Canvas that the system will provide. As a result, the drag shadow will fill the
         // Canvas.
-        shadow.setBounds(0, 0, width, height);
+//        shadow.setBounds(0, 0, width, height);
 
         // Sets the size parameter's width and height values. These get back to the system
         // through the size parameter.
@@ -56,8 +65,6 @@ public class ScheduledInstructionShadowBuilder extends View.DragShadowBuilder {
     // from the dimensions passed in onProvideShadowMetrics().
     @Override
     public void onDrawShadow(Canvas canvas) {
-
-        // Draws the ColorDrawable in the Canvas passed in from the system.
-        shadow.draw(canvas);
+        canvas.drawBitmap(bufferBitmap, null, new Rect(0, 0, width, height), new Paint());
     }
 }

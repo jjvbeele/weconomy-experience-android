@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.DrawableRes;
 import android.support.v7.widget.RecyclerView;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import com.teachwithapps.weconomyexperience.R;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
 import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
+import com.teachwithapps.weconomyexperience.view.util.ViewAnimation;
 
 import org.parceler.Parcels;
 
@@ -252,5 +254,22 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
                 null,      // no need to use local data
                 0          // flags (not currently used, set to 0)
         );
+
+        view.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View view, DragEvent event) {
+                switch(event.getAction()) {
+                    case DragEvent.ACTION_DRAG_STARTED:
+                        ViewAnimation.viewFade(view, 0.5f);
+                        return true;
+
+                    case DragEvent.ACTION_DRAG_ENDED:
+                        ViewAnimation.viewFade(view, 1f);
+                        view.setOnDragListener(null);
+                        return true;
+                }
+                return false;
+            }
+        });
     }
 }

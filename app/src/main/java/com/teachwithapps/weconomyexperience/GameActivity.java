@@ -1045,7 +1045,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
                         }
                         return true;
 
-                    default:git
+                    default:
                         return false;
                 }
             }

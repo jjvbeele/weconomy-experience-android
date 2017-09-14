@@ -41,4 +41,11 @@ public class ViewAnimation {
                 .setDuration(300)
                 .start();
     }
+
+    public static void viewFade(View view, float fadeTo) {
+        view.animate()
+                .alpha(fadeTo)
+                .setDuration(300)
+                .start();
+    }
 }
