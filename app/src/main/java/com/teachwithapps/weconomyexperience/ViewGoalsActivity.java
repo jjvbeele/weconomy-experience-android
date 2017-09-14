@@ -43,9 +43,6 @@ public class ViewGoalsActivity extends AppCompatActivity {
     @BindView(R.id.toolbar_title)
     protected TextView toolbarTitle;
 
-    @BindView(R.id.discover_goal)
-    protected View discoverGoalView;
-
     //firebase attributes
     private FireDatabaseTransactions fireDatabaseTransactions;
     private FireAuthHelper fireAuthHelper;
@@ -80,13 +77,6 @@ public class ViewGoalsActivity extends AppCompatActivity {
         fireDatabaseTransactions = new FireDatabaseTransactions();
         fireAuthHelper = new FireAuthHelper(this);
         fireAuthHelper.withUser(this, fireAuthCallback);
-
-        boolean admin = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE).getBoolean(Constants.PREF_ADMIN, false);
-        if (admin) {
-            discoverGoalView.setVisibility(View.VISIBLE);
-        } else {
-            discoverGoalView.setVisibility(View.GONE);
-        }
     }
 
     @Override
@@ -247,51 +237,6 @@ public class ViewGoalsActivity extends AppCompatActivity {
         );
     }
 
-    private void showAdminGoalMenu() {
-        String[] goalArray = new String[libraryGoalList.size()];
-        boolean[] discoveredGoalArray = new boolean[libraryGoalList.size()];
-
-        Log.d(TAG, "list size " + libraryGoalList.size());
-
-        for (int i = 0; i < libraryGoalList.size(); i++) {
-            GoalData goalData = libraryGoalList.get(i);
-            goalArray[i] = goalData.getText();
-
-            Log.d(TAG, goalData.getText());
-
-            discoveredGoalArray[i] = false;
-            for (GoalData availableGoalData : availableGoalList) {
-                boolean discovered = goalData.getId().equals(availableGoalData.getId());
-                if (discovered) {
-                    discoveredGoalArray[i] = true;
-                    break;
-                }
-            }
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(ViewGoalsActivity.this);
-        builder.setTitle(R.string.set_goal_discovery);
-        builder.setPositiveButton(R.string.done, null);
-        builder.setMultiChoiceItems(
-                goalArray,
-                discoveredGoalArray,
-                new DialogInterface.OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                        GoalData goalData = libraryGoalList.get(which);
-
-                        if (isChecked) {
-                            fireDatabaseTransactions.addGoalToAvailableGoals(gameData.getId(), goalData);
-
-                        } else {
-                            fireDatabaseTransactions.removeGoalFromAvailableGoals(gameData.getId(), goalData);
-                        }
-                    }
-                }
-        );
-        builder.show();
-    }
-
     private void showAddGoalMenu() {
         String[] availableGoalArray = new String[availableGoalList.size()];
         for (int i = 0; i < availableGoalList.size(); i++) {
@@ -319,11 +264,6 @@ public class ViewGoalsActivity extends AppCompatActivity {
     @OnClick(R.id.add_goal)
     protected void onClickAddGoal() {
         showAddGoalMenu();
-    }
-
-    @OnClick(R.id.discover_goal)
-    protected void onClickDiscoverGoal() {
-        showAdminGoalMenu();
     }
 
     @OnClick(R.id.toolbar_close)

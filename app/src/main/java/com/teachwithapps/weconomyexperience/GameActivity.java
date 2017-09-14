@@ -23,6 +23,7 @@ import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
 import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
 import com.teachwithapps.weconomyexperience.firebase.util.ReturnableChange;
 import com.teachwithapps.weconomyexperience.model.GameData;
+import com.teachwithapps.weconomyexperience.model.GoalData;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
 import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
@@ -70,12 +71,13 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     @BindView(R.id.loading_view)
     protected View loadingView;
 
-    @BindView(R.id.discover)
-    protected View discover;
+    @BindView(R.id.discover_goal)
+    protected View discoverGoal;
+
+    @BindView(R.id.discover_instruction)
+    protected View discoverInstruction;
 
     private List<PlayerData> playerDataList;
-
-    private List<SelectedGoalData> selectedGoalList;
 
     private GameData gameData;
 
@@ -88,6 +90,11 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     private List<InstructionData> availableInstructionList;
     private List<InstructionData> libraryInstructionList;
 
+    private List<GoalData> availableGoalList;
+    private List<GoalData> libraryGoalList;
+
+    private List<SelectedGoalData> selectedGoalList;
+
     //firebase attributes
     private FireDatabaseTransactions fireDatabaseTransactions;
     private FireAuthHelper fireAuthHelper;
@@ -99,6 +106,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
             observePlayers();
             observeLibraryInstructions();
             observeAvailableInstructionsInGame();
+            observeAvailableGoals();
+            observeLibraryGoals();
             observeSchedule();
             observeGoalCount();
             loadingView.setVisibility(View.GONE);
@@ -115,13 +124,19 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
         boolean admin = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE).getBoolean(Constants.PREF_ADMIN, false);
         if (admin) {
-            discover.setVisibility(View.VISIBLE);
+            discoverGoal.setVisibility(View.VISIBLE);
+            discoverInstruction.setVisibility(View.VISIBLE);
         } else {
-            discover.setVisibility(View.GONE);
+            discoverGoal.setVisibility(View.GONE);
+            discoverInstruction.setVisibility(View.GONE);
         }
 
         availableInstructionList = new ArrayList<>();
         libraryInstructionList = new ArrayList<>();
+
+        availableGoalList = new ArrayList<>();
+        libraryGoalList = new ArrayList<>();
+
         selectedGoalList = new ArrayList<>();
 
         new AppNavigationDrawer(this, drawerLayout);
@@ -880,8 +895,147 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         builder.show();
     }
 
-    @OnClick(R.id.discover)
-    protected void onClickDiscover() {
+    @OnClick(R.id.discover_instruction)
+    protected void onClickDiscoverInstruction() {
         showAdminInstructionMenu();
+    }
+
+
+
+    private void observeAvailableGoals() {
+        fireDatabaseTransactions.observeAvailableGoalsInGame(
+                gameData.getId(),
+                gameData.getLibraryKey(),
+                new ReturnableChange<GoalData>() {
+                    @Override
+                    public void onChildAdded(GoalData data) {
+                        availableGoalList.add(data);
+                    }
+
+                    @Override
+                    public void onChildChanged(GoalData data) {
+                        for (GoalData needle : availableGoalList) {
+                            if (needle.getId().equals(data.getId())) {
+                                int index = availableGoalList.indexOf(needle);
+                                availableGoalList.remove(index);
+                                availableGoalList.add(index, data);
+                                return;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildRemoved(GoalData data) {
+                        for (GoalData needle : availableGoalList) {
+                            if (needle.getId().equals(data.getId())) {
+                                int index = availableGoalList.indexOf(needle);
+                                availableGoalList.remove(index);
+                                return;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildMoved(GoalData data) {
+                    }
+
+                    @Override
+                    public void onResult(GoalData data) {
+                    }
+                }
+        );
+    }
+
+    private void observeLibraryGoals() {
+        fireDatabaseTransactions.observeGoalsFromLibrary(
+                gameData.getLibraryKey(),
+                new ReturnableChange<GoalData>() {
+                    @Override
+                    public void onChildAdded(GoalData data) {
+                        libraryGoalList.add(data);
+                    }
+
+                    @Override
+                    public void onChildChanged(GoalData data) {
+                        for (GoalData needle : libraryGoalList) {
+                            if (needle.getId().equals(data.getId())) {
+                                int index = libraryGoalList.indexOf(needle);
+                                libraryGoalList.remove(index);
+                                libraryGoalList.add(index, data);
+                                return;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildRemoved(GoalData data) {
+                        for (GoalData needle : libraryGoalList) {
+                            if (needle.getId().equals(data.getId())) {
+                                int index = libraryGoalList.indexOf(needle);
+                                libraryGoalList.remove(index);
+                                return;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildMoved(GoalData data) {
+                    }
+
+                    @Override
+                    public void onResult(GoalData data) {
+                    }
+                }
+        );
+    }
+
+    private void showAdminGoalMenu() {
+        String[] goalArray = new String[libraryGoalList.size()];
+        boolean[] discoveredGoalArray = new boolean[libraryGoalList.size()];
+
+        Log.d(TAG, "list size " + libraryGoalList.size());
+
+        for (int i = 0; i < libraryGoalList.size(); i++) {
+            GoalData goalData = libraryGoalList.get(i);
+            goalArray[i] = goalData.getText();
+
+            Log.d(TAG, goalData.getText());
+
+            discoveredGoalArray[i] = false;
+            for (GoalData availableGoalData : availableGoalList) {
+                boolean discovered = goalData.getId().equals(availableGoalData.getId());
+                if (discovered) {
+                    discoveredGoalArray[i] = true;
+                    break;
+                }
+            }
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(GameActivity.this);
+        builder.setTitle(R.string.set_goal_discovery);
+        builder.setPositiveButton(R.string.done, null);
+        builder.setMultiChoiceItems(
+                goalArray,
+                discoveredGoalArray,
+                new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                        GoalData goalData = libraryGoalList.get(which);
+
+                        if (isChecked) {
+                            fireDatabaseTransactions.addGoalToAvailableGoals(gameData.getId(), goalData);
+
+                        } else {
+                            fireDatabaseTransactions.removeGoalFromAvailableGoals(gameData.getId(), goalData);
+                        }
+                    }
+                }
+        );
+        builder.show();
+    }
+
+    @OnClick(R.id.discover_goal)
+    protected void onClickDiscoverGoal() {
+        showAdminGoalMenu();
     }
 }

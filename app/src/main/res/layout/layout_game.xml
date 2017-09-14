@@ -10,8 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/dark_gray"
-        android:padding="12dp"
         android:drawableRight="@drawable/ic_view_list"
+        android:padding="12dp"
         android:text="@string/goals_text"
         android:textColor="@color/white_gray"
         android:textSize="16sp" />
@@ -20,8 +20,8 @@
         android:id="@+id/days_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_below="@+id/goal_view" />
+        android:layout_below="@+id/goal_view"
+        android:orientation="horizontal" />
 
     <com.teachwithapps.weconomyexperience.view.util.MultiRecyclerView
         android:id="@+id/schedule_recycler_view"
@@ -38,16 +38,29 @@
         tools:visibility="visible" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/discover"
+        android:id="@+id/discover_instruction"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="20dp"
-        android:layout_marginLeft="20dp"
+        android:layout_marginLeft="5dp"
         android:layout_marginRight="20dp"
-        android:visibility="gone"
         android:layout_marginTop="20dp"
-        android:src="@drawable/ic_flare" />
+        android:src="@drawable/ic_i"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/discover_goal"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_toLeftOf="@+id/discover_instruction"
+        android:src="@drawable/ic_g"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
 </RelativeLayout>
