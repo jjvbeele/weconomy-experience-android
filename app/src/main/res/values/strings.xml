@@ -33,4 +33,6 @@
     <string name="game_too_old_title">Game is too old</string>
     <string name="game_too_old">The game is too old for this app. Please join another game.</string>
     <string name="add_goal">Add goal</string>
+    <string name="operation_key">operation_key</string>
+    <string name="payload_key">payload_key</string>
 </resources>

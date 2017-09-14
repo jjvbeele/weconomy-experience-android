@@ -1,5 +1,12 @@
-package com.teachwithapps.weconomyexperience.view;
+package com.teachwithapps.weconomyexperience.view.schedulerecycler;
 
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.DrawableRes;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,14 +16,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.gson.GsonBuilder;
 import com.squareup.picasso.Picasso;
 import com.teachwithapps.weconomyexperience.Constants;
 import com.teachwithapps.weconomyexperience.GameActivity;
 import com.teachwithapps.weconomyexperience.R;
-import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
 import com.teachwithapps.weconomyexperience.model.PlayerData;
 import com.teachwithapps.weconomyexperience.model.ScheduledInstructionData;
+
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,15 +104,16 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
         public void setData(final ScheduledInstructionData scheduledInstructionData) {
             this.scheduledInstructionData = scheduledInstructionData;
             InstructionData instructionData = scheduledInstructionData.getBindedInstructionData();
-            if(instructionData == null) {
+            if (instructionData == null) {
                 return;
             }
             titleTextView.setText(instructionData.getText());
 
+            itemView.setTag(R.string.operation_key, "scheduled instruction");
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
-                public boolean onLongClick(View v) {
-                    ((GameActivity) itemView.getContext()).longClickScheduledInstruction(scheduledInstructionData);
+                public boolean onLongClick(View view) {
+                    handleScheduledInstructionDrag(view, scheduledInstructionData);
                     return true;
                 }
             });
@@ -161,16 +171,17 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
         /**
          * Handle iconlist, assign player avatars on the icons in the respective player map
          * Needs to be a map (instead of a list) to retain order
+         *
          * @param playerIdMap a map where playerId is connected to an index from the labour or claim array
-         * @param iconList list of icons where the indices are respective to the index array in the playerIdMap
+         * @param iconList    list of icons where the indices are respective to the index array in the playerIdMap
          */
         private void handlePlayerDataFromIds(final Map<String, String> playerIdMap, final List<ImageView> iconList) {
-            for(int i = 0; i < playerIdMap.keySet().size(); i++) {
+            for (int i = 0; i < playerIdMap.keySet().size(); i++) {
                 final int index = i;
-                final String keyString = (String)playerIdMap.keySet().toArray()[index];
+                final String keyString = (String) playerIdMap.keySet().toArray()[index];
                 String playerId = playerIdMap.get(keyString);
                 PlayerData playerData = ((GameActivity) itemView.getContext()).getPlayerById(playerId);
-                if(playerData != null) {
+                if (playerData != null) {
                     Picasso.with(itemView.getContext())
                             .load(playerData.getPhotoUrl())
                             .into(iconList.get(Integer.parseInt(keyString)));
@@ -216,11 +227,30 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
                 claimViewList.add(imageView);
             }
 
-            if(ready) {
+            if (ready) {
                 imageView.setAlpha(1f);
             } else {
                 imageView.setAlpha(0.4f);
             }
         }
+    }
+
+    private void handleScheduledInstructionDrag(View view, ScheduledInstructionData scheduledInstructionData) {
+        String tag = (String) view.getTag(R.string.operation_key);
+
+        ScheduleMultiRecyclerView.setDraggedScheduledInstructionData(scheduledInstructionData);
+
+        ClipData.Item item = new ClipData.Item(tag);
+        ClipData dragData = new ClipData(tag, new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}, item);
+        // Instantiates the drag shadow builder.
+        View.DragShadowBuilder myShadow = new ScheduledInstructionShadowBuilder(view);
+
+        // Starts the drag
+        view.startDrag(
+                dragData,  // the data to be dragged
+                myShadow,  // the drag shadow builder
+                null,      // no need to use local data
+                0          // flags (not currently used, set to 0)
+        );
     }
 }

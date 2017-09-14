@@ -11,13 +11,11 @@ import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.teachwithapps.weconomyexperience.firebase.FireAuthHelper;
-import com.teachwithapps.weconomyexperience.firebase.util.Returnable;
 import com.teachwithapps.weconomyexperience.firebase.util.ReturnableChange;
 import com.teachwithapps.weconomyexperience.model.GameData;
 import com.teachwithapps.weconomyexperience.model.InstructionData;
 import com.teachwithapps.weconomyexperience.util.IntentUtil;
-import com.teachwithapps.weconomyexperience.util.Log;
-import com.teachwithapps.weconomyexperience.view.FoldedInstructionRecyclerAdapter;
+import com.teachwithapps.weconomyexperience.view.InstructionRecyclerAdapter;
 
 import org.parceler.Parcels;
 
@@ -136,9 +134,9 @@ public class SelectInstructionActivity extends AppCompatActivity {
     private void setupInstructionRecycler() {
         availableInstructionList = new ArrayList<>();
         instructionRecycler.setLayoutManager(new LinearLayoutManager(this));
-        instructionRecycler.setAdapter(new FoldedInstructionRecyclerAdapter(
+        instructionRecycler.setAdapter(new InstructionRecyclerAdapter(
                 availableInstructionList,
-                new FoldedInstructionRecyclerAdapter.OnInstructionClickListener() {
+                new InstructionRecyclerAdapter.OnInstructionClickListener() {
                     @Override
                     public void onClick(InstructionData instructionData) {
                         finishWithInstruction(instructionData);

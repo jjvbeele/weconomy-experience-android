@@ -6,10 +6,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -31,8 +32,8 @@ import com.teachwithapps.weconomyexperience.model.SelectedGoalData;
 import com.teachwithapps.weconomyexperience.util.IntentUtil;
 import com.teachwithapps.weconomyexperience.util.Log;
 import com.teachwithapps.weconomyexperience.view.AppNavigationDrawer;
-import com.teachwithapps.weconomyexperience.view.ScheduleRecyclerAdapter;
-import com.teachwithapps.weconomyexperience.view.util.MultiRecyclerView;
+import com.teachwithapps.weconomyexperience.view.schedulerecycler.ScheduleMultiRecyclerView;
+import com.teachwithapps.weconomyexperience.view.util.ViewAnimation;
 
 import org.parceler.Parcels;
 
@@ -60,7 +61,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     protected TextView toolbarTitle;
 
     @BindView(R.id.schedule_recycler_view)
-    protected MultiRecyclerView<ScheduledInstructionData> scheduleRecyclerView;
+    protected ScheduleMultiRecyclerView scheduleRecyclerView;
 
     @BindView(R.id.days_row)
     protected LinearLayout daysRowLayout;
@@ -72,10 +73,16 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     protected View loadingView;
 
     @BindView(R.id.discover_goal)
-    protected View discoverGoal;
+    protected FloatingActionButton discoverGoal;
 
     @BindView(R.id.discover_instruction)
-    protected View discoverInstruction;
+    protected FloatingActionButton discoverInstruction;
+
+    @BindView(R.id.remove_instruction)
+    protected FloatingActionButton removeInstruction;
+
+    @BindView(android.R.id.content)
+    protected View contentView;
 
     private List<PlayerData> playerDataList;
 
@@ -124,8 +131,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
         boolean admin = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE).getBoolean(Constants.PREF_ADMIN, false);
         if (admin) {
-            discoverGoal.setVisibility(View.VISIBLE);
-            discoverInstruction.setVisibility(View.VISIBLE);
+            ViewAnimation.viewScaleIn(discoverGoal);
+            ViewAnimation.viewScaleIn(discoverInstruction);
         } else {
             discoverGoal.setVisibility(View.GONE);
             discoverInstruction.setVisibility(View.GONE);
@@ -158,20 +165,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
             addDayToSchedule(i); //we start at day 1
         }
 
-        //adapterfactory that will create scheduleadapters for the scheduledrecyclerview
-        MultiRecyclerView.AdapterFactory<ScheduleRecyclerAdapter.ViewHolder, ScheduledInstructionData> adapterFactory =
-                new MultiRecyclerView.AdapterFactory<ScheduleRecyclerAdapter.ViewHolder, ScheduledInstructionData>() {
-                    @Override
-                    public RecyclerView.Adapter<ScheduleRecyclerAdapter.ViewHolder> createAdapter(List<ScheduledInstructionData> ts) {
-                        return new ScheduleRecyclerAdapter(ts);
-                    }
-                };
-
         //add instructiondatamap to the schedulerecyclerview
-        scheduleRecyclerView.setDataMap(
-                scheduledInstructionDataMap,
-                adapterFactory
-        );
+        scheduleRecyclerView.setDataMap(scheduledInstructionDataMap);
 
         //show loading view, will be hidden when user is ready
         //firedatabasetransactions can show and hide it again
@@ -185,6 +180,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         fireDatabaseTransactions.setOnLoadingListener(this);
 
         updateGoalCount();
+        setOnDragListeners();
     }
 
     @Override
@@ -222,8 +218,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
      *
      * @param data
      */
-    public void longClickScheduledInstruction(final ScheduledInstructionData data) {
-        showEditScheduledInstructionScreen(data);
+    public void longClickScheduledInstruction(final View view, final ScheduledInstructionData data) {
+//        showEditScheduledInstructionScreen(data);
     }
 
     /**
@@ -468,70 +464,9 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         startActivityForResult(intent, Constants.REQUEST_CODE_SELECT_INSTRUCTION);
     }
 
-    /**
-     * Shows screen for editting a scheduled instruction
-     * The instruction can be removed or moved to another day here
-     *
-     * @param data
-     */
-    private void showEditScheduledInstructionScreen(final ScheduledInstructionData data) {
-        final View scheduledInstructionEditDialog = LayoutInflater.from(this).inflate(R.layout.edit_scheduled_instruction_dialog, null);
-        Spinner daySpinner = ((Spinner) scheduledInstructionEditDialog.findViewById(R.id.day_spinner));
-
-        final String[] daysArray = new String[daysCount];
-        for (int i = 0; i < daysCount; i++) {
-            daysArray[i] = String.valueOf(i + 1);
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, daysArray);
-        daySpinner.setAdapter(adapter);
-
-        daySpinner.setSelection(data.getDay() - 1);
-        daySpinner.setOnItemSelectedListener(
-                new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        int selectedDay = Integer.valueOf(daysArray[position]);
-                        data.setDay(selectedDay);
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
-                });
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.edit_scheduled_instruction_dialog_title);
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.setView(scheduledInstructionEditDialog);
-        final Dialog dialog = builder.show();
-
-        scheduledInstructionEditDialog
-                .findViewById(R.id.remove_schedule_button)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        fireDatabaseTransactions.removeScheduledInstruction(gameData.getId(), data);
-                        dialog.dismiss();
-                    }
-                });
-
-        scheduledInstructionEditDialog
-                .findViewById(R.id.move_scheduled_button)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        fireDatabaseTransactions.rescheduleScheduledInstruction(gameData.getId(), data);
-                        dialog.dismiss();
-                    }
-                });
+    public void rescheduleScheduledInstruction(ScheduledInstructionData data, int day) {
+        data.setDay(day);
+        fireDatabaseTransactions.rescheduleScheduledInstruction(gameData.getId(), data);
     }
 
     /**
@@ -906,7 +841,6 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     }
 
 
-
     private void observeAvailableGoals() {
         fireDatabaseTransactions.observeAvailableGoalsInGame(
                 gameData.getId(),
@@ -1042,5 +976,79 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     @OnClick(R.id.discover_goal)
     protected void onClickDiscoverGoal() {
         showAdminGoalMenu();
+    }
+
+
+    private void setOnDragListeners() {
+        discoverGoal.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View v, DragEvent event) {
+                switch (event.getAction()) {
+                    case DragEvent.ACTION_DRAG_STARTED:
+                        ViewAnimation.viewScaleOut(discoverGoal);
+                        return true;
+
+                    case DragEvent.ACTION_DRAG_ENDED:
+                        ViewAnimation.viewScaleIn(discoverGoal);
+                        return true;
+
+                    default:
+                        return false;
+                }
+            }
+        });
+
+        discoverInstruction.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View v, DragEvent event) {
+                Log.d(TAG, "discoverinstruction drag event " + event.getAction());
+                switch (event.getAction()) {
+                    case DragEvent.ACTION_DRAG_STARTED:
+                        ViewAnimation.viewScaleOut(discoverInstruction);
+                        return true;
+
+                    case DragEvent.ACTION_DRAG_ENDED:
+                        ViewAnimation.viewScaleIn(discoverInstruction);
+                        return true;
+
+                    default:
+                        return false;
+                }
+            }
+        });
+
+        removeInstruction.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View view, DragEvent event) {
+                Log.d(TAG, "removeInstruction drag event " + event.getAction());
+                switch (event.getAction()) {
+                    case DragEvent.ACTION_DRAG_STARTED:
+                        ViewAnimation.viewScaleIn(removeInstruction);
+                        return true;
+
+                    case DragEvent.ACTION_DRAG_ENDED:
+                        ViewAnimation.viewScaleOut(removeInstruction);
+                        return true;
+
+                    case DragEvent.ACTION_DRAG_ENTERED:
+                        ViewAnimation.viewScaleUp(removeInstruction);
+                        return true;
+
+                    case DragEvent.ACTION_DRAG_EXITED:
+                        ViewAnimation.viewScaleDown(removeInstruction);
+                        return true;
+
+                    case DragEvent.ACTION_DROP:
+                        ScheduledInstructionData data = ScheduleMultiRecyclerView.obtainAndClearDraggedScheduledInstructionData();
+                        if(data != null) {
+                            fireDatabaseTransactions.removeScheduledInstruction(gameData.getId(), data);
+                        }
+                        return true;
+
+                    default:git
+                        return false;
+                }
+            }
+        });
     }
 }

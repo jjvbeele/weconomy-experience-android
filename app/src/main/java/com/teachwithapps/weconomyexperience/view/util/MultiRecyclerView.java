@@ -29,7 +29,7 @@ public class MultiRecyclerView<DT> extends LinearLayout {
 
     private AdapterFactory<? extends RecyclerView.ViewHolder, DT> adapterFactory;
 
-    private List<RecyclerView> childRecyclerList = new ArrayList<>();
+    protected List<RecyclerView> childRecyclerList = new ArrayList<>();
 
     public MultiRecyclerView(Context context) {
         super(context);
@@ -100,7 +100,7 @@ public class MultiRecyclerView<DT> extends LinearLayout {
             recyclerView.setLayoutParams(
                     new LinearLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT,
                             1
                     )
             );

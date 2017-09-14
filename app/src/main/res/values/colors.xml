@@ -3,6 +3,7 @@
     <color name="colorPrimary">#b58551</color>
     <color name="colorPrimaryDark">#785735</color>
     <color name="colorAccent">#e2900c</color>
+    <color name="red">#9c1c1a</color>
     <color name="dark_gray">#716353</color>
     <color name="white_gray">#f2e7da</color>
     <color name="scheduled_instruction">#d6b99a</color>
@@ -13,4 +14,5 @@
     <color name="dark_loading">#88000000</color>
     <color name="transparent">#00ffffff</color>
     <color name="textDark">#000000</color>
+    <color name="shadow">#66000000</color>
 </resources>

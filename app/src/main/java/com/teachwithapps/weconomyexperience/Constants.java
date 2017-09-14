@@ -19,6 +19,7 @@ public class Constants {
     public static final String KEY_INSTRUCTION_PARCEL = "instruction_parcel";
     public static final String DEFAULT_SHARED_PREFERENCES = "default_shared_preferences";
     public static final String PREF_ADMIN = "pref_admin";
+    public static final String KEY_SCHEDULED_INSTRUCTION_PARCEL = "scheduled_instruction_parcel";
 
     public static
     @DrawableRes

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -21,13 +22,13 @@
         android:id="@+id/goal_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_margin="4dp"
-        android:padding="8dp"
-        android:gravity="center"
-        android:background="@drawable/accent_rect_round"
-        android:layout_alignTop="@+id/goal_text"
         android:layout_alignBottom="@+id/goal_text"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/goal_text"
+        android:layout_margin="4dp"
+        android:background="@drawable/accent_rect_round"
+        android:gravity="center"
+        android:padding="8dp"
         android:text="@string/add_goal"
         android:textColor="@color/white_gray"
         android:textSize="16sp" />
@@ -39,11 +40,13 @@
         android:layout_below="@+id/goal_view"
         android:orientation="horizontal" />
 
-    <com.teachwithapps.weconomyexperience.view.util.MultiRecyclerView
+    <com.teachwithapps.weconomyexperience.view.schedulerecycler.ScheduleMultiRecyclerView
         android:id="@+id/schedule_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/days_row" />
+        android:layout_below="@+id/days_row">
+
+    </com.teachwithapps.weconomyexperience.view.schedulerecycler.ScheduleMultiRecyclerView>
 
     <ProgressBar
         android:id="@+id/loading_view"
@@ -55,28 +58,46 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/discover_instruction"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="20dp"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="20dp"
+        android:alpha="0"
+        android:scaleX="0"
+        android:scaleY="0"
         android:src="@drawable/ic_i"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        app:fabSize="mini" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/discover_goal"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="20dp"
         android:layout_marginTop="20dp"
         android:layout_toLeftOf="@+id/discover_instruction"
+        android:alpha="0"
+        android:scaleX="0"
+        android:scaleY="0"
         android:src="@drawable/ic_g"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        app:fabSize="mini" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/remove_instruction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:alpha="0"
+        android:scaleX="0"
+        android:scaleY="0"
+        android:src="@drawable/ic_close"
+        app:backgroundTint="@color/red"
+        app:fabSize="mini" />
 
 </RelativeLayout>

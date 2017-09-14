@@ -22,7 +22,7 @@ import butterknife.ButterKnife;
  * Created by mint on 1-8-17.
  */
 
-public class FoldedInstructionRecyclerAdapter extends RecyclerView.Adapter<FoldedInstructionRecyclerAdapter.InstructionViewHolder> {
+public class InstructionRecyclerAdapter extends RecyclerView.Adapter<InstructionRecyclerAdapter.InstructionViewHolder> {
 
     public interface OnInstructionClickListener {
         void onClick(InstructionData instructionData);
@@ -31,7 +31,7 @@ public class FoldedInstructionRecyclerAdapter extends RecyclerView.Adapter<Folde
     private List<InstructionData> instructionDataList;
     private OnInstructionClickListener onItemClickListener;
 
-    public FoldedInstructionRecyclerAdapter(List<InstructionData> instructionDataList, OnInstructionClickListener onItemClickListener) {
+    public InstructionRecyclerAdapter(List<InstructionData> instructionDataList, OnInstructionClickListener onItemClickListener) {
         this.instructionDataList = instructionDataList;
         this.onItemClickListener = onItemClickListener;
     }
