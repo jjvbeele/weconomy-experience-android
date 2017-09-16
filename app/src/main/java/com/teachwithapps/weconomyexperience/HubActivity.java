@@ -83,6 +83,7 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
         public void userReady(FirebaseUser firebaseUser) {
             setupLayout();
             observeHubGames();
+            checkAdminRole();
         }
     };
 
@@ -117,13 +118,6 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
                 )
         );
         gameRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        boolean admin = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE).getBoolean(Constants.PREF_ADMIN, false);
-        if (!admin) {
-            checkAdminRole();
-        } else {
-            enableAdminLayout(true);
-        }
     }
 
     private void checkAdminRole() {
