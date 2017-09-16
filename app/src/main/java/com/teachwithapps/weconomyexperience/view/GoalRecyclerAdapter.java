@@ -1,5 +1,6 @@
 package com.teachwithapps.weconomyexperience.view;
 
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,9 +69,14 @@ public class GoalRecyclerAdapter extends RecyclerView.Adapter<GoalRecyclerAdapte
         }
 
         public void setData(final SelectedGoalData selectedGoalData) {
-            Picasso.with(itemView.getContext())
-                    .load(selectedGoalData.getPlayerData().getPhotoUrl())
-                    .into(avatar);
+            Bitmap playerBitmap = selectedGoalData.getPlayerData().getBitmap();
+            if(playerBitmap == null) {
+                Picasso.with(itemView.getContext())
+                        .load(selectedGoalData.getPlayerData().getPhotoUrl())
+                        .into(avatar);
+            } else {
+                avatar.setImageBitmap(playerBitmap);
+            }
 
             if (selectedGoalData.getGoalData() != null) {
                 goalText.setText(selectedGoalData

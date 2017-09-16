@@ -5,6 +5,7 @@ import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.DrawableRes;
@@ -184,9 +185,15 @@ public class ScheduleRecyclerAdapter extends RecyclerView.Adapter<ScheduleRecycl
                 String playerId = playerIdMap.get(keyString);
                 PlayerData playerData = ((GameActivity) itemView.getContext()).getPlayerById(playerId);
                 if (playerData != null) {
-                    Picasso.with(itemView.getContext())
-                            .load(playerData.getPhotoUrl())
-                            .into(iconList.get(Integer.parseInt(keyString)));
+                    ImageView icon = iconList.get(Integer.parseInt(keyString));
+                    Bitmap playerBitmap = playerData.getBitmap();
+                    if(playerBitmap == null) {
+                        Picasso.with(itemView.getContext())
+                                .load(playerData.getPhotoUrl())
+                                .into(icon);
+                    } else {
+                        icon.setImageBitmap(playerBitmap);
+                    }
                 }
             }
         }

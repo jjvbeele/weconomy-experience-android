@@ -109,8 +109,8 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     private FireAuthHelper.FireAuthCallback fireAuthCallback = new FireAuthHelper.FireAuthCallback() {
         @Override
         public void userReady(FirebaseUser firebaseUser) {
-            registerPlayer();
             observePlayers();
+            registerPlayer();
             observeLibraryInstructions();
             observeAvailableInstructionsInGame();
             observeAvailableGoals();
@@ -270,14 +270,37 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
      * Register this player (created through the FireAuthHelper class) to the current game, if not already registered
      */
     private void registerPlayer() {
-        FirebaseUser user = fireAuthHelper.getUser();
-        Uri photoUrl = user.getPhotoUrl();
-        PlayerData playerData = new PlayerData(
-                user.getUid(),
-                user.getDisplayName(),
-                (photoUrl != null) ? photoUrl.toString() : null
-        );
-        fireDatabaseTransactions.registerPlayerToGame(gameData.getId(), playerData);
+        final FirebaseUser user = fireAuthHelper.getUser();
+        fireDatabaseTransactions.getPlayerById(gameData.getId(), user.getUid(), new Returnable<PlayerData>() {
+            @Override
+            public void onResult(PlayerData playerData) {
+                Uri photoUrl = user.getPhotoUrl();
+                String displayName = user.getDisplayName();
+
+                if(displayName == null) {
+                    displayName = "Visitor #" + user.getUid().substring(0, 4);
+                }
+
+                if(playerData == null) {
+                    Log.d(TAG, "Player data is null");
+                    playerData = new PlayerData(
+                            user.getUid(),
+                            displayName,
+                            Constants.getUniqueColor(displayName.charAt(0)),
+                            (photoUrl != null) ? photoUrl.toString() : null
+                    );
+                } else {
+                    if(playerData.getName() == null) {
+                        playerData.setName(displayName);
+                    }
+                    if(playerData.getColor() == null) {
+                        playerData.setColor(Constants.getUniqueColor(displayName.charAt(0)));
+                    }
+                }
+                fireDatabaseTransactions.registerPlayerToGame(gameData.getId(), playerData);
+            }
+        });
+
     }
 
     /**

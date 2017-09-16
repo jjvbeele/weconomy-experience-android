@@ -581,6 +581,9 @@ public class FireDatabaseTransactions {
     }
 
     public void getPlayerById(String gameId, String playerId, Returnable<PlayerData> onReturn) {
+        if(!playerId.startsWith("player_id_")) {
+            playerId = "player_id_" + playerId;
+        }
         fireDatabaseHelper.getRecord(
                 PlayerData.class,
                 new String[]{"games", gameId, "players", playerId},
