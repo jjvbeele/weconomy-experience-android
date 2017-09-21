@@ -2,13 +2,6 @@ package com.teachwithapps.weconomyexperience;
 
 import android.graphics.Color;
 import android.support.annotation.DrawableRes;
-import android.support.v4.graphics.ColorUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by mint on 1-8-17.
@@ -64,39 +57,13 @@ public class Constants {
         return R.drawable.ic_shovel;
     }
 
-    private static Map<Character, ArrayList<String>> userColorMap = new HashMap<>();
+    public static String getRandomColor(long count) {
+        int intColor = Color.HSVToColor(new float[]{
+                (float) ((Math.random() * 10 - 5) + (360 / 8) * count), 1f, 1f});
+        return String.format("#%06X", (0xFFFFFF & intColor));
+    }
 
-    private static String[] defaultColorArray = {
-            "ff0000",
-            "00ff00",
-            "0000ff",
-            "ffff00",
-            "ff00ff",
-            "00ffff",
-            "ff8800",
-            "ff0088",
-            "88ff00",
-            "00ff88",
-            "8800ff",
-            "0088ff",
-            "ffff88",
-            "ff88ff",
-            "88ffff"
-    };
-
-    public static String getUniqueColor(char startNameChar) {
-        if(userColorMap.containsKey(startNameChar)) {
-            if(userColorMap.size() > 0) {
-                return userColorMap.get(startNameChar).remove(0);
-            } else {
-                int intColor = Color.argb(255, (int)(Math.random() * 255), (int)(Math.random() * 255), (int)(Math.random() * 255));
-                return String.format("#%06X", (0xFFFFFF & intColor));
-            }
-
-        } else {
-            ArrayList<String> userColorList = new ArrayList<>(Arrays.asList(defaultColorArray));
-            userColorMap.put(startNameChar, userColorList);
-            return userColorMap.get(startNameChar).remove(0);
-        }
+    public static String getRandomColor() {
+        return getRandomColor( (long) (Math.random() * 8));
     }
 }

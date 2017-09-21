@@ -86,7 +86,7 @@ public class PlayerData extends FireData {
 
             String color = getColor();
             if (color == null) {
-                color = Constants.getUniqueColor(name.charAt(0));
+                color = Constants.getRandomColor();
             }
 
             if(color.charAt(0) != '#') {

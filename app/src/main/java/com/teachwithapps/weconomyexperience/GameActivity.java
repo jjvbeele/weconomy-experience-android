@@ -274,30 +274,33 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         fireDatabaseTransactions.getPlayerById(gameData.getId(), user.getUid(), new Returnable<PlayerData>() {
             @Override
             public void onResult(PlayerData playerData) {
-                Uri photoUrl = user.getPhotoUrl();
-                String displayName = user.getDisplayName();
-
-                if(displayName == null) {
-                    displayName = "Visitor #" + user.getUid().substring(0, 4);
-                }
+                final Uri photoUrl = user.getPhotoUrl();
+                final String displayName = (user.getDisplayName() != null) ? user.getDisplayName() : "Visitor #" + user.getUid().substring(0, 4);
 
                 if(playerData == null) {
-                    Log.d(TAG, "Player data is null");
-                    playerData = new PlayerData(
-                            user.getUid(),
-                            displayName,
-                            Constants.getUniqueColor(displayName.charAt(0)),
-                            (photoUrl != null) ? photoUrl.toString() : null
-                    );
+                    fireDatabaseTransactions.getPlayerCount(gameData.getId(), new Returnable<Long>() {
+                        @Override
+                        public void onResult(Long count) {
+                            Log.d(TAG, "Player data is null");
+                            PlayerData playerData = new PlayerData(
+                                    user.getUid(),
+                                    displayName,
+                                    Constants.getRandomColor(count),
+                                    (photoUrl != null) ? photoUrl.toString() : null
+                            );
+                            fireDatabaseTransactions.registerPlayerToGame(gameData.getId(), playerData);
+                        }
+                    });
+
                 } else {
                     if(playerData.getName() == null) {
                         playerData.setName(displayName);
                     }
                     if(playerData.getColor() == null) {
-                        playerData.setColor(Constants.getUniqueColor(displayName.charAt(0)));
+                        //playerData.setColor(Constants.getRandomColor());
                     }
+                    fireDatabaseTransactions.registerPlayerToGame(gameData.getId(), playerData);
                 }
-                fireDatabaseTransactions.registerPlayerToGame(gameData.getId(), playerData);
             }
         });
 

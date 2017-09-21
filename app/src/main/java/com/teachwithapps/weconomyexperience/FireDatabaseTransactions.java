@@ -773,6 +773,23 @@ public class FireDatabaseTransactions {
         );
     }
 
+    public void getPlayerCount(final String gameId, final Returnable<Long> onReturn) {
+        fireDatabaseHelper.getChildCount(
+                new String[]{
+                        "games",
+                        gameId,
+                        "players"
+                },
+                onReturn,
+                new Returnable<DatabaseError>() {
+                    @Override
+                    public void onResult(DatabaseError data) {
+                        Log.e(TAG, "Can't retrieve player count", data.toException());
+                    }
+                }
+        );
+    }
+
     public void observeSelectedGoalsInGame(
             final String gameId,
             final String libraryKey,
