@@ -5,13 +5,13 @@ android {
     compileSdkVersion 25
     buildToolsVersion "26.0.0"
     defaultConfig {
-        applicationId "com.teachwithapps.weconomyexperience"
+        //set your own application id here
+        applicationId "org.guts4roses.weconomyexperience"
         minSdkVersion 16
         targetSdkVersion 25
         versionCode 10
         versionName "1.1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
         buildConfigField "double", "FIREBASE_MIN_VERSION_CODE", "1.0"
         buildConfigField "double", "FIREBASE_MAX_VERSION_CODE", "1.1"
     }
@@ -31,6 +31,7 @@ android {
         prod{
         }
         dev {
+            //add your package id here for debugging with a separate firebase
             applicationId "com.teachwithapps.debug.weconomyexperience"
         }
     }

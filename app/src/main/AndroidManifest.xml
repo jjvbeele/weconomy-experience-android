@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.teachwithapps.weconomyexperience">
+    package="org.guts4roses.weconomyexperience">
 
     <application
         android:allowBackup="true"
@@ -9,28 +9,28 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".GameActivity"
+            android:name="org.guts4roses.weconomyexperience.GameActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".SelectInstructionActivity"
+            android:name="org.guts4roses.weconomyexperience.SelectInstructionActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".ViewGoalsActivity"
+            android:name="org.guts4roses.weconomyexperience.ViewGoalsActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".HubActivity"
+            android:name="org.guts4roses.weconomyexperience.HubActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

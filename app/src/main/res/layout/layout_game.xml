@@ -40,13 +40,13 @@
         android:layout_below="@+id/goal_view"
         android:orientation="horizontal" />
 
-    <com.teachwithapps.weconomyexperience.view.schedulerecycler.ScheduleMultiRecyclerView
+    <org.guts4roses.weconomyexperience.view.schedulerecycler.ScheduleMultiRecyclerView
         android:id="@+id/schedule_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/days_row">
 
-    </com.teachwithapps.weconomyexperience.view.schedulerecycler.ScheduleMultiRecyclerView>
+    </org.guts4roses.weconomyexperience.view.schedulerecycler.ScheduleMultiRecyclerView>
 
     <ProgressBar
         android:id="@+id/loading_view"
