@@ -35,4 +35,8 @@
     <string name="add_goal">Add goal</string>
     <string name="operation_key">operation_key</string>
     <string name="payload_key">payload_key</string>
+    <string name="sign_out">Sign out</string>
+    <string name="enable_admin">Enable admin</string>
+    <string name="wifi_off">The internet connection appears to be offline. Enable your internet and restart the app.</string>
+    <string name="wifi_off_title">No internet</string>
 </resources>

@@ -13,7 +13,9 @@ import org.guts4roses.weconomyexperience.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by mint on 23-12-16.
@@ -25,6 +27,8 @@ public class FireDatabaseHelper {
 
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseRef;
+
+    private Map<DatabaseReference, ChildEventListener> allChildListenersMap = new HashMap<>();
 
     public FireDatabaseHelper() {
         firebaseDatabase = FirebaseDatabase.getInstance();
@@ -401,7 +405,18 @@ public class FireDatabaseHelper {
     }
 
     private void addRecordChildListener(DatabaseReference ref, ChildEventListener childEventListener) {
+        allChildListenersMap.put(ref, childEventListener);
         ref.addChildEventListener(childEventListener);
+    }
+
+    public void unregisterAllListeners() {
+        for(DatabaseReference reference : allChildListenersMap.keySet()) {
+            unregisterListenersFromReference(reference);
+        }
+    }
+
+    public void unregisterListenersFromReference(DatabaseReference ref) {
+            ref.removeEventListener(allChildListenersMap.get(ref));
     }
 
     private DatabaseReference getLocationRef(String[] locationArray) {

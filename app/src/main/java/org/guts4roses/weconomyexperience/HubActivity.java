@@ -1,9 +1,12 @@
 package org.guts4roses.weconomyexperience;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
@@ -17,6 +20,7 @@ import android.view.Window;
 import android.widget.EditText;
 
 import com.google.firebase.auth.FirebaseUser;
+
 import org.guts4roses.weconomyexperience.firebase.FireAuthHelper;
 import org.guts4roses.weconomyexperience.firebase.util.Returnable;
 import org.guts4roses.weconomyexperience.firebase.util.ReturnableChange;
@@ -24,7 +28,6 @@ import org.guts4roses.weconomyexperience.model.GameData;
 import org.guts4roses.weconomyexperience.util.Log;
 import org.guts4roses.weconomyexperience.view.AppNavigationDrawer;
 import org.guts4roses.weconomyexperience.view.GameRecyclerAdapter;
-
 import org.parceler.Parcels;
 
 import java.util.HashMap;
@@ -38,7 +41,7 @@ import butterknife.OnClick;
  * Created by mint on 26-7-17.
  */
 
-public class HubActivity extends AppCompatActivity implements FireDatabaseTransactions.OnLoadingListener {
+public class HubActivity extends AppCompatActivity implements FireDatabaseTransactions.OnLoadingListener, AppNavigationDrawer.NavigationInterface {
 
     private static final String TAG = HubActivity.class.getName();
 
@@ -81,7 +84,7 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
         public void userReady(FirebaseUser firebaseUser) {
             setupLayout();
             observeHubGames();
-            checkAdminRole();
+            observeAdminRole();
         }
     };
 
@@ -95,14 +98,37 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
 
         ButterKnife.bind(this);
 
-        new AppNavigationDrawer(this, drawerLayout);
+        new AppNavigationDrawer(this, this, drawerLayout);
+    }
 
-        //set up firebase helper classes
-        fireDatabaseTransactions = new FireDatabaseTransactions();
-        fireAuthHelper = new FireAuthHelper(this);
-        fireAuthHelper.withUser(this, fireAuthCallback);
+    @Override
+    protected void onStart() {
+        super.onStart();
 
-        fireDatabaseTransactions.setOnLoadingListener(this);
+        ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+        if (activeNetwork != null) {
+            //set up firebase helper classes
+            fireDatabaseTransactions = new FireDatabaseTransactions();
+            fireAuthHelper = new FireAuthHelper(this);
+            fireAuthHelper.withUser(this, fireAuthCallback);
+
+            fireDatabaseTransactions.setOnLoadingListener(this);
+
+        } else {
+            new AlertDialog.Builder(this)
+                    .setPositiveButton(R.string.ok, null)
+                    .setMessage(R.string.wifi_off)
+                    .setTitle(R.string.wifi_off_title)
+                    .show();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        fireDatabaseTransactions.unregister();
+        fireAuthHelper.unregister(this);
     }
 
     private void setupLayout() {
@@ -118,21 +144,20 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
         gameRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
-    private void checkAdminRole() {
-        fireDatabaseTransactions.verifyRole("admin", fireAuthHelper.getUser().getUid(), new Returnable<Boolean>() {
+    private void observeAdminRole() {
+        fireDatabaseTransactions.observeRole("admin", fireAuthHelper.getUser().getUid(), new Returnable<String>() {
             @Override
-            public void onResult(Boolean data) {
-                if (data == null) {
-                    data = false;
-                }
-                Log.d(TAG, "admin? " + data);
+            public void onResult(String data) {
+                boolean admin = (data == null) ? false : Boolean.valueOf(data);
+
+                Log.d(TAG, "admin? " + admin);
                 SharedPreferences preferences = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE);
                 preferences
                         .edit()
-                        .putBoolean(Constants.PREF_ADMIN, data)
+                        .putBoolean(Constants.PREF_ADMIN, admin)
                         .apply();
 
-                enableAdminLayout(data);
+                enableAdminLayout(admin);
             }
         });
     }
@@ -279,5 +304,20 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
         } else {
             loadingView.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void signOut() {
+        fireAuthHelper.stopGoogleApiClient(this);
+        Intent intent = new Intent(this, HubActivity.class);
+        this.startActivity(intent);
+        this.finish();
+    }
+
+    @Override
+    public void toggleAdminMode() {
+        SharedPreferences prefs = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE);
+        boolean admin = !prefs.getBoolean(Constants.PREF_ADMIN, true);
+        fireDatabaseTransactions.setRole(fireAuthHelper.getUser().getUid(), "admin", admin);
     }
 }

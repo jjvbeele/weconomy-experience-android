@@ -2,10 +2,12 @@ package org.guts4roses.weconomyexperience;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseUser;
+
 import org.guts4roses.weconomyexperience.firebase.FireAuthHelper;
 import org.guts4roses.weconomyexperience.firebase.util.Returnable;
 import org.guts4roses.weconomyexperience.firebase.util.ReturnableChange;
@@ -30,7 +33,6 @@ import org.guts4roses.weconomyexperience.util.Log;
 import org.guts4roses.weconomyexperience.view.AppNavigationDrawer;
 import org.guts4roses.weconomyexperience.view.schedulerecycler.ScheduleMultiRecyclerView;
 import org.guts4roses.weconomyexperience.view.util.ViewAnimation;
-
 import org.parceler.Parcels;
 
 import java.util.ArrayList;
@@ -46,7 +48,7 @@ import butterknife.OnClick;
  * Created by mint on 1-8-17.
  */
 
-public class GameActivity extends AppCompatActivity implements FireDatabaseTransactions.OnLoadingListener {
+public class GameActivity extends AppCompatActivity implements FireDatabaseTransactions.OnLoadingListener, AppNavigationDrawer.NavigationInterface {
 
     private static final String TAG = GameActivity.class.getName();
 
@@ -113,6 +115,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
             observeLibraryGoals();
             observeSchedule();
             observeGoalCount();
+            observeAdminRole();
             loadingView.setVisibility(View.GONE);
         }
     };
@@ -126,13 +129,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         ButterKnife.bind(this);
 
         boolean admin = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE).getBoolean(Constants.PREF_ADMIN, false);
-        if (admin) {
-            ViewAnimation.viewScaleIn(discoverGoal);
-            ViewAnimation.viewScaleIn(discoverInstruction);
-        } else {
-            discoverGoal.setVisibility(View.GONE);
-            discoverInstruction.setVisibility(View.GONE);
-        }
+        enableAdminLayout(admin);
 
         availableInstructionList = new ArrayList<>();
         libraryInstructionList = new ArrayList<>();
@@ -142,7 +139,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
         selectedGoalList = new ArrayList<>();
 
-        new AppNavigationDrawer(this, drawerLayout);
+        new AppNavigationDrawer(this, this, drawerLayout);
 
         playerDataList = new ArrayList<>();
         gameData = IntentUtil.getParcelsIntentData(getIntent(), savedInstanceState, Constants.KEY_GAME_DATA_PARCEL);
@@ -180,6 +177,13 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        fireDatabaseTransactions.unregister();
+        fireAuthHelper.unregister(this);
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelable(Constants.KEY_GAME_DATA_PARCEL, Parcels.wrap(gameData));
         super.onSaveInstanceState(outState);
@@ -205,6 +209,34 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
             }
         } else {
             Log.d(TAG, "REQUEST NOT SELECTED INSTRUCTION");
+        }
+    }
+
+    private void observeAdminRole() {
+        fireDatabaseTransactions.observeRole("admin", fireAuthHelper.getUser().getUid(), new Returnable<String>() {
+            @Override
+            public void onResult(String data) {
+                boolean admin = (data == null) ? false : Boolean.valueOf(data);
+
+                Log.d(TAG, "admin? " + data);
+                SharedPreferences preferences = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE);
+                preferences
+                        .edit()
+                        .putBoolean(Constants.PREF_ADMIN, admin)
+                        .apply();
+
+                enableAdminLayout(admin);
+            }
+        });
+    }
+
+    public void enableAdminLayout(boolean admin) {
+        if (admin) {
+            ViewAnimation.viewScaleIn(discoverGoal);
+            ViewAnimation.viewScaleIn(discoverInstruction);
+        } else {
+            ViewAnimation.viewScaleOut(discoverGoal);
+            ViewAnimation.viewScaleOut(discoverInstruction);
         }
     }
 
@@ -273,7 +305,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
                 final Uri photoUrl = user.getPhotoUrl();
                 final String displayName = (user.getDisplayName() != null) ? user.getDisplayName() : "Visitor #" + user.getUid().substring(0, 4);
 
-                if(playerData == null) {
+                if (playerData == null) {
                     fireDatabaseTransactions.getPlayerCount(gameData.getId(), new Returnable<Long>() {
                         @Override
                         public void onResult(Long count) {
@@ -289,10 +321,10 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
                     });
 
                 } else {
-                    if(playerData.getName() == null) {
+                    if (playerData.getName() == null) {
                         playerData.setName(displayName);
                     }
-                    if(playerData.getColor() == null) {
+                    if (playerData.getColor() == null) {
                         //playerData.setColor(Constants.getRandomColor());
                     }
                     fireDatabaseTransactions.registerPlayerToGame(gameData.getId(), playerData);
@@ -631,7 +663,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     }
 
     /**
-     * Updates the textview with theamount of selected goals and realised goals
+     * Updates the textview with the amount of selected goals and realised goals
      */
     private void updateGoalCount() {
         int realisedGoalCount = 0;
@@ -1062,7 +1094,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
                     case DragEvent.ACTION_DROP:
                         ScheduledInstructionData data = ScheduleMultiRecyclerView.obtainAndClearDraggedScheduledInstructionData();
-                        if(data != null) {
+                        if (data != null) {
                             fireDatabaseTransactions.removeScheduledInstruction(gameData.getId(), data);
                         }
                         return true;
@@ -1072,5 +1104,23 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
                 }
             }
         });
+    }
+
+    @Override
+    public void signOut() {
+        FireAuthHelper fireAuthHelper = new FireAuthHelper(this);
+        fireAuthHelper.stopGoogleApiClient(this);
+        Intent intent = new Intent(this, HubActivity.class);
+        this.startActivity(intent);
+        this.finish();
+    }
+
+    @Override
+    public void toggleAdminMode() {
+        SharedPreferences prefs = getSharedPreferences(Constants.DEFAULT_SHARED_PREFERENCES, MODE_PRIVATE);
+        boolean admin = !prefs.getBoolean(Constants.PREF_ADMIN, true);
+        fireDatabaseTransactions.setRole(fireAuthHelper.getUser().getUid(), "admin", admin);
+
+        enableAdminLayout(admin);
     }
 }

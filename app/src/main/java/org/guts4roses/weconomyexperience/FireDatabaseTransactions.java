@@ -1,6 +1,7 @@
 package org.guts4roses.weconomyexperience;
 
 import com.google.firebase.database.DatabaseError;
+
 import org.guts4roses.weconomyexperience.firebase.FireDatabaseHelper;
 import org.guts4roses.weconomyexperience.firebase.util.Returnable;
 import org.guts4roses.weconomyexperience.firebase.util.ReturnableChange;
@@ -62,6 +63,11 @@ public class FireDatabaseTransactions {
                 onLoadingListener.onLoadingChanged(callback, loadState);
             }
         }
+    }
+
+    public void unregister() {
+        onLoadingListenerRef.clear();
+        fireDatabaseHelper.unregisterAllListeners();
     }
 
     /**
@@ -581,7 +587,7 @@ public class FireDatabaseTransactions {
     }
 
     public void getPlayerById(String gameId, String playerId, Returnable<PlayerData> onReturn) {
-        if(!playerId.startsWith("player_id_")) {
+        if (!playerId.startsWith("player_id_")) {
             playerId = "player_id_" + playerId;
         }
         fireDatabaseHelper.getRecord(
@@ -913,18 +919,17 @@ public class FireDatabaseTransactions {
      * @param userId
      * @param callback
      */
-    public void verifyRole(final String role, final String userId, final Returnable<Boolean> callback) {
-        updateLoadingState(callback, LoadState.LOADING_STARTED);
-        fireDatabaseHelper.getRecord(
-                Boolean.class,
+    public void observeRole(final String role, final String userId, final Returnable<String> callback) {
+        fireDatabaseHelper.observeRecord(
+                String.class,
                 new String[]{
                         "secured",
                         userId,
                         role
                 },
-                new Returnable<Boolean>() {
+                new Returnable<String>() {
                     @Override
-                    public void onResult(Boolean data) {
+                    public void onResult(String data) {
                         updateLoadingState(callback, LoadState.LOADING_DONE);
                         callback.onResult(data);
                     }
@@ -936,5 +941,16 @@ public class FireDatabaseTransactions {
                         Log.e(TAG, "Can't fetch security role", data.toException());
                     }
                 });
+    }
+
+    public void setRole(final String userId, final String role, final boolean toggle) {
+        fireDatabaseHelper.addRecord(
+                new String[]{
+                        "secured",
+                        userId
+                },
+                role,
+                String.valueOf(toggle)
+        );
     }
 }

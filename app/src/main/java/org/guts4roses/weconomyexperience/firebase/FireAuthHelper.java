@@ -3,7 +3,9 @@ package org.guts4roses.weconomyexperience.firebase;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -15,6 +17,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -22,6 +26,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+
 import org.guts4roses.weconomyexperience.R;
 
 import java.lang.ref.WeakReference;
@@ -60,29 +65,24 @@ public class FireAuthHelper {
                 Toast.LENGTH_SHORT);
     }
 
-    public boolean withUser(FragmentActivity activity, FireAuthCallback callback) {
+    public void unregister(FragmentActivity activity) {
+        callbackQueue.clear();
+        stopGoogleApiClient(activity);
+    }
+
+    public boolean withUser(final FragmentActivity activity, final FireAuthCallback callback) {
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if (firebaseUser == null) {
             Log.d(TAG, "firebaseUser is null, signing in");
 
             if (googleApiClient == null) {
-                Log.d(TAG, "googleApiClient is null");
-                // Not signed in, launch the Sign In activity
-                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(activity.getResources().getString(R.string.default_web_client_id))
-                        .requestId()
-                        .requestEmail()
-                        .build();
-
-                googleApiClient = new GoogleApiClient.Builder(activity)
-                        .enableAutoManage(activity, new GoogleApiClient.OnConnectionFailedListener() {
-                            @Override
-                            public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                                Log.e(TAG, connectionResult.getErrorMessage());
-                            }
-                        })
-                        .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                        .build();
+                signInGooglePlus(activity, new Runnable() {
+                    @Override
+                    public void run() {
+                        withUser(activity, callback);
+                    }
+                });
+                return false;
             }
 
             Integer id = callbackQueue.size();
@@ -97,6 +97,37 @@ public class FireAuthHelper {
             callback.userReady(firebaseUser);
             return false;
         }
+    }
+
+    public void signInGooglePlus(FragmentActivity activity, final Runnable onConnect) {
+        Log.d(TAG, "googleApiClient is null");
+        // Not signed in, launch the Sign In activity
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(activity.getResources().getString(R.string.default_web_client_id))
+                .requestId()
+                .requestEmail()
+                .build();
+
+        googleApiClient = new GoogleApiClient.Builder(activity)
+                .enableAutoManage(activity, new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        Log.e(TAG, connectionResult.getErrorMessage());
+                    }
+                })
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(@Nullable Bundle bundle) {
+                        onConnect.run();
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+
+                    }
+                })
+                .build();
     }
 
     public void passActivityResult(Intent data, int resultCode) {
@@ -133,11 +164,38 @@ public class FireAuthHelper {
         }
     }
 
-    public void stopGoogleApiClient(FragmentActivity activity) {
+    public void stopGoogleApiClient(final FragmentActivity activity) {
         Log.d(TAG, "googleApiClient stopped");
-        if (googleApiClient != null) {
+
+        if (googleApiClient == null || !googleApiClient.isConnected()) {
+            signInGooglePlus(activity, new Runnable() {
+                @Override
+                public void run() {
+                    signOutGoogleApiClient(activity);
+                }
+            });
+            return;
+
+        } else {
+            signOutGoogleApiClient(activity);
+        }
+    }
+
+    public void signOutGoogleApiClient(final FragmentActivity activity) {
+        //TODO: Logging out doesn't work for some unknown reason
+        if (googleApiClient.isConnected()) {
+            googleApiClient.clearDefaultAccountAndReconnect();
             googleApiClient.stopAutoManage(activity);
-            googleApiClient.disconnect();
+//            Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(
+//                    new ResultCallback<Status>() {
+//                        @Override
+//                        public void onResult(Status status) {
+//                            Log.d(TAG, "code: " + status.getStatusCode() + ", message: " + status.getStatusMessage());
+//
+//                        }
+//                    });
+        } else {
+
         }
     }
 

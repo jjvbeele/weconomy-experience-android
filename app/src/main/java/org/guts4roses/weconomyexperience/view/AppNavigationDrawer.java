@@ -1,7 +1,7 @@
 package org.guts4roses.weconomyexperience.view;
 
-import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -24,11 +24,12 @@ public class AppNavigationDrawer extends NavigationDrawer {
     @BindView(R.id.version)
     protected TextView appVersionInfoTextView;
 
-    private Activity activity;
+    private NavigationInterface navigationInterface;
 
-    public AppNavigationDrawer(AppCompatActivity activity, DrawerLayout drawerLayout) {
+    public AppNavigationDrawer(AppCompatActivity activity, NavigationInterface navigationInterface, DrawerLayout drawerLayout) {
         super(activity, drawerLayout);
-        this.activity = activity;
+
+        this.navigationInterface = navigationInterface;
 
         ButterKnife.bind(this, drawerLayout);
 
@@ -38,28 +39,48 @@ public class AppNavigationDrawer extends NavigationDrawer {
     @OnClick(R.id.info_text)
     protected void onClickInfoText() {
         Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse(activity.getString(R.string.explanation_link)));
-        activity.startActivity(i);
+        i.setData(Uri.parse(navigationInterface.getResources().getString(R.string.explanation_link)));
+        navigationInterface.startActivity(i);
     }
 
     @OnClick(R.id.guts4roses_link)
     protected void onClickGuts4rosesLink() {
         Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse(activity.getString(R.string.guts4roses_link)));
-        activity.startActivity(i);
+        i.setData(Uri.parse(navigationInterface.getResources().getString(R.string.guts4roses_link)));
+        navigationInterface.startActivity(i);
     }
 
     @OnClick(R.id.teachwithapps_link)
     protected void onClickTeachwithappsLink() {
         Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse(activity.getString(R.string.teachwithapps_link)));
-        activity.startActivity(i);
+        i.setData(Uri.parse(navigationInterface.getResources().getString(R.string.teachwithapps_link)));
+        navigationInterface.startActivity(i);
     }
 
     @OnClick(R.id.icons_link)
     protected void onClickIconsLink() {
         Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse(activity.getString(R.string.icons_link)));
-        activity.startActivity(i);
+        i.setData(Uri.parse(navigationInterface.getResources().getString(R.string.icons_link)));
+        navigationInterface.startActivity(i);
+    }
+
+    @OnClick(R.id.sign_out_link)
+    protected void onClickSignOut() {
+        navigationInterface.signOut();
+    }
+
+    @OnClick(R.id.enable_admin)
+    protected void onClickEnableAdmin() {
+        navigationInterface.toggleAdminMode();
+    }
+
+    public interface NavigationInterface {
+        void toggleAdminMode();
+
+        void startActivity(Intent intent);
+
+        void signOut();
+
+        Resources getResources();
     }
 }

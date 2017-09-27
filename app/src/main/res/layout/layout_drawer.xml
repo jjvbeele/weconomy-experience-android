@@ -98,11 +98,38 @@
         android:textColor="@color/colorAccent"
         android:textSize="12sp" />
 
+
+    <TextView
+        android:id="@+id/enable_admin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/sign_out_link"
+        android:gravity="center_vertical"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="20dp"
+        android:text="@string/enable_admin"
+        android:textColor="@color/colorAccent"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/sign_out_link"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/version"
+        android:gravity="center_vertical"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="20dp"
+        android:text="@string/sign_out"
+        android:textColor="@color/colorAccent"
+        android:textSize="12sp" />
+
     <TextView
         android:id="@+id/version"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp"
+        android:paddingTop="20dp"
         android:paddingBottom="10dp"
         android:layout_alignParentBottom="true"
         android:gravity="center_vertical"
