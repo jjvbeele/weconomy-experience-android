@@ -9,8 +9,8 @@ android {
         applicationId "org.guts4roses.weconomyexperience"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 10
-        versionName "1.1.1"
+        versionCode 11
+        versionName "1.1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "double", "FIREBASE_MIN_VERSION_CODE", "1.0"
         buildConfigField "double", "FIREBASE_MAX_VERSION_CODE", "1.1"
