@@ -1,0 +1,115 @@
+{
+  "libraries" : {
+    "default_library" : {
+      "goals" : {
+        "goal_id_01" : {
+          "text" : "Bread",
+          "type" : "bread"
+        },
+        "goal_id_02" : {
+          "text" : "Recreation park",
+          "type" : "recreation_park"
+        },
+        "goal_id_03" : {
+          "text" : "Laboratory",
+          "type" : "laboratory"
+        },
+        "goal_id_04" : {
+          "text" : "University",
+          "type" : "university"
+        },
+        "goal_id_05" : {
+          "text" : "Hot air balloon",
+          "type" : "hot_air_balloon"
+        },
+        "goal_id_06" : {
+          "text" : "Party",
+          "type" : "party"
+        },
+        "goal_id_07" : {
+          "text" : "Tools",
+          "type" : "tools"
+        }
+      },
+      "instructions" : {
+        "instruction_id_01" : {
+          "input" : 1,
+          "input_type" : "flour",
+          "labour" : 1,
+          "output" : 1,
+          "output_type" : "bread",
+          "text" : "Bake"
+        },
+        "instruction_id_02" : {
+          "labour" : 1,
+          "output" : 1,
+          "output_type" : "flour",
+          "text" : "Grind"
+        },
+        "instruction_id_03" : {
+          "input" : 4,
+          "input_type" : "flour",
+          "labour" : 1,
+          "output" : 4,
+          "output_type" : "bread",
+          "text" : "Cooperate"
+        },
+        "instruction_id_04" : {
+          "labour" : 1,
+          "output" : 4,
+          "output_type" : "flour",
+          "text" : "Mill"
+        },
+        "instruction_id_05" : {
+          "input" : 4,
+          "input_type" : "flour",
+          "labour" : 2,
+          "output" : 4,
+          "output_type" : "bread",
+          "text" : "Oven"
+        },
+        "instruction_id_06" : {
+          "labour" : 1,
+          "output" : 1,
+          "output_type" : "party",
+          "text" : "Organize"
+        },
+        "instruction_id_07" : {
+          "labour" : 2,
+          "output" : 1,
+          "output_type" : "recreation_park",
+          "text" : "Construct"
+        },
+        "instruction_id_08" : {
+          "labour" : 4,
+          "output" : 1,
+          "output_type" : "laboratory",
+          "text" : "Blow glass"
+        },
+        "instruction_id_09" : {
+          "labour" : 3,
+          "output" : 1,
+          "output_type" : "university",
+          "text" : "Research"
+        },
+        "instruction_id_10" : {
+          "labour" : 2,
+          "output" : 1,
+          "output_type" : "hot_air_balloon",
+          "text" : "Sew"
+        },
+        "instruction_id_11" : {
+          "labour" : 1,
+          "output" : 1,
+          "output_type" : "tools",
+          "text" : "Workbench"
+        }
+      }
+    }
+  },
+  "secured" : {
+    "DzLixw38qsRvPa0btDxAL9VP2Lv1" : {
+      "admin" : "true"
+    }
+  }
+}
