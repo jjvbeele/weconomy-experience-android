@@ -82,20 +82,30 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
     @BindView(android.R.id.content)
     protected View contentView;
 
-    private List<PlayerData> playerDataList;
-
+    //game data belonging to this game
     private GameData gameData;
 
-    private int maxVisibleColumn = 3;
-    private int minVisibleColumn = 0;
-    private int daysCount = maxVisibleColumn - minVisibleColumn + 1;
+    //list of players
+    private List<PlayerData> playerDataList;
 
+    //columns in which the instructions are scheduled
+    private int maxVisibleColumn = 3; //last column to show
+    private int minVisibleColumn = 0; //first column to show
+    private int daysCount = maxVisibleColumn - minVisibleColumn + 1; //amount of columns visible
+
+    //list of instructions that are scheduled in the planning screen
     private List<List<ScheduledInstructionData>> scheduledInstructionDataMap;
 
+    //list of instructions that can be selected from the SelectInstructionActivity screen
     private List<InstructionData> availableInstructionList;
+
+    //list of instructions retrieved from the default library in firebase
     private List<InstructionData> libraryInstructionList;
 
+    //list of goals that can be selected from the ViewGoalsActivity screen
     private List<GoalData> availableGoalList;
+
+    //list of goals retrieved from the default library in firebase
     private List<GoalData> libraryGoalList;
 
     private List<SelectedGoalData> selectedGoalList;
@@ -139,6 +149,7 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
 
         selectedGoalList = new ArrayList<>();
 
+        //set up the navigation drawer for this screen
         new AppNavigationDrawer(this, this, drawerLayout);
 
         playerDataList = new ArrayList<>();
@@ -212,6 +223,10 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         }
     }
 
+    /**
+     * Observes any changes in the admin role and reflects those changes on the screen and
+     * in the preferences
+     */
     private void observeAdminRole() {
         fireDatabaseTransactions.observeRole("admin", fireAuthHelper.getUser().getUid(), new Returnable<String>() {
             @Override
@@ -230,6 +245,11 @@ public class GameActivity extends AppCompatActivity implements FireDatabaseTrans
         });
     }
 
+
+    /**
+     * Enables or disables admin layout to give the administrator extra functions
+     * @param enabled whether or not the admin layout should be enabled
+     */
     public void enableAdminLayout(boolean admin) {
         if (admin) {
             ViewAnimation.viewScaleIn(discoverGoal);

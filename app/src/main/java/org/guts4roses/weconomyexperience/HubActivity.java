@@ -39,6 +39,8 @@ import butterknife.OnClick;
 
 /**
  * Created by mint on 26-7-17.
+ * Activity that shows the hub screen with available games.
+ * Admins can create new games and remove existing games here.
  */
 
 public class HubActivity extends AppCompatActivity implements FireDatabaseTransactions.OnLoadingListener, AppNavigationDrawer.NavigationInterface {
@@ -98,6 +100,7 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
 
         ButterKnife.bind(this);
 
+        //set up the navigation drawer for this screen
         new AppNavigationDrawer(this, this, drawerLayout);
     }
 
@@ -131,6 +134,10 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
         fireAuthHelper.unregister(this);
     }
 
+    /**
+     * Method to be called at the start of the activity creation
+     * Sets up the recyclerview and other things
+     */
     private void setupLayout() {
         //set up the list of games present in the hub
         gameDataMap = new HashMap<>();
@@ -144,6 +151,10 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
         gameRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
+    /**
+     * Observes any changes in the admin role and reflects those changes on the screen and
+     * in the preferences
+     */
     private void observeAdminRole() {
         fireDatabaseTransactions.observeRole("admin", fireAuthHelper.getUser().getUid(), new Returnable<String>() {
             @Override
@@ -162,6 +173,10 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
         });
     }
 
+    /**
+     * Enables or disables admin layout to give the administrator extra functions
+     * @param enabled whether or not the admin layout should be enabled
+     */
     private void enableAdminLayout(boolean enabled) {
         if (enabled) {
             startNewGameButton.setVisibility(View.VISIBLE);
@@ -223,6 +238,10 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
         );
     }
 
+    /**
+     * Requests game data of a specific game
+     * @param gameKey key of the game to retrieve
+     */
     private void getGameData(final String gameKey) {
         fireDatabaseTransactions.getGameData(gameKey, new Returnable<GameData>() {
             @Override
@@ -270,6 +289,9 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
         }
     }
 
+    /**
+     * Shows a screen to create a game
+     */
     private void showCreateGameScreen() {
         final View createGameView = LayoutInflater.from(this).inflate(R.layout.view_create_game, null);
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(HubActivity.this);
@@ -296,6 +318,11 @@ public class HubActivity extends AppCompatActivity implements FireDatabaseTransa
         showCreateGameScreen();
     }
 
+    /**
+     * FireDatabaseTransactions indicates a change in the loading status
+     * @param callback
+     * @param loadState
+     */
     @Override
     public void onLoadingChanged(Returnable<?> callback, FireDatabaseTransactions.LoadState loadState) {
         if (loadState == FireDatabaseTransactions.LoadState.LOADING_STARTED) {

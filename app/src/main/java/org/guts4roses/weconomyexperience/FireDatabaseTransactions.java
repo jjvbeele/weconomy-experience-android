@@ -195,6 +195,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Adds a new instruction to the given library
+     * @param instructionLibraryName library to add the instruction to
+     * @param instructionData instruction to add to the library
+     */
     public void addInstructionToLibrary(String instructionLibraryName, InstructionData instructionData) {
         fireDatabaseHelper.pushRecord(
                 "library_id_",
@@ -207,6 +212,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Get all instructions from the given library
+     * @param libraryKey library from which to retrieve instructions
+     * @param callback callback in which the list of instructions is returned
+     */
     public void getInstructionsFromLibrary(
             String libraryKey,
             Returnable<List<InstructionData>> callback) {
@@ -232,6 +242,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Registers a new instruction to the schedule
+     * @param gameId game to which to add the new instruction
+     * @param scheduledInstructionData scheduledinstruction to add to the game's schedule
+     */
     public void registerInstructionToSchedule(String gameId, ScheduledInstructionData scheduledInstructionData) {
         fireDatabaseHelper.pushRecord(
                 "scheduled_instruction_id_",
@@ -243,6 +258,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Register a new player to the game
+     * @param gameId game to which to register the new player
+     * @param playerData player to register to the game
+     */
     public void registerPlayerToGame(String gameId, PlayerData playerData) {
         fireDatabaseHelper.addRecord(
                 new String[]{
@@ -358,6 +378,11 @@ public class FireDatabaseTransactions {
                 });
     }
 
+    /**
+     * Observe any changes in player data for a game
+     * @param gameId game from which to observe the players
+     * @param callback callback to handle any changes in player data
+     */
     public void observePlayersInGame(String gameId, final ReturnableChange<PlayerData> callback) {
         updateLoadingState(callback, LoadState.LOADING_STARTED);
         fireDatabaseHelper.observeChild(
@@ -410,6 +435,12 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Retrieve a specific instructions from a given library
+     * @param libraryKey library from which to retrieve instructions
+     * @param instructionKey instruction to retrieve
+     * @param onReturnSuccess callback to receive the instruction data
+     */
     public void getInstructionFromLibrary(String libraryKey, String instructionKey, Returnable<InstructionData> onReturnSuccess) {
         fireDatabaseHelper.getRecord(
                 InstructionData.class,
@@ -429,6 +460,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Updates a change in a scheduledinstruction
+     * @param gameId game in which to update the scheduledinstruction
+     * @param scheduledInstructionData scheduledinstruction that has changed and needs to push its update
+     */
     public void updateScheduledInstruction(String gameId, ScheduledInstructionData scheduledInstructionData) {
         fireDatabaseHelper.addRecord(
                 new String[]{
@@ -440,6 +476,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * remove a scheduledinstruction from a game
+     * @param gameId game from which to remove a scheduled instruction
+     * @param scheduledInstructionData scheduledinstruction to remove
+     */
     public void removeScheduledInstruction(String gameId, ScheduledInstructionData scheduledInstructionData) {
         fireDatabaseHelper.removeRecord(
                 new String[]{
@@ -449,6 +490,11 @@ public class FireDatabaseTransactions {
                 });
     }
 
+    /**
+     * Add instruction to the list of available instructions, which can be picked by the players
+     * @param gameId game in which to make an instruction available
+     * @param instructionData instruction to make available to pick
+     */
     public void addInstructionToAvailableInstructions(
             String gameId,
             InstructionData instructionData) {
@@ -463,6 +509,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Removes availability of an instruction
+     * @param gameId game in which to remove availability of an instruction
+     * @param instructionData instruction to make unavailable for players
+     */
     public void removeInstructionFromAvailableInstructions(
             String gameId,
             InstructionData instructionData) {
@@ -476,6 +527,12 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Observe any changes in availability of instructions
+     * @param gameId game in which to observe availability of instructions
+     * @param libraryKey library from which to retrieve instruction data if it changed
+     * @param callback callback in which to pass the changed instruction
+     */
     public void observeAvailableInstructionsInGame(
             final String gameId,
             final String libraryKey,
@@ -549,6 +606,12 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Retrieve an instruction from a library by its id
+     * @param libraryKey library from which to retrieve an instruction
+     * @param instructionId instruction id to search for
+     * @param callback callback to pass in the result
+     */
     public void getInstructionFromLibraryById(final String libraryKey, final String instructionId, final Returnable<InstructionData> callback) {
         fireDatabaseHelper.getRecord(
                 InstructionData.class,
@@ -568,6 +631,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Observe any changes in instructions in a library
+     * @param libraryKey library to observe
+     * @param callback callback in which to receive changes
+     */
     public void observeInstructionsFromLibrary(String libraryKey, ReturnableChange<InstructionData> callback) {
         fireDatabaseHelper.observeChild(
                 InstructionData.class,
@@ -586,6 +654,12 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Retrieve a player by id
+     * @param gameId game in which to retrieve a player
+     * @param playerId id to search for
+     * @param onReturn callback to receive the result in
+     */
     public void getPlayerById(String gameId, String playerId, Returnable<PlayerData> onReturn) {
         if (!playerId.startsWith("player_id_")) {
             playerId = "player_id_" + playerId;
@@ -603,6 +677,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Returns the amount of goals currently set by players in a game
+     * @param gameId game in which to count set goals
+     * @param returnable calllback in which to receive the result
+     */
     public void getSelectedGoalCount(String gameId, Returnable<Long> returnable) {
         fireDatabaseHelper.getChildCount(
                 new String[]{
@@ -620,6 +699,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Removes a goal from the set goals by players
+     * @param gameId game in which to remove goal
+     * @param selectedGoalId id of the goal to remove from selected goals
+     */
     public void removeSelectedGoal(String gameId, String selectedGoalId) {
         fireDatabaseHelper.removeRecord(
                 new String[]{
@@ -631,6 +715,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Makes a goal available to select for all players
+     * @param gameId game in which to make a goal available
+     * @param goalData goal to make available
+     */
     public void addGoalToAvailableGoals(
             String gameId,
             GoalData goalData) {
@@ -645,6 +734,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Removes a goal from available goals for the players
+     * @param gameId game in which to make a goal unavailable
+     * @param goalData goal to make unavailable for players
+     */
     public void removeGoalFromAvailableGoals(
             String gameId,
             GoalData goalData) {
@@ -658,6 +752,12 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Observes any changes in a goal
+     * @param gameId game in which to observe goals
+     * @param libraryKey library from which to retrieve a goal that changed
+     * @param callback callback to receive the changed goal
+     */
     public void observeAvailableGoalsInGame(
             final String gameId,
             final String libraryKey,
@@ -731,6 +831,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Observes changes in goal data in a library
+     * @param libraryKey library to observe
+     * @param callback callback in which to receive changed goal data
+     */
     public void observeGoalsFromLibrary(String libraryKey, ReturnableChange<GoalData> callback) {
         fireDatabaseHelper.observeChild(
                 GoalData.class,
@@ -749,6 +854,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Updates a goal that was changed
+     * @param gameId game in which this change should be updated
+     * @param selectedGoalData goal that was changed
+     */
     public void updateSelectedGoal(String gameId, SelectedGoalData selectedGoalData) {
         fireDatabaseHelper.addRecord(
                 new String[]{
@@ -761,6 +871,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Returns a list of players in game
+     * @param gameId game from which to retrieve player list
+     * @param onReturn callback in which to receive player list
+     */
     public void getPlayersInGame(final String gameId, final Returnable<List<PlayerData>> onReturn) {
         fireDatabaseHelper.getRecordsList(
                 PlayerData.class,
@@ -779,6 +894,11 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Count the players in a game
+     * @param gameId game in which to count players
+     * @param onReturn callback to receive the result
+     */
     public void getPlayerCount(final String gameId, final Returnable<Long> onReturn) {
         fireDatabaseHelper.getChildCount(
                 new String[]{
@@ -796,6 +916,12 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Observe changes in selected goals by players
+     * @param gameId game in which to observe changes in selected goals
+     * @param libraryKey library from which to retrieve goal data that changed
+     * @param callback callback to receive changed goal data
+     */
     public void observeSelectedGoalsInGame(
             final String gameId,
             final String libraryKey,
@@ -851,6 +977,12 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Returns goal data from library by id
+     * @param libraryKey library from which to retrieve a goal
+     * @param goalId id of the goal to retrieve
+     * @param callback callback to receive goal data in
+     */
     public void getGoalFromLibraryById(final String libraryKey, final String goalId, final Returnable<GoalData> callback) {
         fireDatabaseHelper.getRecord(
                 GoalData.class,
@@ -870,6 +1002,14 @@ public class FireDatabaseTransactions {
         );
     }
 
+    /**
+     * Binds goal data to selectedgoal data
+     * This is a post-firebase transaction method to reconnect references from selectedgoal data to actual goal data
+     * @param gameId game in which the goal resides
+     * @param libraryKey library in which the goal resides
+     * @param selectedGoalData selected goal data in which the goal data should be bound
+     * @param callback callback that receives the selectedgoal data on success
+     */
     public void bindSelectedGoalData(final String gameId, final String libraryKey, final SelectedGoalData selectedGoalData, final Returnable<SelectedGoalData> callback) {
         getPlayerById(gameId, selectedGoalData.getPlayerId(), new Returnable<PlayerData>() {
             @Override
