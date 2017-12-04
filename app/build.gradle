@@ -32,7 +32,7 @@ android {
         }
         dev {
             //add your package id here for debugging with a separate firebase
-            applicationId "com.teachwithapps.debug.weconomyexperience"
+            applicationId "org.guts4roses.weconomyexperience"
         }
     }
 }
