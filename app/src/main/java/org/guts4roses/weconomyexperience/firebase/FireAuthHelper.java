@@ -168,12 +168,6 @@ public class FireAuthHelper {
         Log.d(TAG, "googleApiClient stopped");
 
         if (googleApiClient == null || !googleApiClient.isConnected()) {
-            signInGooglePlus(activity, new Runnable() {
-                @Override
-                public void run() {
-                    signOutGoogleApiClient(activity);
-                }
-            });
             return;
 
         } else {
@@ -186,14 +180,7 @@ public class FireAuthHelper {
         if (googleApiClient.isConnected()) {
             googleApiClient.clearDefaultAccountAndReconnect();
             googleApiClient.stopAutoManage(activity);
-//            Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(
-//                    new ResultCallback<Status>() {
-//                        @Override
-//                        public void onResult(Status status) {
-//                            Log.d(TAG, "code: " + status.getStatusCode() + ", message: " + status.getStatusMessage());
-//
-//                        }
-//                    });
+
         } else {
 
         }
